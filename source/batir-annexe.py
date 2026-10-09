@@ -107,6 +107,7 @@ PROD = {
     "ANNEXE-PRIVACY.html": "privacy.html",
     "ANNEXE-ACCESSIBILITE.html": "accessibility.html",
     "CONTACT.html": "contact.html",
+    "ANALYSE-OFAC-2026-07-14.html": "ofac-2026-07-14.html",   # 9/10: the first analysis, Arslane's yes
     "MENTIONS.html": "colophon.html",
     "404.html": "404.html",
 }
@@ -464,7 +465,7 @@ for page in PLOMBERIE["pages"]:
 <section class="tete-nuit"><div class="colonne">
   <div class="ariane">
     <span class="fno">{page["fno"]}</span>
-    <a class="retour" href="HERO.html">&#8592; Back to the findings</a>
+    <a class="retour" href="{page.get("retour_href", "HERO.html")}">{page.get("retour_texte", "&#8592; Back to the findings")}</a>
   </div>
   <h1>{page["titre"]}</h1>
 </div></section>

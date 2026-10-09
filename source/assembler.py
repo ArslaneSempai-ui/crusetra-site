@@ -78,6 +78,7 @@ PROD = {
     "ANNEXE-PRIVACY.html": "privacy.html",
     "ANNEXE-ACCESSIBILITE.html": "accessibility.html",
     "CONTACT.html": "contact.html",
+    "ANALYSE-OFAC-2026-07-14.html": "ofac-2026-07-14.html",   # 9/10: the first analysis, Arslane's yes
     "MENTIONS.html": "colophon.html",
     "404.html": "404.html",
 }
