@@ -83,7 +83,8 @@
       "h2": "What you send us for a report",
       "html": [
         "<p>Two services run on our side, and for them you do send us something. For a <b>Screening report</b>, you email a list of company and vessel names, with the IMO number of a vessel when you have it: a CSV, a spreadsheet, or names in the body of the mail. For a <b>Routing free test</b>, you email the measured record the tool wrote beside your CSV, the file ending in <code>-measured.json</code>: counts, a right, wrong or blank verdict per case and field, your file's name and its SHA-256 hash, and the prices and volume you declared. In both cases nothing else is asked for, and no document of yours is.</p>",
-        "<p>What we receive is used for that report and for nothing else. Once the report is sent, your file and the mails that carried it go to the trash and are permanently deleted within 30 days. A weekly re-screen subscriber's list is kept for the re-screen and goes the same way when the subscription stops.</p>",
+        "<p>What we receive is used for that report and for nothing else. Once the report is sent, your file and the mails that carried it go to the trash and are permanently deleted within 30 days. A weekly re-screen subscriber's list is kept for the re-screen and goes the same way when the paid period ends.</p>",
+        "<p>When you pay, the payment runs through <b>Stripe</b>, which processes it for HS Industries LLC. The checkout asks for your email, your company name and your billing address, and a tax ID if you want it on the invoice. Stripe keeps your card details: we see the card brand and its last four digits, never the full number. We use these details to invoice you and for our accounts.</p>",
         "<p><b>HS Industries LLC</b> is responsible for this processing. Write to <a href=\"mailto:contact@crusetra.com\">contact@crusetra.com</a> to ask what we hold about you, to have it deleted earlier, or to object.</p>"
       ]
     }

@@ -13,6 +13,7 @@ plafond de renouvellement au plus bas de CPI-U et 5 %%). Aucun palier
 intermédiaire n'est documenté ; aucun n'est affiché.
 """
 import json
+import sys
 import pathlib
 
 BASE = pathlib.Path(__file__).parent
@@ -23,6 +24,10 @@ OFFRE_ROUTING = json.loads((BASE / "offre-routing.json").read_text())
 # 05/10 (parcours client) : « See pricing » depuis la page Screening menait à une page sans offre Screening ; elle se lit
 # dans offre-screening.json (la grille choisie par Arslane le 29/09, la conservation tranchée le 5/10), jamais tapée ici
 OFFRE_SCREENING = json.loads((BASE / "offre-screening.json").read_text())
+# 10/10: the yearly re-screen is ten months paid ("two months free"), printed as an amount derived from the monthly price
+if OFFRE_SCREENING["annuel"] != "two months free":
+    sys.exit("offre-screening.json: the yearly rule changed, so MOIS_PAYES_AN must be reviewed")
+MOIS_PAYES_AN = 10
 SCEAU = SCEAU_ROUTING   # lu dans le relevé scellé du vert, jamais tapé (8/09)
 # la barre du site (10/09) : les cinq instruments dans l'ordre du rideau, lus dans OUTILS, jamais tapés
 NAV = "".join(f'\n    <a href="{o["page_hero"]}">{o["nom"]}</a>' for o in OUTILS.values())
@@ -372,11 +377,11 @@ PAGE = f'''<!doctype html><html lang="en">
   <p class="ex-l">You already pay a document extractor. The audit grades it and its challengers on a labeled sample of your pages, on your machine, and names for each field the cheapest source that stays within the margin you declare. <a href="HERO.html#report">See how it runs on 100 real receipts</a>.</p>
   <div class="ex-grille">
     <div class="ex-c"><p class="ex-eti">Free test</p><p class="ex-prix">$0<small> &#183; {OFFRE_ROUTING["essai"]["pages"]} pages</small></p><p class="ex-q">One document type, up to {OFFRE_ROUTING["essai"]["extracteurs"]} extractors. You run it, you email us the record, you get a one-page PDF back within {OFFRE_ROUTING["essai"]["delai_heures"]} hours. An internal evaluation, like the thirty days. The record carries a content hash; the report is not signed.</p></div>
-    <div class="ex-c"><p class="ex-eti">Snapshot</p><p class="ex-prix">${OFFRE_ROUTING["snapshot"]["prix_usd"]:,}<small> &#183; up to {OFFRE_ROUTING["snapshot"]["pages"]:,} pages</small></p><p class="ex-q">One document type, up to {OFFRE_ROUTING["snapshot"]["champs"]} fields and {OFFRE_ROUTING["snapshot"]["extracteurs"]} extractors. The signed report, its PDF and the sealed record, back within {OFFRE_ROUTING["snapshot"]["delai_heures"]} hours, with the right to act on the recommendation in your own operations.</p></div>
-    <div class="ex-c haute"><p class="ex-eti">Audit</p><p class="ex-prix">${OFFRE_ROUTING["audit"]["prix_usd"]:,}<small> &#183; up to {OFFRE_ROUTING["audit"]["pages"]:,} pages</small></p><p class="ex-q">Up to {OFFRE_ROUTING["audit"]["types_document"]} document types, {OFFRE_ROUTING["audit"]["champs"]} fields and {OFFRE_ROUTING["audit"]["extracteurs"]} extractors. The signed report, its PDF and the sealed record, back within {OFFRE_ROUTING["audit"]["delai_heures"]} hours, with the same right to act on the recommendation.</p></div>
-    <div class="ex-c"><p class="ex-eti">Quarterly audit</p><p class="ex-prix">${OFFRE_ROUTING["audit_trimestriel"]["prix_usd_an"]:,}<small> a year</small></p><p class="ex-q">The Audit measured again {OFFRE_ROUTING["audit_trimestriel"]["remesures_par_an"]} times a year, each report saying what moved since the last. Stop at any time.</p></div>
+    <div class="ex-c"><p class="ex-eti">Snapshot</p><p class="ex-prix">${OFFRE_ROUTING["snapshot"]["prix_usd"]:,}<small> &#183; up to {OFFRE_ROUTING["snapshot"]["pages"]:,} pages</small></p><p class="ex-q">One document type, up to {OFFRE_ROUTING["snapshot"]["champs"]} fields and {OFFRE_ROUTING["snapshot"]["extracteurs"]} extractors. The signed report, its PDF and the sealed record, back within {OFFRE_ROUTING["snapshot"]["delai_heures"]} hours, with the right to act on the recommendation in your own operations. Paid in two halves, on signature and on delivery.</p></div>
+    <div class="ex-c haute"><p class="ex-eti">Audit</p><p class="ex-prix">${OFFRE_ROUTING["audit"]["prix_usd"]:,}<small> &#183; up to {OFFRE_ROUTING["audit"]["pages"]:,} pages</small></p><p class="ex-q">Up to {OFFRE_ROUTING["audit"]["types_document"]} document types, {OFFRE_ROUTING["audit"]["champs"]} fields and {OFFRE_ROUTING["audit"]["extracteurs"]} extractors. The signed report, its PDF and the sealed record, back within {OFFRE_ROUTING["audit"]["delai_heures"]} hours, with the same right to act on the recommendation. Paid in two halves, on signature and on delivery.</p></div>
+    <div class="ex-c"><p class="ex-eti">Quarterly audit</p><p class="ex-prix">${OFFRE_ROUTING["audit_trimestriel"]["prix_usd_an"]:,}<small> a year</small></p><p class="ex-q">The Audit measured again {OFFRE_ROUTING["audit_trimestriel"]["remesures_par_an"]} times a year, each report saying what moved since the last. Paid a year in advance. Stop at any time: it runs to the end of the year paid, with no refund.</p></div>
   </div>
-  <p class="ex-fin">Each engagement is contracted and invoiced by <b>HS Industries LLC</b>, under an engagement letter written before signature. Vendor fees for the pages you run through cloud extractors are billed to you by those vendors, on your own keys. Sealed means the record carries a content hash, which shows an edit made after sealing; a content hash is not a signature.</p>
+  <p class="ex-fin">Prices are in US dollars. Each engagement is contracted and invoiced by <b>HS Industries LLC</b>: the Snapshot and the Audit under an engagement letter written before signature, the Quarterly audit as a subscription. Vendor fees for the pages you run through cloud extractors are billed to you by those vendors, on your own keys. Sealed means the record carries a content hash, which shows an edit made after sealing; a content hash is not a signature.</p>
 </div></section>
 
 <section class="ex" aria-label="The screening report, by the tier"><div class="colonne">
@@ -386,10 +391,10 @@ PAGE = f'''<!doctype html><html lang="en">
   <div class="ex-grille">
     <div class="ex-c"><p class="ex-eti">Free test</p><p class="ex-prix">$0<small> &#183; {OFFRE_SCREENING["essai_noms"]} names</small></p><p class="ex-q">Email {OFFRE_SCREENING["essai_noms"]} of your names. The report comes back within {OFFRE_SCREENING["delai_heures"]} hours, at no charge.</p></div>
     <div class="ex-c haute"><p class="ex-eti">One report</p><p class="ex-prix">${OFFRE_SCREENING["rapport"]["prix_usd"]:,}<small> &#183; up to {OFFRE_SCREENING["rapport"]["noms"]:,} names</small></p><p class="ex-q">Your list, screened once and sealed, back within {OFFRE_SCREENING["delai_heures"]} hours: the PDF, the spreadsheet and the sealed record.</p></div>
-    <div class="ex-c"><p class="ex-eti">Weekly re-screen</p><p class="ex-prix">${OFFRE_SCREENING["recriblage"][0]["prix_usd_mois"]:,}<small> a month &#183; up to {OFFRE_SCREENING["recriblage"][0]["noms"]:,} names</small></p><p class="ex-q">The same list, screened again each week against the lists of that week. Each report opens with what changed since the last one. Paid yearly, {OFFRE_SCREENING["annuel"]}. Stop at any time.</p></div>
-    <div class="ex-c"><p class="ex-eti">Longer lists</p><p class="ex-prix">${OFFRE_SCREENING["recriblage"][1]["prix_usd_mois"]:,}<small> a month &#183; up to {OFFRE_SCREENING["recriblage"][1]["noms"]:,} names</small></p><p class="ex-q">The weekly re-screen for a longer list: ${OFFRE_SCREENING["recriblage"][2]["prix_usd_mois"]:,} a month up to {OFFRE_SCREENING["recriblage"][2]["noms"]:,} names. Above that, write to us for a price.</p></div>
+    <div class="ex-c"><p class="ex-eti">Weekly re-screen</p><p class="ex-prix">${OFFRE_SCREENING["recriblage"][0]["prix_usd_mois"]:,}<small> a month &#183; up to {OFFRE_SCREENING["recriblage"][0]["noms"]:,} names</small></p><p class="ex-q">The same list, screened again each week; each report opens with what changed since the last one. ${OFFRE_SCREENING["recriblage"][0]["prix_usd_mois"]:,} a month, or ${OFFRE_SCREENING["recriblage"][0]["prix_usd_mois"] * MOIS_PAYES_AN:,} a year with {OFFRE_SCREENING["annuel"]}. Stop at any time: it runs to the end of the month or year paid, with no refund.</p></div>
+    <div class="ex-c"><p class="ex-eti">Longer lists</p><p class="ex-prix">${OFFRE_SCREENING["recriblage"][1]["prix_usd_mois"]:,}<small> a month &#183; up to {OFFRE_SCREENING["recriblage"][1]["noms"]:,} names</small></p><p class="ex-q">The weekly re-screen for a longer list: ${OFFRE_SCREENING["recriblage"][2]["prix_usd_mois"]:,} a month up to {OFFRE_SCREENING["recriblage"][2]["noms"]:,} names. Yearly: ${OFFRE_SCREENING["recriblage"][1]["prix_usd_mois"] * MOIS_PAYES_AN:,} and ${OFFRE_SCREENING["recriblage"][2]["prix_usd_mois"] * MOIS_PAYES_AN:,}, on the same terms. Above that, write to us for a price.</p></div>
   </div>
-  <p class="ex-fin">Each report is contracted and invoiced by <b>HS Industries LLC</b>. {OFFRE_SCREENING["conservation"]} A candidate is a name for your compliance officer to check: the report does not decide, does not screen ownership, and is not legal advice.</p>
+  <p class="ex-fin">Prices are in US dollars. Each report is contracted and invoiced by <b>HS Industries LLC</b>. {OFFRE_SCREENING["conservation"]} A candidate is a name for your compliance officer to check: the report does not decide, does not screen ownership, and is not legal advice.</p>
 </div></section>
 
 <section class="jours" aria-label="The days"><div class="colonne">

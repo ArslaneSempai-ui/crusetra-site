@@ -1574,21 +1574,21 @@ def _section_rapport_routing():
         <p class="r-eti">Snapshot</p>
         <p class="r-montant"><span class="r-n">{usd(sn["prix_usd"])}</span><small>up to {sn["pages"]:,} pages</small></p>
         <p class="r-sous">One document type, measured once and sealed, back within {sn["delai_heures"]} hours.</p>
-        <ul class="r-inclus"><li>Up to {sn["champs"]} fields and {sn["extracteurs"]} extractors</li><li>The routing for each field, and the saving at your volume</li><li>What the sample is too small to decide</li></ul>
+        <ul class="r-inclus"><li>Up to {sn["champs"]} fields and {sn["extracteurs"]} extractors</li><li>The routing for each field, and the saving at your volume</li><li>What the sample is too small to decide</li><li>Paid in two halves, on signature and on delivery</li></ul>
       </article>
       <article class="r-col haute" data-col="audit">
         <img class="r-robot" src="../rendus/robot-vert-pese.webp" width="1061" height="968" alt="" loading="lazy" decoding="async">
         <p class="r-eti">Audit</p>
         <p class="r-montant"><span class="r-n">{usd(au["prix_usd"])}</span><small>up to {au["pages"]:,} pages</small></p>
         <p class="r-sous">Up to {au["types_document"]} document types, sealed, back within {au["delai_heures"]} hours.</p>
-        <ul class="r-inclus"><li>Up to {au["champs"]} fields and {au["extracteurs"]} extractors</li><li>A sample sized to separate sources a few points apart, when they are</li><li>The signed report, its PDF, and the sealed record</li></ul>
+        <ul class="r-inclus"><li>Up to {au["champs"]} fields and {au["extracteurs"]} extractors</li><li>A sample sized to separate sources a few points apart, when they are</li><li>The signed report, its PDF, and the sealed record</li><li>Paid in two halves, on signature and on delivery</li></ul>
       </article>
       <article class="r-col" data-col="trimestriel">
         <img class="r-robot" src="../rendus/robot-vert-tient.webp" width="926" height="963" alt="" loading="lazy" decoding="async">
         <p class="r-eti">Quarterly audit</p>
         <p class="r-montant"><span class="r-n">{usd(tr["prix_usd_an"])}</span><small>a year</small></p>
         <p class="r-sous">The audit measured again {tr["remesures_par_an"]} times a year, as vendors change their models and prices.</p>
-        <ul class="r-inclus"><li>{tr["remesures_par_an"]} sealed reports a year</li><li>Each one says what moved since the last</li><li>Stop at any time</li></ul>
+        <ul class="r-inclus"><li>{tr["remesures_par_an"]} sealed reports a year</li><li>Each one says what moved since the last</li><li>Paid a year in advance; if you stop, it runs to the end of the year paid, no refund</li></ul>
       </article>
     </div>
   </div>
@@ -2417,7 +2417,7 @@ def _section_rapport(o):
         <p class="r-eti">Weekly re-screen</p>
         <p class="r-montant"><span class="r-n" data-v="{rc[0]["prix_usd_mois"]}">{usd(rc[0]["prix_usd_mois"])}</span><small class="r-unite">a month, up to {rc[0]["noms"]:,} names</small></p>
         <p class="r-sous">The same list, screened again each week against the lists of that week.</p>
-        <ul class="r-inclus"><li><b>{SEMAINES}</b> sealed reports a year</li><li>Each report opens with what changed since the last one</li><li>Paid yearly, {off["annuel"]}</li><li>Stop any time: your list goes to the trash, deleted within 30 days</li></ul>
+        <ul class="r-inclus"><li><b>{SEMAINES}</b> sealed reports a year</li><li>Each report opens with what changed since the last one</li><li>Billed monthly, or yearly with {off["annuel"]}</li><li>Stop any time: it runs to the end of the month or year paid, no refund</li></ul>
       </article>
     </div>
     <div class="r-taille">
