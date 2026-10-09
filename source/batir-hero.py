@@ -1208,10 +1208,10 @@ def choix_outils(outil):
 # (arrondie à la seconde supérieure) du fichier livré films-rendus/<outil>-livraison.mp4, mesuré au ffprobe :
 # routing 78,50 s, dossier 92,97, screening 87,87, monitoring 94,63, scoring 90,17.
 # 10/10 : les films Crusetra (source/films, ffprobe) : routing 89,57 s, dossier 97,40, screening 92,57. Leurs anciens
-# liens YouTube montrent les films « Cascade » : plus de lien tant que les nouveaux ne sont pas en ligne.
-FILMS = {"routing":    (None, "1:30", "1 minute 30"),
-         "dossier":    (None, "1:38", "1 minute 38"),
-         "screening":  (None, "1:33", "1 minute 33"),
+# liens YouTube montraient les films « Cascade » (passés en privé) ; les nouveaux sont publiés le 10/10.
+FILMS = {"routing":    ("https://youtu.be/Usym93fV3ZY", "1:30", "1 minute 30"),
+         "dossier":    ("https://youtu.be/KntYNO-j_Xs", "1:38", "1 minute 38"),
+         "screening":  ("https://youtu.be/3fy9XWqeDoU", "1:33", "1 minute 33"),
          "monitoring": ("https://youtu.be/xx_1lFJsw9E", "1:35", "1 minute 35"),
          "scoring":    ("https://youtu.be/mCybN-xq4jA", "1:31", "1 minute 31"),
          # 29/09 : la DÉMO Screening (Dana, son fichier, la passe, le rapport, le registre), 85,06 s ; validée « parfait »
