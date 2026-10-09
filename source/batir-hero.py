@@ -1207,9 +1207,11 @@ def choix_outils(outil):
 # 27/09 : LES FILMS EN LIGNE, chaîne YouTube « HS Industries LLC ». Durée = celle qu'affiche YouTube
 # (arrondie à la seconde supérieure) du fichier livré films-rendus/<outil>-livraison.mp4, mesuré au ffprobe :
 # routing 78,50 s, dossier 92,97, screening 87,87, monitoring 94,63, scoring 90,17.
-FILMS = {"routing":    ("https://youtu.be/SXxViU7rhU8", "1:19", "1 minute 19"),
-         "dossier":    ("https://youtu.be/aNZ5uks7ibE", "1:33", "1 minute 33"),
-         "screening":  ("https://youtu.be/AoINd6J2XMI", "1:28", "1 minute 28"),
+# 10/10 : les films Crusetra (source/films, ffprobe) : routing 89,57 s, dossier 97,40, screening 92,57. Leurs anciens
+# liens YouTube montrent les films « Cascade » : plus de lien tant que les nouveaux ne sont pas en ligne.
+FILMS = {"routing":    (None, "1:30", "1 minute 30"),
+         "dossier":    (None, "1:38", "1 minute 38"),
+         "screening":  (None, "1:33", "1 minute 33"),
          "monitoring": ("https://youtu.be/xx_1lFJsw9E", "1:35", "1 minute 35"),
          "scoring":    ("https://youtu.be/mCybN-xq4jA", "1:31", "1 minute 31"),
          # 29/09 : la DÉMO Screening (Dana, son fichier, la passe, le rapport, le registre), 85,06 s ; validée « parfait »
@@ -1222,6 +1224,7 @@ FILMS = {"routing":    ("https://youtu.be/SXxViU7rhU8", "1:19", "1 minute 19"),
 # blind … 332 of 400 » : sa carte quitte la page jusqu'à ce que le chef la refasse. Le fichier source/films/screening-demo.mp4
 # et l'entrée FILMS restent (rien n'est effacé) ; sans entrée ici, la page n'a ni carte ni texte qui y mène.
 DEMOS = {"routing":   ("The five Routing findings", "The price, the receipts, the routing, the report")}
+DEMOS = {k: v for k, v in DEMOS.items() if f"{k}-demo" in FILMS_VISIBLES}   # 10/10 : la démo Routing dit encore « Cascade » : pas de carte tant qu'elle n'est pas refaite
 
 
 def lecteur_html(oid, nom, prefixe, affiche=None, visuel="", genre="film"):
@@ -1268,7 +1271,7 @@ def film_html(outil):
     """LA PLACE DU FILM d'un outil, la même sur chaque couleur : le titre, le lecteur
     natif et sa durée (table FILMS, 27/09 : les cinq films sont en ligne). Sans affiche
     rendue, l'affiche est COMPOSÉE (nuit de l'outil, robot penché, question)."""
-    if not FILMS_VISIBLES:
+    if outil["id"] not in FILMS_VISIBLES:
         return ""
     if outil.get("affiche"):
         # l'affiche RENDUE, comme le vert : le robot de la couleur, paumes ouvertes,
@@ -1619,13 +1622,13 @@ def _section_rapport_routing():
 
 _SECTION_RAPPORT_ROUTING = _section_rapport_routing()
 
-# the Routing film section, empty while the films are hidden (FILMS_VISIBLES, outil.py)
+# the Routing film section, empty while its film is hidden (FILMS_VISIBLES, outil.py)
 _SECTION_FILM_ROUTING = f'''<section class="film"><div class="colonne">
-  <h2 class="h2">Crusetra, proven in 79 seconds.</h2>
-  <p class="film-duree">The film, and the demo</p>
+  <h2 class="h2">Crusetra, proven in 90 seconds.</h2>
+  <p class="film-duree">{"The film, and the demo" if "routing" in DEMOS else "The five Routing findings"}</p>
   {lecteur_html("routing", "Routing", "", "affiche-film.jpg")}{liste_films("routing", "", "affiche-film.jpg")}
 </div></section>
-''' if FILMS_VISIBLES else ""
+''' if "routing" in FILMS_VISIBLES else ""
 
 PAGE = f'''<!doctype html><html lang="en">
 <meta charset="utf-8"><title>Crusetra &#183; Routing, the extraction cost audit</title>

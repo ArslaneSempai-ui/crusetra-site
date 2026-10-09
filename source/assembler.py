@@ -1190,26 +1190,39 @@ def _film_absent(texte, oid):
 
 _pages_outils = {"routing": "routing/index.html"} | {n.split("/", 1)[0]: n for n in EMISES_EN_BLOC.values()
                                                      if n.endswith("/index.html")}
-if FILMS_VISIBLES:
-    if not _film_absent("<main></main>", "routing") or _film_absent(
-            '<section class="film"><video><source src="../films/routing.mp4"></video></section>', "routing"):
-        sys.exit("BROKEN GUARD: the shown-films check no longer tells a page with its film from one without")
-    _sans_film = [n for oid, n in sorted(_pages_outils.items()) if _film_absent((DOCS / n).read_text(), oid)]
-    if _sans_film:
-        sys.exit(f"FILMS_VISIBLES is True but these tool pages carry no film of their own: {_sans_film}")
-    print(f"  films guard held: shown, {len(_pages_outils)} tool pages carry their film (witness bitten)")
-else:
-    _zzf = DOCS / "zz-temoin-films.html"
-    _zzf.write_text('<video><source src="films/routing.mp4"></video><a href="https://youtu.be/x">YouTube</a>')
-    _vu = any(x.startswith("zz-temoin-films.html") for x in _traces_de_film(DOCS))
-    _zzf.unlink()
-    if not _vu:
-        sys.exit("BROKEN GUARD: the hidden-films scan did not see the planted page: its zero is worth nothing")
-    _traces = _traces_de_film(DOCS)
-    if _traces:
-        sys.exit("FILMS_VISIBLES is False but served files still point at a film:\n  " + "\n  ".join(_traces))
-    print(f"  films guard held: hidden, 0 film trace in the served files (witness bitten); "
-          f"{len(list((DOCS / 'films').glob('*.mp4')))} mp4 files left unlinked in docs/films")
+# 10/10: FILMS_VISIBLES is a set of film names (outil.py). A tool whose film is listed must carry it on its page;
+# every other film (Monitoring, Scoring, the demos: still "Cascade") must be linked from NO served file, and the
+# old YouTube uploads (the "Cascade" cuts) neither. Each half bites its witness before its green is believed.
+_YT_CASCADE = ("SXxViU7rhU8", "aNZ5uks7ibE", "AoINd6J2XMI", "xx_1lFJsw9E", "mCybN-xq4jA", "mTlpC9yXnXo")
+
+
+def _traces_cachees(dossier):
+    """Every served trace of a film that is not shown: a link to its mp4, or an old "Cascade" YouTube upload."""
+    return [t for t in _traces_de_film(dossier)
+            if (re.search(r'films/([\w-]+)\.mp4', t) and re.search(r'films/([\w-]+)\.mp4', t).group(1) not in FILMS_VISIBLES)
+            or any(y in t for y in _YT_CASCADE)] + [
+            f"{f.relative_to(dossier)} : {y}" for f in sorted(dossier.rglob("*.html")) for y in _YT_CASCADE if y in f.read_text(errors="replace")]
+
+
+if not _film_absent("<main></main>", "routing") or _film_absent(
+        '<section class="film"><video><source src="../films/routing.mp4"></video></section>', "routing"):
+    sys.exit("BROKEN GUARD: the shown-films check no longer tells a page with its film from one without")
+_zzf = DOCS / "zz-temoin-films.html"
+_zzf.write_text('<video><source src="films/monitoring.mp4"></video><a href="https://youtu.be/SXxViU7rhU8">YouTube</a>')
+_vu = any(x.startswith("zz-temoin-films.html") for x in _traces_cachees(DOCS))
+_zzf.unlink()
+if not _vu:
+    sys.exit("BROKEN GUARD: the hidden-films scan did not see the planted page: its zero is worth nothing")
+_sans_film = [n for oid, n in sorted(_pages_outils.items()) if oid in FILMS_VISIBLES and _film_absent((DOCS / n).read_text(), oid)]
+if _sans_film:
+    sys.exit(f"these tool pages should carry their film (FILMS_VISIBLES) and do not: {_sans_film}")
+_pages_cachees = [(oid, n) for oid, n in sorted(_pages_outils.items()) if oid not in FILMS_VISIBLES]
+_traces = [f"{n} : {m.group(0)}" for oid, n in _pages_cachees for m in _TRACE_FILM.finditer((DOCS / n).read_text())] + _traces_cachees(DOCS)
+if _traces:
+    sys.exit("a hidden film is still linked from the served files:\n  " + "\n  ".join(sorted(set(_traces))))
+print(f"  films guard held: {sum(1 for o in _pages_outils if o in FILMS_VISIBLES)} tool pages carry their film "
+      f"({', '.join(sorted(o for o in _pages_outils if o in FILMS_VISIBLES))}), {len(_pages_cachees)} without "
+      f"({', '.join(o for o, _ in _pages_cachees)}), 0 link to a hidden film or an old upload (witnesses bitten)")
 
 # ── le contrôle de liens, témoin d'abord ─────────────────────────────────────
 def liens_casses(dossier):
