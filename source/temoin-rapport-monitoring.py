@@ -126,9 +126,10 @@ def main():
                 dire(s.get("alertes") == d["source"]["alerts"] and s.get("suspects") == d["source"]["suspicious"]
                      and s.get("benins") == d["source"]["benign"], "the counts of the sidecar are read from the record")
                 dire('id="rapport"' in page, "the page carries the id=\"rapport\" block that npm run verify reads")
-                dire("Altman" in page and "CDLA-Sharing" in page,
+                visible = re.sub(r"<script.*?</script>", "", page, flags=re.S)      # what a reader sees, not the data block
+                dire("Altman" in visible and "CDLA-Sharing" in visible,
                      "the page credits the data provider and names the licence (CDLA-Sharing 1.0, section 3.1)")
-                dire("constructed" in page.lower(), "the page says the alerts are constructed, not raised by a system")
+                dire("constructed" in visible.lower(), "the page says the alerts are constructed, not raised by a system")
                 dire("—" not in page and "—" not in json.dumps(s, ensure_ascii=False), "no em dash on the page or in the sidecar")
                 dire(not any(x in page for x in ("/Users/", "arslanechr")), "no local path on the page")
         # 3. the detector of "nothing written" sees a planted file, or its zero would prove nothing
