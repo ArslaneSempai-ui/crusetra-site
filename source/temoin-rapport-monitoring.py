@@ -149,7 +149,7 @@ def main():
                      "neither the page nor the PDF says the measurement ran on the reader's machine or that a record came back")
                 bloc = json.loads(re.search(r'<script type="application/json" id="rapport">(.*?)</script>', page, re.S).group(1))
                 dire(bloc.get("sample") is True, "the data block of the page says sample true")
-                dire("—" not in page and "—" not in json.dumps(s, ensure_ascii=False), "no em dash on the page or in the sidecar")
+                dire(chr(0x2014) not in page and chr(0x2014) not in json.dumps(s, ensure_ascii=False), "no em dash on the page or in the sidecar")
                 dire(not any(x in page for x in ("/Users/", "arslanechr")), "no local path on the page")
         # 3. the detector of "nothing written" sees a planted file, or its zero would prove nothing
         plante = sortie / "out-plante"
