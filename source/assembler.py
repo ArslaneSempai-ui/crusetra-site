@@ -118,6 +118,13 @@ def verifier_pieces_stables(avant, apres):
 
 _PIECES_AVANT = photo_pieces()
 
+# slice S4 (11/10): the Monitoring sample report is checked BEFORE anything is built or docs/ is touched: its record must match its
+# seal (cascade-monitoring's own sceller --check), the sidecar must quote that seal and recount on it. A refusal says so in words;
+# left to batir-hero.py it would reach this script as a bare CalledProcessError, the builders' output being captured.
+import echantillon_monitoring as _em
+_EX_MON, _REC_MON = _em.verifier(MAQ)
+print(f"  Monitoring sample report: seal {_EX_MON['sceau']} holds (record checked by sceller --check, counts recounted)")
+
 for batisseur in ("batir-hero.py", "batir-instrument.py", "batir-instrument-screening.py",
                   "batir-instrument-monitoring.py", "batir-instrument-scoring.py",
                   "batir-instrument-dossier.py",
@@ -756,7 +763,8 @@ for rb in (MAQ / "rendus").glob("robot-*.webp"):          # les robots de toutes
 # et, depuis le 30/09, celui de la page Routing (batir-rapport-routing.py, le relevé réel CORD) : même contrôle
 (DOCS / "rapports").mkdir(exist_ok=True)
 for _pdf, _img, _bat in ((MAQ / "rapports" / "screening-sample-report.pdf", MAQ / "rendus" / "rapport-exemple.webp", "batir-rapport-exemple.py"),
-                         (MAQ / "rapports" / "routing-sample-report.pdf", MAQ / "rendus" / "rapport-routing.webp", "batir-rapport-routing.py")):
+                         (MAQ / "rapports" / "routing-sample-report.pdf", MAQ / "rendus" / "rapport-routing.webp", "batir-rapport-routing.py"),
+                         (MAQ / "rapports" / "monitoring-sample-report.pdf", MAQ / "rendus" / "rapport-monitoring.webp", "batir-rapport-monitoring.py")):
     if not _pdf.exists() or _pdf.read_bytes()[:5] != b"%PDF-":
         sys.exit(f"source/rapports/{_pdf.name} absent ou illisible : relancer {_bat}")
     if _pdf.stat().st_size > 2 * 1048576:
@@ -791,6 +799,25 @@ if _inc:
              + "\n  ".join(_inc) + "\n  → compléter emisLe, client, corpus.empreinte, corpus.dossiers, outil.commit dans le rendu, re-signer")
 print("  " + _v.stdout.strip().splitlines()[0].strip() + " (routing-sample-report.html, servie ; "
       + ", ".join(l.strip() for l in _v.stdout.splitlines() if l.strip().startswith(("Issued", "For ", "Corpus", "Tool"))) + ")")
+# slice S4 (11/10): the Monitoring sample page is served only when the sidecar says it is signed, and then it must pass
+# cascade-monitoring's public verifier. An unsigned sample (signe false, until Arslane signs with the house key) serves its PDF and
+# its image, not its page, and the report section says nothing about a signature: nothing is refused for being unsigned, nothing
+# unsigned is passed off as signed.
+if _EX_MON.get("signe"):
+    _pm = MAQ / "rapports" / "monitoring-sample-report.html"
+    if not _pm.exists():
+        sys.exit("source/rapports/monitoring-sample-report.html absent : run batir-rapport-monitoring.py --signe (the sidecar says the page is signed)")
+    shutil.copy(_pm, DOCS / "rapports" / _pm.name)
+    _vm = subprocess.run(["node", str(_OUTILS0["monitoring"]["outil_chemin"] / "src" / "verifier-rapport.mjs"), str(DOCS / "rapports" / _pm.name)],
+                         capture_output=True, text=True)
+    if _vm.returncode != 0 or "Signature valid" not in _vm.stdout:
+        sys.exit(f"the SERVED signed Monitoring sample page does not verify:\n{_vm.stdout}{_vm.stderr}")
+    _incm = _lignes_incompletes(_vm.stdout)
+    if _incm:
+        sys.exit("the SERVED signed Monitoring sample page carries an incomplete data block (the verifier prints a ?):\n  " + "\n  ".join(_incm))
+    print("  " + _vm.stdout.strip().splitlines()[0].strip() + " (monitoring-sample-report.html, served)")
+else:
+    print("  Monitoring sample report: the page is not signed (signe false); its PDF and image are served, the page is not")
 # Crusetra V4, 6 October 2026: a page that says WHOSE corpus the signed example of the Routing repository was issued on
 # quotes that signed file, never a renamed version of it. rapport-exemple.html was signed on 3 September and says
 # « cascade's own held-out corpus »; the FAQ had turned it into « Crusetra's ». The signed file cannot be re-signed to
