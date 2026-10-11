@@ -50,6 +50,13 @@ def dits(r):
     return r.stdout + r.stderr
 
 
+def refuse(r, *mots):
+    """The run was refused, in the words asked for, with no traceback and WITHOUT the line the assembler prints when the sample
+    passes: the assembler may stop later on something unrelated (so a nonzero exit alone proves nothing)."""
+    t = dits(r)
+    return r.returncode != 0 and all(m in t for m in mots) and "Traceback" not in t and "holds (record checked" not in t
+
+
 class Copie:
     """A copy of source/ in a temporary folder: the builders and the assembler run there, never on the real tree."""
 
@@ -91,7 +98,7 @@ def main():
         c.sidecar(lambda d: d.__setitem__("sceau", autre))
         r = lancer(c.src, "assembler.py")
         t = dits(r)
-        dire(r.returncode != 0 and "Monitoring sample report" in t and autre in t and side["sceau"] in t and "Traceback" not in t,
+        dire(refuse(r, "Monitoring sample report", autre, side["sceau"]),
              "a sidecar whose seal differs from the sample's record refuses the assembly, in words, naming both seals")
         dire(not (c.site / "docs").exists(), "and the refusal comes before docs/ is touched")
         c.remettre(original)
@@ -99,7 +106,7 @@ def main():
         # 2. counts that do not recount, a record edited after sealing, a sidecar that claims a signature the page does not carry
         c.sidecar(lambda d: d.__setitem__("suspects", d["suspects"] + 1))
         r = lancer(c.src, "assembler.py")
-        dire(r.returncode != 0 and "Monitoring sample report" in dits(r) and "recount" in dits(r) and "Traceback" not in dits(r),
+        dire(refuse(r, "Monitoring sample report", "do not recount"),
              "a sidecar whose counts do not recount on the record is refused in words")
         c.remettre(original)
         edite = racine / "record-edite.json"
@@ -108,12 +115,12 @@ def main():
         edite.write_text(json.dumps(e, indent=2), encoding="utf-8")
         c.sidecar(lambda d: d.__setitem__("source", os.path.relpath(edite, MAISON)))
         r = lancer(c.src, "assembler.py")
-        dire(r.returncode != 0 and "Monitoring sample report" in dits(r) and "does not match its seal" in dits(r) and "Traceback" not in dits(r),
+        dire(refuse(r, "Monitoring sample report", "does not match its seal"),
              "a record edited after it was sealed is refused even when the sidecar quotes the seal it still carries")
         c.remettre(original)
         c.sidecar(lambda d: d.__setitem__("signe", True))
         r = lancer(c.src, "assembler.py")
-        dire(r.returncode != 0 and "does not verify" in dits(r) and "Monitoring" in dits(r),
+        dire(r.returncode != 0 and "does not verify" in dits(r) and "Monitoring" in dits(r) and "Traceback" not in dits(r),
              "a sidecar that says the page is signed, over a page that is not, is refused by the verifier")
         c.remettre(original)
 
