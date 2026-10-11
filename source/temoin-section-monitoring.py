@@ -21,8 +21,10 @@ copy's docs/ is the only one written; the real docs/ is never touched) and requi
   - step 3 says "a sealed record and a report beside your file" without an offer, and "a one-page PDF" only with one;
   - the finding "no cell holds the declared recall floor" is followed by the sentence that the zscore and peer scenarios score
     nothing on the alerts that have no history, with the figure READ from the sidecar (sans_historique): the sample's own figure
-    in the built page, another figure when the sidecar is planted with another, no sentence when the sidecar says none, and a
-    sidecar without the field refused in words; the sentence is in both versions of the paragraph (example published or not).
+    in the built page, another figure when a record re-sealed with another one and a sidecar quoting it are planted, no sentence
+    when they say none, an impossible figure refused in words; the sentence is in both versions of the paragraph (example
+    published or not). The sidecar's sans_historique is recounted on the sealed record like alertes, suspects and benins: a
+    sidecar that differs from the record, or that lacks the field, is refused in words by the assembler and by the page builder.
 
 The assembler may later stop on something that has nothing to do with Monitoring (another tool's citations, say); this
 witness reads what the assembler did about Monitoring and says so when it stops elsewhere.
@@ -195,28 +197,52 @@ def main():
             for ligne in t.strip().splitlines()[-3:]:
                 print("        " + ligne[:150])
 
-        # 3b. the figure of the no-history sentence is READ from the sidecar: another figure changes it, none removes it, and a
-        #     sidecar without the field or with an impossible one is refused in words (the builder is run alone, on the copy)
+        # 3b. the figure of the no-history sentence is READ from the sidecar. A sidecar that disagrees with the sealed record is
+        #     refused (the recount), so to tell the figure the page prints from any figure typed in the builder, the witness plants
+        #     a CONSISTENT pair: a copy of the record with another sansHistorique, re-sealed by the tool's own sealer, and a sidecar
+        #     that quotes that seal and that figure. The builder is run alone, on the copy.
+        def planter_une_paire(nom, sans_hist):
+            chemin = racine / nom
+            e = json.loads(json.dumps(rec))
+            e["source"]["sansHistorique"] = sans_hist
+            chemin.write_text(json.dumps(e, indent=2), encoding="utf-8")
+            sc = subprocess.run(["node", str(DEPOT / "src" / "sceller.ts"), str(chemin)], capture_output=True, text=True)
+            assert sc.returncode == 0, f"the sealer could not seal the planted record: {dits(sc)}"
+            neuf = json.loads(chemin.read_text(encoding="utf-8"))["empreinte"]
+            c.sidecar(lambda d: d.update({"source": os.path.relpath(chemin, MAISON), "sceau": neuf, "sans_historique": sans_hist}))
+
         plante = 777
         assert side["sans_historique"] != plante, "the planted figure equals the real one: the case below would prove nothing"
-        c.sidecar(lambda d: d.__setitem__("sans_historique", plante))
+        planter_une_paire("record-777.json", plante)
         r = lancer(c.src, "batir-hero.py")
         h = (c.src / "HERO-MONITORING.html").read_text(encoding="utf-8")
         dire(r.returncode == 0 and sans_historique_dit(section_de(h)) == (plante, side["alertes"]),
-             f"a sidecar planted with another figure ({plante}) changes the sentence: it is read from the sidecar, not typed")
-        c.sidecar(lambda d: d.__setitem__("sans_historique", 0))
+             f"a record and a sidecar that agree on another figure ({plante}) change the sentence: it is read from the sidecar, not typed")
+        c.remettre(original)
+        planter_une_paire("record-0.json", 0)
         r = lancer(c.src, "batir-hero.py")
         h = (c.src / "HERO-MONITORING.html").read_text(encoding="utf-8")
         dire(r.returncode == 0 and bool(section_de(h)) and "have no transaction before their window" not in section_de(h),
-             "a sidecar that says no alert lacks history carries no such sentence")
+             "a record and a sidecar that say no alert lacks history carry no such sentence")
+        c.remettre(original)
+        planter_une_paire("record-trop.json", side["alertes"] + 1)
+        r = lancer(c.src, "batir-hero.py")
+        dire(refuse(r, "Monitoring sample report", "sans_historique"),
+             "a record and a sidecar that agree on more alerts without history than alerts are refused in words")
+        c.remettre(original)
         c.sidecar(lambda d: d.pop("sans_historique"))
         r = lancer(c.src, "batir-hero.py")
-        dire(refuse(r, "Monitoring sample report", "sans_historique"),
+        dire(refuse(r, "Monitoring sample report", "sans_historique", "do not recount"),
              "a sidecar without sans_historique is refused in words, not with a traceback")
-        c.sidecar(lambda d: d.__setitem__("sans_historique", d["alertes"] + 1))
+        c.remettre(original)
+        # the recount: a sidecar whose sans_historique differs from the sealed record's (the record untouched, its seal holding)
+        c.sidecar(lambda d: d.__setitem__("sans_historique", plante))
+        r = lancer(c.src, "assembler.py")
+        dire(refuse(r, "Monitoring sample report", "sans_historique", "do not recount"),
+             "a sidecar whose sans_historique differs from the sealed record's refuses the assembly, in words")
         r = lancer(c.src, "batir-hero.py")
-        dire(refuse(r, "Monitoring sample report", "sans_historique"),
-             "a sidecar that counts more alerts without history than alerts is refused in words")
+        dire(refuse(r, "Monitoring sample report", "sans_historique", "do not recount"),
+             "and the Monitoring page builder refuses it too: no page carries a figure the record does not")
         c.remettre(original)
 
         # 4. the offer part: only when the offer file exists, every price read from it, and never with a statut
