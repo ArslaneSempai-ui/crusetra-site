@@ -136,11 +136,13 @@ def main():
                 dire("Altman" in visible and "CDLA-Sharing" in visible,
                      "the page credits the data provider and names the licence (CDLA-Sharing 1.0, section 3.1)")
                 dire("constructed" in visible.lower(), "the page says the alerts are constructed, not raised by a system")
-                # the PDF is what is read and printed: its text, whitespace removed (a line may break at a hyphen of a link), keeps what the page says
-                texte_pdf = re.sub(r"\s+", "", subprocess.run(["pdftotext", str(pdf), "-"], capture_output=True, text=True).stdout)
+                # the PDF is what is read and printed: its text keeps what the page says (the sentences compared with whitespace removed, since a line may break)
+                pdf_brut = subprocess.run(["pdftotext", str(pdf), "-"], capture_output=True, text=True).stdout
+                texte_pdf = re.sub(r"\s+", "", pdf_brut)
                 texte_page = re.sub(r"\s+", "", htmllib.unescape(re.sub(r"<[^>]+>", " ", visible)))
                 for url in URLS:
-                    dire(url in visible and url in texte_pdf, f"the link {url} is visible text on the page and in the PDF text")
+                    # whole in the raw PDF text: a link cut at a hyphen loses the hyphen there, and a printed link must be copyable
+                    dire(url in visible and url in pdf_brut, f"the link {url} is visible text on the page and whole in the PDF text")
                 dire(re.sub(r"\s+", "", PIED_ECHANTILLON) in texte_page and re.sub(r"\s+", "", PIED_ECHANTILLON) in texte_pdf,
                      "the footer of the page and of the PDF says who measured and that the record is published with it")
                 dire(not any(re.sub(r"\s+", "", x) in texte_page or re.sub(r"\s+", "", x) in texte_pdf for x in PIED_CLIENT),

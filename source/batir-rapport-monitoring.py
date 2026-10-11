@@ -26,9 +26,11 @@ RENDU = MAISON / "cascade-portes" / "outils" / "rapport-monitoring.py"
 SIGNEUR = MAISON / "cascade-portes" / "outils" / "signer-rapport.mjs"
 CAPTURE = BASE / "capturer-rapport.mjs"
 # what the page says about the data, under the title: the credit CDLA-Sharing 1.0 asks for (section 3.1) and what the alerts are
+# (the links are plain visible text, so the printed PDF carries them)
 DATA = ("Sample on public data, not a client's file. The alerts were constructed by Crusetra from the synthetic IBM AMLworld transactions "
-        "(Erik Altman and IBM, CDLA-Sharing 1.0, changed from the original): AMLworld labels transactions, and no monitoring system raised "
-        "these alerts. Read \"your\" below as \"this file's\".")
+        "(Erik Altman and IBM, https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml), changed from "
+        "the original, and are shared under CDLA-Sharing 1.0 (https://cdla.dev/sharing-1-0/): AMLworld labels transactions, and no monitoring "
+        "system raised these alerts. Read \"your\" below as \"this file's\".")
 
 argv = sys.argv[1:]
 VALEUR = ("--record", "--out")
@@ -60,7 +62,7 @@ with tempfile.TemporaryDirectory(prefix="batir-rapport-monitoring-") as tmpdir:
     nu = t / "rapports" / "_page.html"
     html, pdf, webp, cote = (t / "rapports" / "monitoring-sample-report.html", t / "rapports" / "monitoring-sample-report.pdf",
                              t / "rendus" / "rapport-monitoring.webp", t / "rapports" / "monitoring-sample-report.json")
-    r = subprocess.run([sys.executable, str(RENDU), str(RECORD), str(nu), "--recall", PLANCHER, "--data", DATA, "--fontes", "../fontes",
+    r = subprocess.run([sys.executable, str(RENDU), str(RECORD), str(nu), "--recall", PLANCHER, "--sample", "--data", DATA, "--fontes", "../fontes",
                         "--client", f"Sample: {d['source']['alerts']} constructed alerts from IBM AMLworld"], capture_output=True, text=True)
     if r.returncode != 0:
         sys.exit(f"the renderer refused {RECORD.name}:\n{(r.stdout + r.stderr).strip()}\nNothing was written.")
