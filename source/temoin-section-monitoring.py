@@ -12,8 +12,13 @@ copy's docs/ is the only one written; the real docs/ is never touched) and requi
     that says the page is signed while the page is not: each refused;
   - the real sample passes: its PDF and image are served, the section is on the Monitoring page with the seal it was built
     from, the page that is not signed is not served and the section says nothing about a signature;
-  - the offer part appears ONLY when source/offre-monitoring.json exists, shows every price read from that file, and a file
-    that is still a draft refuses the build: no price is typed anywhere, no price leaves the house before it is chosen.
+  - the offer part appears ONLY when source/offre-monitoring.json exists and shows every price read from it; a file that carries
+    ANY statut (proposal, brouillon, draft, empty) refuses the build, because a chosen offer carries none (offre-routing.json and
+    offre-screening.json carry none): no price is typed anywhere, no price leaves the house before it is chosen;
+  - the links to the example folder and to the sealed record, and the commands that clone the repository and run the example,
+    exist only when cascade-monitoring's origin/main holds the record (a local check, no fetch): until the example is merged
+    they would 404, so the section drops them and keeps the sample, its PDF and the credit;
+  - step 3 says "a sealed record and a report beside your file" without an offer, and "a one-page PDF" only with one.
 
 The assembler may later stop on something that has nothing to do with Monitoring (another tool's citations, say); this
 witness reads what the assembler did about Monitoring and says so when it stops elsewhere.
@@ -32,6 +37,8 @@ BASE = pathlib.Path(__file__).parent
 MAISON = pathlib.Path.home() / "Documents"
 RECORD = MAISON / "cascade-monitoring" / "examples" / "amlworld" / "amlworld-alerts-measured.json"
 COTE = "rapports/monitoring-sample-report.json"
+REL_RECORD = "examples/amlworld/amlworld-alerts-measured.json"
+DEPOT = MAISON / "cascade-monitoring"
 rouge = 0
 
 
@@ -79,6 +86,15 @@ class Copie:
 
     def docs(self, chemin):
         return self.site / "docs" / chemin
+
+    def pointer_le_depot(self, depot):
+        """Point the COPY's monitoring tool path at another checkout (outil.py names it once): the seam that lets the witness
+        plant the state of origin/main without touching the real repository."""
+        outil = self.src / "outil.py"
+        t = outil.read_text(encoding="utf-8")
+        a = '"outil_chemin": _MAISON / "cascade-monitoring",'
+        assert t.count(a) == 1, "outil.py no longer names the monitoring checkout once: the witness cannot point the copy at a clone"
+        outil.write_text(t.replace(a, f'"outil_chemin": __import__("pathlib").Path({str(depot)!r}),'), encoding="utf-8")
 
 
 def main():
@@ -152,9 +168,8 @@ def main():
             for ligne in t.strip().splitlines()[-3:]:
                 print("        " + ligne[:150])
 
-        # 4. the offer part: only when the offer file exists, every price read from it, never from a draft
-        offre = {"statut": "decided by the witness, planted",
-                 "essai": {"alertes": 111, "delai_heures": 13},
+        # 4. the offer part: only when the offer file exists, every price read from it, and never with a statut
+        offre = {"essai": {"alertes": 111, "delai_heures": 13},          # a chosen offer carries no statut, like offre-routing.json
                  "snapshot": {"alertes": 2222, "fenetres": 1, "delai_heures": 14, "prix_usd": 1234},
                  "audit": {"alertes": 33333, "fenetres": 3, "delai_heures": 15, "prix_usd": 5678},
                  "audit_trimestriel": {"remesures_par_an": 6, "prix_usd_an": 9012},
@@ -165,19 +180,47 @@ def main():
         r = lancer(c.src, "batir-hero.py")
         h = (c.src / "HERO-MONITORING.html").read_text(encoding="utf-8")
         dire(r.returncode == 0 and 'class="r-offre"' in h and all(x in h for x in ("$1,234", "$5,678", "$9,012")),
-             "with an offer file, the offer part appears and shows every price read from it")
+             "with an offer file that carries no statut, the offer part appears and shows every price read from it")
         dire("A planted sentence about the data." in h and "A planted sentence about the fees." in h,
              "the notes under the prices are read from the offer file too")
-        offre["statut"] = "DRAFT, not chosen: a proposal"
-        chemin.write_text(json.dumps(offre), encoding="utf-8")
-        r = lancer(c.src, "batir-hero.py")
-        dire(r.returncode != 0 and "draft" in dits(r).lower() and "Traceback" not in dits(r),
-             "an offer file that is still a draft refuses the build, in words: no price leaves the house before it is chosen")
+        dire("a sealed record and a one-page PDF" in h and "a sealed record and a report beside your file" not in h,
+             "with an offer, step 3 promises the one-page PDF")
+        for statut in ("proposal", "brouillon", "DRAFT, not chosen: a proposal", "", "decided"):
+            chemin.write_text(json.dumps({**offre, "statut": statut}), encoding="utf-8")
+            r = lancer(c.src, "batir-hero.py")
+            dire(r.returncode != 0 and "offre-monitoring.json" in dits(r) and "statut" in dits(r) and "Traceback" not in dits(r),
+                 f"an offer file that carries the statut {statut!r} refuses the build, in words: a chosen offer carries none")
         chemin.unlink()
         r = lancer(c.src, "batir-hero.py")
         h = (c.src / "HERO-MONITORING.html").read_text(encoding="utf-8")
         dire(r.returncode == 0 and 'class="rapport" id="report"' in h and 'class="r-offre"' not in h,
              "without the offer file the report section is still there and the offer part is gone again")
+        dire("a sealed record and a report beside your file" in h and "one-page" not in h,
+             "without an offer, step 3 says a sealed record and a report beside your file, and promises no one-page PDF")
+
+        # 5. the links to the example and the commands that run it: only when origin/main holds the record (planted in a clone)
+        clone = racine / "monitoring-clone"
+        tete = subprocess.run(["git", "-C", str(DEPOT), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+        subprocess.run(["git", "clone", "--quiet", "--no-checkout", str(DEPOT), str(clone)], check=True, capture_output=True)
+        subprocess.run(["git", "-C", str(clone), "checkout", "--quiet", tete], check=True, capture_output=True)
+        git = lambda *a: subprocess.run(["git", "-C", str(clone), *a], capture_output=True, text=True)
+        git("update-ref", "-d", "refs/remotes/origin/main")                 # the state to plant: origin/main without the record
+        dire(git("cat-file", "-e", f"origin/main:{REL_RECORD}").returncode != 0 and git("cat-file", "-e", f"HEAD:{REL_RECORD}").returncode == 0,
+             "the clone holds the record on its HEAD and not on origin/main: the state to plant is the one planted")
+        c.pointer_le_depot(clone)
+        r = lancer(c.src, "batir-hero.py")
+        h = (c.src / "HERO-MONITORING.html").read_text(encoding="utf-8")
+        sec = (re.search(r'<section class="rapport" id="report">.*?</section>', h, re.S) or [""])[0]
+        dire(r.returncode == 0 and bool(sec) and "examples/amlworld" not in sec and "map-alerts" not in sec and "git clone" not in sec,
+             "while origin/main lacks the record, the section has no link to the example folder or the record and no command that runs it")
+        dire(bool(sec) and "../rapports/monitoring-sample-report.pdf" in sec and "Altman" in sec and "https://cdla.dev/sharing-1-0/" in sec,
+             "and it still shows the sample, its PDF and the credit to the provider with the licence link")
+        git("update-ref", "refs/remotes/origin/main", tete)                 # the record is now on origin/main (planted, no fetch)
+        r = lancer(c.src, "batir-hero.py")
+        h = (c.src / "HERO-MONITORING.html").read_text(encoding="utf-8")
+        sec = (re.search(r'<section class="rapport" id="report">.*?</section>', h, re.S) or [""])[0]
+        dire(r.returncode == 0 and "/blob/main/examples/amlworld/amlworld-alerts-measured.json" in sec and "/tree/main/examples/amlworld" in sec
+             and "map-alerts.ts" in sec, "once origin/main holds the record, the links and the commands are there")
     finally:
         if garder:
             print(f"  copy kept: {racine}")
