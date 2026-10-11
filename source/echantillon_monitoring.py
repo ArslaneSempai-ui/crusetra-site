@@ -19,6 +19,7 @@ import sys
 from outil import OUTILS
 
 COTE = pathlib.Path("rapports") / "monitoring-sample-report.json"
+RECORD_DANS_LE_DEPOT = "examples/amlworld/amlworld-alerts-measured.json"
 
 
 def verifier(base):
@@ -44,3 +45,11 @@ def verifier(base):
         sys.exit("Monitoring sample report: the sidecar's counts do not recount on its record: run batir-rapport-monitoring.py again. "
                  "Nothing was assembled.")
     return ex, rec
+
+
+def exemple_publie(depot):
+    """True when cascade-monitoring's origin/main holds the sample's record, so a link to it or a command that clones the repository
+    and runs the example would work. A LOCAL check, no fetch: `git cat-file -e origin/main:<record>` on the checkout. Until the example is
+    merged and fetched, the section drops those links and commands rather than publish ones that 404."""
+    r = subprocess.run(["git", "-C", str(depot), "cat-file", "-e", f"origin/main:{RECORD_DANS_LE_DEPOT}"], capture_output=True, text=True)
+    return r.returncode == 0
