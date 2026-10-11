@@ -8,7 +8,8 @@
 // largeur de l'écran (et 150 px). usage: node temoin-effondrement.mjs <url>…   (Chrome sur 9222)
 // code 1 si un bloc est écrasé ; TEMOIN_EFFONDRE=1 plante une fiche écrasée : le témoin doit rougir.
 const urls = process.argv.slice(2);
-const largeurs = (process.env.TEMOIN_LARGEURS || "375,768").split(",").map(Number);
+// 1000 and 1060 are the widths where the two-column sample-sheet grid squeezed its text column (11 October 2026)
+const largeurs = (process.env.TEMOIN_LARGEURS || "375,768,1000,1060").split(",").map(Number);
 const mesure = async (url, w) => {
   const t = await fetch("http://127.0.0.1:9222/json/new?about:blank", {method: "PUT"}).then(r => r.json());
   const ws = new WebSocket(t.webSocketDebuggerUrl); let id = 0; const pend = new Map();
