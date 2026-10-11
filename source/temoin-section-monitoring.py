@@ -18,7 +18,11 @@ copy's docs/ is the only one written; the real docs/ is never touched) and requi
   - the links to the example folder and to the sealed record, and the commands that clone the repository and run the example,
     exist only when cascade-monitoring's origin/main holds the record (a local check, no fetch): until the example is merged
     they would 404, so the section drops them and keeps the sample, its PDF and the credit;
-  - step 3 says "a sealed record and a report beside your file" without an offer, and "a one-page PDF" only with one.
+  - step 3 says "a sealed record and a report beside your file" without an offer, and "a one-page PDF" only with one;
+  - the finding "no cell holds the declared recall floor" is followed by the sentence that the zscore and peer scenarios score
+    nothing on the alerts that have no history, with the figure READ from the sidecar (sans_historique): the sample's own figure
+    in the built page, another figure when the sidecar is planted with another, no sentence when the sidecar says none, and a
+    sidecar without the field refused in words; the sentence is in both versions of the paragraph (example published or not).
 
 The assembler may later stop on something that has nothing to do with Monitoring (another tool's citations, say); this
 witness reads what the assembler did about Monitoring and says so when it stops elsewhere.
@@ -55,6 +59,27 @@ def lancer(src, script, *args):
 
 def dits(r):
     return r.stdout + r.stderr
+
+
+# The sentence about the alerts that have no history, in the two forms the page can print: "All N alerts ..." when every alert
+# lacks history, "K of the N alerts ..." otherwise. The figures are read back from the HTML so that the witness compares what
+# the page says with what the sidecar holds, never with a number typed here.
+SANS_HISTORIQUE = re.compile(r"(?:All (\d+)|(\d+) of the (\d+)) alerts have no transaction before their window, "
+                             r"so the zscore and peer scenarios[^<.]*\.")
+
+
+def sans_historique_dit(html):
+    """(K, N) the page states, or None when the sentence is absent: K alerts without history out of N."""
+    m = SANS_HISTORIQUE.search(html)
+    if not m:
+        return None
+    tous, k, n = m.groups()
+    return (int(tous), int(tous)) if tous else (int(k), int(n))
+
+
+def section_de(html):
+    m = re.search(r'<section class="rapport" id="report">.*?</section>', html, re.S)
+    return m.group(0) if m else ""
 
 
 def refuse(r, *mots):
@@ -158,6 +183,8 @@ def main():
              and side["sceau"] in section, "the section links the PDF and the image and names the seal the sample was built from")
         dire(rec["empreinte"] == side["sceau"] and f"{side['alertes']} constructed alerts" in section,
              "the figures in the section are read from the sidecar and its record")
+        dire(sans_historique_dit(section) == (side["sans_historique"], side["alertes"]),
+             "the section says the zscore and peer scenarios score nothing on the alerts without history, with the sidecar's own figure")
         dire(bool(section) and "signed" not in section.lower() and "verify" not in section.lower(),
              "the section says nothing about a signature while the sample is not signed")
         dire(bool(section) and not re.search(r"\$\d", section) and 'class="r-offre"' not in section,
@@ -167,6 +194,30 @@ def main():
             print("  note  the assembler later stopped on something else; last lines:")
             for ligne in t.strip().splitlines()[-3:]:
                 print("        " + ligne[:150])
+
+        # 3b. the figure of the no-history sentence is READ from the sidecar: another figure changes it, none removes it, and a
+        #     sidecar without the field or with an impossible one is refused in words (the builder is run alone, on the copy)
+        plante = 777
+        assert side["sans_historique"] != plante, "the planted figure equals the real one: the case below would prove nothing"
+        c.sidecar(lambda d: d.__setitem__("sans_historique", plante))
+        r = lancer(c.src, "batir-hero.py")
+        h = (c.src / "HERO-MONITORING.html").read_text(encoding="utf-8")
+        dire(r.returncode == 0 and sans_historique_dit(section_de(h)) == (plante, side["alertes"]),
+             f"a sidecar planted with another figure ({plante}) changes the sentence: it is read from the sidecar, not typed")
+        c.sidecar(lambda d: d.__setitem__("sans_historique", 0))
+        r = lancer(c.src, "batir-hero.py")
+        h = (c.src / "HERO-MONITORING.html").read_text(encoding="utf-8")
+        dire(r.returncode == 0 and bool(section_de(h)) and "have no transaction before their window" not in section_de(h),
+             "a sidecar that says no alert lacks history carries no such sentence")
+        c.sidecar(lambda d: d.pop("sans_historique"))
+        r = lancer(c.src, "batir-hero.py")
+        dire(refuse(r, "Monitoring sample report", "sans_historique"),
+             "a sidecar without sans_historique is refused in words, not with a traceback")
+        c.sidecar(lambda d: d.__setitem__("sans_historique", d["alertes"] + 1))
+        r = lancer(c.src, "batir-hero.py")
+        dire(refuse(r, "Monitoring sample report", "sans_historique"),
+             "a sidecar that counts more alerts without history than alerts is refused in words")
+        c.remettre(original)
 
         # 4. the offer part: only when the offer file exists, every price read from it, and never with a statut
         offre = {"essai": {"alertes": 111, "delai_heures": 13},          # a chosen offer carries no statut, like offre-routing.json
@@ -215,12 +266,16 @@ def main():
              "while origin/main lacks the record, the section has no link to the example folder or the record and no command that runs it")
         dire(bool(sec) and "../rapports/monitoring-sample-report.pdf" in sec and "Altman" in sec and "https://cdla.dev/sharing-1-0/" in sec,
              "and it still shows the sample, its PDF and the credit to the provider with the licence link")
+        dire("About the sample" in sec and sans_historique_dit(sec) == (side["sans_historique"], side["alertes"]),
+             "in that version of the paragraph too, the no-history sentence is there with the sidecar's figure")
         git("update-ref", "refs/remotes/origin/main", tete)                 # the record is now on origin/main (planted, no fetch)
         r = lancer(c.src, "batir-hero.py")
         h = (c.src / "HERO-MONITORING.html").read_text(encoding="utf-8")
         sec = (re.search(r'<section class="rapport" id="report">.*?</section>', h, re.S) or [""])[0]
         dire(r.returncode == 0 and "/blob/main/examples/amlworld/amlworld-alerts-measured.json" in sec and "/tree/main/examples/amlworld" in sec
              and "map-alerts.ts" in sec, "once origin/main holds the record, the links and the commands are there")
+        dire("Start with public data" in sec and sans_historique_dit(sec) == (side["sans_historique"], side["alertes"]),
+             "and in that version of the paragraph too, the no-history sentence is there with the sidecar's figure")
     finally:
         if garder:
             print(f"  copy kept: {racine}")
