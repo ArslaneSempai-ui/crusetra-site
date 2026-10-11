@@ -2334,8 +2334,12 @@ def _section_rapport_monitoring(o):
     does not match its seal, when the sidecar quotes another seal or does not recount. No figure is typed here: the counts come
     from the sidecar and its record, the thirty and the hundred and eighty days from cas.ts.
     THE OFFER PART (the three price columns, the free test, the notes) exists only when source/offre-monitoring.json does, as
-    Routing's reads offre-routing.json. That file is mkt-stratege's proposal until Arslane chooses the grid: a file still marked
-    draft refuses the build, so no price leaves the house by accident. Without it, the section is the sample and the way to start.
+    Routing's reads offre-routing.json. That file is mkt-stratege's proposal until Arslane chooses the grid, and a chosen offer
+    carries no `statut` (offre-routing.json and offre-screening.json carry none): a file with ANY statut, whatever its value, refuses
+    the build, so no price leaves the house by accident. Without it, the section is the sample and the way to start.
+    THE LINKS TO THE EXAMPLE AND THE COMMANDS THAT RUN IT exist only when cascade-monitoring's origin/main holds the record (local
+    check, no fetch): until the example is merged they point at nothing, so they are dropped, and the sample, its PDF and the credit
+    to the data provider stay.
     A sample that is not signed (signe false) shows no signature wording and no verification link; a signed one shows both."""
     import echantillon_monitoring
     ex, rec = echantillon_monitoring.verifier(BASE)
@@ -2359,23 +2363,36 @@ def _section_rapport_monitoring(o):
     signature = " &#183; signed page beside the PDF" if signe else ""
     verifier_lien = (f'<a class="lien-e" href="../rapports/monitoring-sample-report.html">Verify the signed report <span aria-hidden="true">&#8594;</span></a>'
                      if signe else "")
+    publie = echantillon_monitoring.exemple_publie(o["outil_chemin"])
     commandes = f"""<code class="r-cmd"><b>$ </b>git clone {depot}
 <b>$ </b>cd {nom_depot} &amp;&amp; npm ci --ignore-scripts
 <b>$ </b>node examples/amlworld/map-alerts.ts --input=&lt;HI-Small_Trans.csv&gt; --out=&lt;a new folder&gt;
 <b>$ </b>npm run measure:yours -- --alerts=&lt;that folder&gt;/amlworld-alerts.csv --transactions=&lt;that folder&gt;/amlworld-transactions.csv</code>"""
-    recus = f"""<div class="r-recus">
+    credit = f"""<p>Data: IBM AMLworld, by Erik Altman and IBM (<a href="{jeu}">dataset page</a>), changed from the original and shared under <a href="{licence}">CDLA-Sharing 1.0</a>.</p>"""
+    if publie:
+        recus = f"""<div class="r-recus">
     <p class="marque-h">Start with public data</p>
     <p>The public example runs the same command on the synthetic IBM AMLworld transactions, which label transactions and hold no alert. The alerts were constructed from those labels, so the sample shows what the tool writes on public data, not the false-alert rate of a real system. On it, {constat}. Map the file and measure it yourself, with nothing sent to us; you download the dataset from its own page:</p>
     {commandes}
-    <p>Data: IBM AMLworld, by Erik Altman and IBM (<a href="{jeu}">dataset page</a>), changed from the original and shared under <a href="{licence}">CDLA-Sharing 1.0</a>.</p>
+    {credit}
   </div>"""
+        liens_depot = (f'<a class="lien-e" href="{exemple}">See the example folder <span aria-hidden="true">&#8594;</span></a>'
+                       f'<a class="lien-e" href="{releve}">Open the sealed record <span aria-hidden="true">&#8594;</span></a>')
+    else:
+        recus = f"""<div class="r-recus">
+    <p class="marque-h">About the sample</p>
+    <p>The sample runs the tool on the synthetic IBM AMLworld transactions, which label transactions and hold no alert. The alerts were constructed from those labels, so it shows what the tool writes on public data, not the false-alert rate of a real system. On it, {constat}.</p>
+    {credit}
+  </div>"""
+        liens_depot = ""
     offre = ""
     offre_p = BASE / "offre-monitoring.json"
     if offre_p.exists():
         off = json.loads(offre_p.read_text())
-        if "draft" in str(off.get("statut", "")).lower():
-            sys.exit(f"offre-monitoring.json is still a draft (statut : {off['statut'][:60]}) : the grid is not chosen, so no price is built into the "
-                     "page. Remove the file, or replace it with the chosen grid.")
+        if "statut" in off:
+            sys.exit(f"offre-monitoring.json carries a statut ({off['statut']!r}) : a chosen offer carries none (offre-routing.json and "
+                     "offre-screening.json carry none), so the grid is not chosen and no price is built into the page. Remove the file, "
+                     "or replace it with the chosen grid.")
         usd = lambda n: f"${n:,}"
         es, sn, au, tr = off["essai"], off["snapshot"], off["audit"], off["audit_trimestriel"]
         fen = lambda n: f"{n} window{'s' if n != 1 else ''} of history"
@@ -2387,14 +2404,14 @@ def _section_rapport_monitoring(o):
         <p class="r-eti">Snapshot</p>
         <p class="r-montant"><span class="r-n">{usd(sn["prix_usd"])}</span><small>up to {sn["alertes"]:,} alerts</small></p>
         <p class="r-sous">Your alerts, measured once and sealed, back within {sn["delai_heures"]} hours.</p>
-        <ul class="r-inclus"><li>Up to {sn["alertes"]:,} alerts, {fen(sn["fenetres"])}</li><li>The sealed record and the one-page report</li><li>The cell that holds your recall floor, or the statement that none does</li></ul>
+        <ul class="r-inclus"><li>Up to {sn["alertes"]:,} alerts, {fen(sn["fenetres"])}</li><li>The sealed record and the one-page PDF</li><li>The cell that holds your recall floor, or the statement that none does</li></ul>
       </article>
       <article class="r-col haute" data-col="audit">
         <img class="r-robot" src="../rendus/robot-lapis-penche.webp" alt="" loading="lazy" decoding="async">
         <p class="r-eti">Audit</p>
         <p class="r-montant"><span class="r-n">{usd(au["prix_usd"])}</span><small>up to {au["alertes"]:,} alerts</small></p>
         <p class="r-sous">A longer history, sealed, back within {au["delai_heures"]} hours.</p>
-        <ul class="r-inclus"><li>Up to {au["alertes"]:,} alerts, {fen(au["fenetres"])}</li><li>The sealed record and the one-page report</li><li>The cell that holds your recall floor, or the statement that none does</li></ul>
+        <ul class="r-inclus"><li>Up to {au["alertes"]:,} alerts, {fen(au["fenetres"])}</li><li>The sealed record and the one-page PDF</li><li>The cell that holds your recall floor, or the statement that none does</li></ul>
       </article>
       <article class="r-col" data-col="trimestriel">
         <img class="r-robot" src="../rendus/robot-lapis-regarde.webp" alt="" loading="lazy" decoding="async">
@@ -2409,6 +2426,7 @@ def _section_rapport_monitoring(o):
   <div class="ouvrir-ligne"><a class="ouvrir" href="mailto:{off["contact"]}?subject=Alert%20threshold%20review%2C%20free%20trial"><span><span class="ouvrir-t">Try it free on {es["alertes"]:,} of your alerts</span>
     <span class="ouvrir-s">The report comes back within {es["delai_heures"]} hours. Write to {off["contact"]}.</span></span>
     <span class="fl" aria-hidden="true">&#8594;</span></a></div>"""
+    recu = "a sealed record and a one-page PDF" if offre else "a sealed record and a report beside your file"
     html = f"""<section class="rapport" id="report"><div class="colonne">
   <div class="r-grille">
   <div class="r-texte">
@@ -2417,7 +2435,7 @@ def _section_rapport_monitoring(o):
     <ol class="r-pas">
       <li><span><b>You export</b> the alerts your analysts already dispositioned, suspicious or benign, and the transactions of the alerted accounts.</span></li>
       <li><span><b>You run it</b> on your machine, offline. Each alert is rebuilt into a {jf}-day case with up to {jh} days of history before it, and every scenario is replayed at every threshold.</span></li>
-      <li><span><b>You receive</b> a sealed record and a one-page report: for each scenario and threshold, the recall on the cases your analysts confirmed and the false-alert rate on the ones they closed, each with its interval and its count, and the cell that holds the recall floor you declare with the fewest false alerts, or the statement that none does. Sealed means the record carries a content hash, so an edit made after sealing shows.</span></li>
+      <li><span><b>You receive</b> {recu}: for each scenario and threshold, the recall on the cases your analysts confirmed and the false-alert rate on the ones they closed, each with its interval and its count, and the cell that holds the recall floor you declare with the fewest false alerts, or the statement that none does. Sealed means the record carries a content hash, so an edit made after sealing shows.</span></li>
     </ol>
   </div>
   <figure class="r-feuille">
@@ -2427,7 +2445,7 @@ def _section_rapport_monitoring(o):
   </figure>
   </div>
   {recus}{offre}
-  <p class="liens"><a class="lien-e" href="{pdf}" download>Download the sample report <span aria-hidden="true">&#8594;</span></a>{verifier_lien}<a class="lien-e" href="{exemple}">See the example folder <span aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{releve}">Open the sealed record <span aria-hidden="true">&#8594;</span></a></p>
+  <p class="liens"><a class="lien-e" href="{pdf}" download>Download the sample report <span aria-hidden="true">&#8594;</span></a>{verifier_lien}{liens_depot}</p>
 </div></section>
 <script>
 (() => {{
