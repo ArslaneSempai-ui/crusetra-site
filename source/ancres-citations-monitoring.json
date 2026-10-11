@@ -19,7 +19,7 @@
     "src/synthetic.ts:31": "export const NATURES_SUSPECTES = [",
     "src/synthetic.ts:51": "export const SEUIL_DECLARATION = 10_000;",
     "src/synthetic.ts:71": "if (!c.raison || !c.raison.trim()) throw new Error(`case \"${c.id}\" carries no raison`);",
-    "src/your-alerts.ts:25": "* `account_id`, un montant, une date de transaction ou un pays. Un test plante des",
+    "src/your-alerts.ts:25": "* l'analyste et « sans historique », jamais un score) : JAMAIS un `account_id`, un",
     "src/your-alerts.ts:9": "* `account_id`, reconstruit pour chaque alerte le CAS du contrat — la fenêtre de trente"
   }
 }
