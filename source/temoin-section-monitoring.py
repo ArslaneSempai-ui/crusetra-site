@@ -1,0 +1,183 @@
+#!/usr/bin/env python3
+"""WITNESS OF THE MONITORING REPORT SECTION AND OF THE ASSEMBLER'S GUARD ON ITS SAMPLE (slice S4, 11/10).
+
+The Monitoring page carries a report section modelled on Routing's (the sample sheet, its PDF, the way to start). The
+sample is the one slice S3 built: batir-rapport-monitoring.py wrote rapports/monitoring-sample-report.{html,pdf,json} and
+rendus/rapport-monitoring.webp from the sealed record of cascade-monitoring examples/amlworld. This witness runs the real
+builders and the real assembler on a COPY of the site (the assembler is anchored on the checkout that carries it, so the
+copy's docs/ is the only one written; the real docs/ is never touched) and requires:
+
+  - a sidecar whose seal differs from the sample's record refuses the assembly, in words, before anything is built;
+  - a sidecar whose counts differ, a record edited after it was sealed (the sidecar still quoting the old seal), a sidecar
+    that says the page is signed while the page is not: each refused;
+  - the real sample passes: its PDF and image are served, the section is on the Monitoring page with the seal it was built
+    from, the page that is not signed is not served and the section says nothing about a signature;
+  - the offer part appears ONLY when source/offre-monitoring.json exists, shows every price read from that file, and a file
+    that is still a draft refuses the build: no price is typed anywhere, no price leaves the house before it is chosen.
+
+The assembler may later stop on something that has nothing to do with Monitoring (another tool's citations, say); this
+witness reads what the assembler did about Monitoring and says so when it stops elsewhere.
+usage: python3 temoin-section-monitoring.py [--keep]     (exit 0 when every case holds)
+"""
+import json
+import os
+import pathlib
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+
+BASE = pathlib.Path(__file__).parent
+MAISON = pathlib.Path.home() / "Documents"
+RECORD = MAISON / "cascade-monitoring" / "examples" / "amlworld" / "amlworld-alerts-measured.json"
+COTE = "rapports/monitoring-sample-report.json"
+rouge = 0
+
+
+def dire(ok, quoi):
+    global rouge
+    print(("  vert  " if ok else "  ROUGE ") + quoi)
+    if not ok:
+        rouge = 1
+
+
+def lancer(src, script, *args):
+    return subprocess.run([sys.executable, str(src / script), *args], cwd=src, capture_output=True, text=True)
+
+
+def dits(r):
+    return r.stdout + r.stderr
+
+
+class Copie:
+    """A copy of source/ in a temporary folder: the builders and the assembler run there, never on the real tree."""
+
+    def __init__(self, racine):
+        self.site = racine / "site"
+        self.src = self.site / "source"
+        shutil.copytree(BASE, self.src, ignore=shutil.ignore_patterns("__pycache__", "*.avant-*", ".verif-final", "zz-*"))
+        shutil.copy(BASE.parent / "README.md", self.site / "README.md")
+
+    def sidecar(self, modifier=None):
+        chemin = self.src / COTE
+        d = json.loads(chemin.read_text(encoding="utf-8"))
+        if modifier:
+            modifier(d)
+            chemin.write_text(json.dumps(d, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        return d
+
+    def remettre(self, octets_sidecar):
+        (self.src / COTE).write_bytes(octets_sidecar)
+
+    def docs(self, chemin):
+        return self.site / "docs" / chemin
+
+
+def main():
+    garder = "--keep" in sys.argv
+    if not (BASE / COTE).exists() or not RECORD.exists():
+        print("  ROUGE the sample or its record is missing: nothing to witness")
+        return 1
+    racine = pathlib.Path(tempfile.mkdtemp(prefix="temoin-section-monitoring-"))
+    try:
+        c = Copie(racine)
+        original = (c.src / COTE).read_bytes()
+        side = json.loads(original)
+        rec = json.loads(RECORD.read_text(encoding="utf-8"))
+
+        # 1. the sidecar that does not match its record: refused, in words, before anything is built
+        autre = ("0" if side["sceau"][0] != "0" else "1") + side["sceau"][1:]
+        c.sidecar(lambda d: d.__setitem__("sceau", autre))
+        r = lancer(c.src, "assembler.py")
+        t = dits(r)
+        dire(r.returncode != 0 and "Monitoring sample report" in t and autre in t and side["sceau"] in t and "Traceback" not in t,
+             "a sidecar whose seal differs from the sample's record refuses the assembly, in words, naming both seals")
+        dire(not (c.site / "docs").exists(), "and the refusal comes before docs/ is touched")
+        c.remettre(original)
+
+        # 2. counts that do not recount, a record edited after sealing, a sidecar that claims a signature the page does not carry
+        c.sidecar(lambda d: d.__setitem__("suspects", d["suspects"] + 1))
+        r = lancer(c.src, "assembler.py")
+        dire(r.returncode != 0 and "Monitoring sample report" in dits(r) and "recount" in dits(r) and "Traceback" not in dits(r),
+             "a sidecar whose counts do not recount on the record is refused in words")
+        c.remettre(original)
+        edite = racine / "record-edite.json"
+        e = json.loads(json.dumps(rec))
+        e["source"]["suspicious"] += 1                 # content moved, the seal field untouched: the sidecar still quotes it
+        edite.write_text(json.dumps(e, indent=2), encoding="utf-8")
+        c.sidecar(lambda d: d.__setitem__("source", os.path.relpath(edite, MAISON)))
+        r = lancer(c.src, "assembler.py")
+        dire(r.returncode != 0 and "Monitoring sample report" in dits(r) and "does not match its seal" in dits(r) and "Traceback" not in dits(r),
+             "a record edited after it was sealed is refused even when the sidecar quotes the seal it still carries")
+        c.remettre(original)
+        c.sidecar(lambda d: d.__setitem__("signe", True))
+        r = lancer(c.src, "assembler.py")
+        dire(r.returncode != 0 and "does not verify" in dits(r) and "Monitoring" in dits(r),
+             "a sidecar that says the page is signed, over a page that is not, is refused by the verifier")
+        c.remettre(original)
+
+        # 3. the real sample: served, in the page, with the seal it was built from, unsigned and saying nothing about a signature
+        r = lancer(c.src, "assembler.py")
+        t = dits(r)
+        dire(f"Monitoring sample report: seal {side['sceau']} holds" in t, "the real sample passes the assembler's guard, which says so")
+        pdf, webp = c.docs("rapports/monitoring-sample-report.pdf"), c.docs("rendus/rapport-monitoring.webp")
+        dire(pdf.exists() and pdf.read_bytes()[:5] == b"%PDF-" and webp.exists() and webp.read_bytes()[8:12] == b"WEBP",
+             "the sample's PDF and page image are served")
+        dire(pdf.exists() and not c.docs("rapports/monitoring-sample-report.html").exists(),
+             "the sample page is NOT served while the sidecar says it is not signed (signe false)")
+        page = c.docs("monitoring/index.html")
+        html = page.read_text(encoding="utf-8") if page.exists() else ""
+        m = re.search(r'<section class="rapport" id="report">.*?</section>', html, re.S)
+        section = m.group(0) if m else ""
+        dire(bool(section), "the Monitoring page carries the report section")
+        dire("../rapports/monitoring-sample-report.pdf" in section and "../rendus/rapport-monitoring.webp" in section
+             and side["sceau"] in section, "the section links the PDF and the image and names the seal the sample was built from")
+        dire(rec["empreinte"] == side["sceau"] and f"{side['alertes']} constructed alerts" in section,
+             "the figures in the section are read from the sidecar and its record")
+        dire(bool(section) and "signed" not in section.lower() and "verify" not in section.lower(),
+             "the section says nothing about a signature while the sample is not signed")
+        dire(bool(section) and not re.search(r"\$\d", section) and 'class="r-offre"' not in section,
+             "no price and no offer block while source/offre-monitoring.json does not exist")
+        dire(bool(section) and chr(0x2014) not in section, "no em dash in the section")
+        if r.returncode != 0:
+            print("  note  the assembler later stopped on something else; last lines:")
+            for ligne in t.strip().splitlines()[-3:]:
+                print("        " + ligne[:150])
+
+        # 4. the offer part: only when the offer file exists, every price read from it, never from a draft
+        offre = {"statut": "decided by the witness, planted",
+                 "essai": {"alertes": 111, "delai_heures": 13},
+                 "snapshot": {"alertes": 2222, "fenetres": 1, "delai_heures": 14, "prix_usd": 1234},
+                 "audit": {"alertes": 33333, "fenetres": 3, "delai_heures": 15, "prix_usd": 5678},
+                 "audit_trimestriel": {"remesures_par_an": 6, "prix_usd_an": 9012},
+                 "contact": "contact@crusetra.com", "donnees": "A planted sentence about the data.",
+                 "frais_fournisseurs": "A planted sentence about the fees."}
+        chemin = c.src / "offre-monitoring.json"
+        chemin.write_text(json.dumps(offre), encoding="utf-8")
+        r = lancer(c.src, "batir-hero.py")
+        h = (c.src / "HERO-MONITORING.html").read_text(encoding="utf-8")
+        dire(r.returncode == 0 and 'class="r-offre"' in h and all(x in h for x in ("$1,234", "$5,678", "$9,012")),
+             "with an offer file, the offer part appears and shows every price read from it")
+        dire("A planted sentence about the data." in h and "A planted sentence about the fees." in h,
+             "the notes under the prices are read from the offer file too")
+        offre["statut"] = "DRAFT, not chosen: a proposal"
+        chemin.write_text(json.dumps(offre), encoding="utf-8")
+        r = lancer(c.src, "batir-hero.py")
+        dire(r.returncode != 0 and "draft" in dits(r).lower() and "Traceback" not in dits(r),
+             "an offer file that is still a draft refuses the build, in words: no price leaves the house before it is chosen")
+        chemin.unlink()
+        r = lancer(c.src, "batir-hero.py")
+        h = (c.src / "HERO-MONITORING.html").read_text(encoding="utf-8")
+        dire(r.returncode == 0 and 'class="rapport" id="report"' in h and 'class="r-offre"' not in h,
+             "without the offer file the report section is still there and the offer part is gone again")
+    finally:
+        if garder:
+            print(f"  copy kept: {racine}")
+        else:
+            shutil.rmtree(racine, ignore_errors=True)
+    return rouge
+
+
+if __name__ == "__main__":
+    sys.exit(main())
