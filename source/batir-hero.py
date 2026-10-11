@@ -2351,7 +2351,7 @@ def _section_rapport_monitoring(o):
     plancher = f"{ex['plancher'] * 100:.0f} %"
     reco = ex["recommandation"]
     constat = (f"the report recommends {reco['scenario']} at threshold {reco['threshold']:.2f}" if reco
-               else f"no cell holds the declared recall floor of {plancher}, and the report says so")
+               else f"no cell holds the declared recall floor of {plancher}")
     releve = f"{depot}/blob/main/examples/amlworld/amlworld-alerts-measured.json"
     exemple = f"{depot}/tree/main/examples/amlworld"
     jeu = "https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml"
