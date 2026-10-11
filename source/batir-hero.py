@@ -2356,6 +2356,16 @@ def _section_rapport_monitoring(o):
     reco = ex["recommandation"]
     constat = (f"the report recommends {reco['scenario']} at threshold {reco['threshold']:.2f}" if reco
                else f"no cell holds the declared recall floor of {plancher}")
+    # The finding alone would hide why the zscore and peer scenarios cannot help here: they compare an account with its own past
+    # or with a peer profile and score nothing without a history. The figure is READ from the sidecar (sans_historique), never
+    # typed; no sentence when the sidecar says every alert has a history, and a missing or impossible field refuses the build.
+    sans_hist, total = ex.get("sans_historique"), ex["alertes"]
+    if not isinstance(sans_hist, int) or isinstance(sans_hist, bool) or not 0 <= sans_hist <= total:
+        sys.exit(f"Monitoring sample report: the sidecar's sans_historique ({sans_hist!r}) is missing or is not a count of the {total} alerts: "
+                 "run batir-rapport-monitoring.py again. Nothing was built.")
+    quantite = f"All {total}" if sans_hist == total else f"{sans_hist} of the {total}"
+    sans_historique = (f" {quantite} alerts have no transaction before their window, so the zscore and peer scenarios, "
+                       "which need a history, score nothing on them." if sans_hist else "")
     releve = f"{depot}/blob/main/examples/amlworld/amlworld-alerts-measured.json"
     exemple = f"{depot}/tree/main/examples/amlworld"
     jeu = "https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml"
@@ -2372,7 +2382,7 @@ def _section_rapport_monitoring(o):
     if publie:
         recus = f"""<div class="r-recus">
     <p class="marque-h">Start with public data</p>
-    <p>The public example runs the same command on the synthetic IBM AMLworld transactions, which label transactions and hold no alert. The alerts were constructed from those labels, so the sample shows what the tool writes on public data, not the false-alert rate of a real system. On it, {constat}. Map the file and measure it yourself, with nothing sent to us; you download the dataset from its own page:</p>
+    <p>The public example runs the same command on the synthetic IBM AMLworld transactions, which label transactions and hold no alert. The alerts were constructed from those labels, so the sample shows what the tool writes on public data, not the false-alert rate of a real system. On it, {constat}.{sans_historique} Map the file and measure it yourself, with nothing sent to us; you download the dataset from its own page:</p>
     {commandes}
     {credit}
   </div>"""
@@ -2381,7 +2391,7 @@ def _section_rapport_monitoring(o):
     else:
         recus = f"""<div class="r-recus">
     <p class="marque-h">About the sample</p>
-    <p>The sample runs the tool on the synthetic IBM AMLworld transactions, which label transactions and hold no alert. The alerts were constructed from those labels, so it shows what the tool writes on public data, not the false-alert rate of a real system. On it, {constat}.</p>
+    <p>The sample runs the tool on the synthetic IBM AMLworld transactions, which label transactions and hold no alert. The alerts were constructed from those labels, so it shows what the tool writes on public data, not the false-alert rate of a real system. On it, {constat}.{sans_historique}</p>
     {credit}
   </div>"""
         liens_depot = ""
