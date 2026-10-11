@@ -10,6 +10,7 @@ Nothing here touches the house key: the builder is run without --signe, and the 
 home of their own.
 usage: python3 temoin-rapport-monitoring.py [--keep]     (exit 0 when every case holds; --keep leaves the output folder)
 """
+import html as htmllib
 import json
 import os
 import pathlib
@@ -23,6 +24,11 @@ BASE = pathlib.Path(__file__).parent
 MAISON = pathlib.Path.home() / "Documents"
 DEPOT = MAISON / "cascade-monitoring"
 RECORD = DEPOT / "examples" / "amlworld" / "amlworld-alerts-measured.json"
+# CDLA-Sharing 1.0 asks that the licence be reachable from what is published (section 3.3): both links are VISIBLE text, so the PDF keeps them
+URLS = ("https://cdla.dev/sharing-1-0/", "https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml")
+# a page published as a sample was not measured on the reader's machine and no record "came back" from a client
+PIED_ECHANTILLON = "Measured by Crusetra on public data; this record is published with it."
+PIED_CLIENT = ("ran on your machine", "Only this record came back", "come back in the record")
 BATISSEUR = BASE / "batir-rapport-monitoring.py"
 
 rouge = 0
@@ -130,6 +136,17 @@ def main():
                 dire("Altman" in visible and "CDLA-Sharing" in visible,
                      "the page credits the data provider and names the licence (CDLA-Sharing 1.0, section 3.1)")
                 dire("constructed" in visible.lower(), "the page says the alerts are constructed, not raised by a system")
+                # the PDF is what is read and printed: its text, whitespace removed (a line may break at a hyphen of a link), keeps what the page says
+                texte_pdf = re.sub(r"\s+", "", subprocess.run(["pdftotext", str(pdf), "-"], capture_output=True, text=True).stdout)
+                texte_page = re.sub(r"\s+", "", htmllib.unescape(re.sub(r"<[^>]+>", " ", visible)))
+                for url in URLS:
+                    dire(url in visible and url in texte_pdf, f"the link {url} is visible text on the page and in the PDF text")
+                dire(re.sub(r"\s+", "", PIED_ECHANTILLON) in texte_page and re.sub(r"\s+", "", PIED_ECHANTILLON) in texte_pdf,
+                     "the footer of the page and of the PDF says who measured and that the record is published with it")
+                dire(not any(re.sub(r"\s+", "", x) in texte_page or re.sub(r"\s+", "", x) in texte_pdf for x in PIED_CLIENT),
+                     "neither the page nor the PDF says the measurement ran on the reader's machine or that a record came back")
+                bloc = json.loads(re.search(r'<script type="application/json" id="rapport">(.*?)</script>', page, re.S).group(1))
+                dire(bloc.get("sample") is True, "the data block of the page says sample true")
                 dire("—" not in page and "—" not in json.dumps(s, ensure_ascii=False), "no em dash on the page or in the sidecar")
                 dire(not any(x in page for x in ("/Users/", "arslanechr")), "no local path on the page")
         # 3. the detector of "nothing written" sees a planted file, or its zero would prove nothing
