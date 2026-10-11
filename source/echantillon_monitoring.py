@@ -9,7 +9,7 @@ verifier() refuses, in words and before anything is built or any docs/ is touche
   - a record that does not match its own seal, checked by cascade-monitoring's own `sceller.ts --check`, so an edit made after
     sealing is seen even when the sidecar still quotes the seal the record carries;
   - a sidecar whose seal is not the record's;
-  - a sidecar whose counts do not recount on the record.
+  - a sidecar whose counts (alerts, suspicious, benign, and the alerts with no history) do not recount on the record.
 Each refusal says "Monitoring sample report" and what to run. Nothing here signs or serves anything."""
 import json
 import pathlib
@@ -41,9 +41,11 @@ def verifier(base):
     if rec["empreinte"] != ex["sceau"]:
         sys.exit(f"Monitoring sample report: the sidecar carries the seal {ex['sceau']} but the record carries {rec['empreinte']}: "
                  "run batir-rapport-monitoring.py again. Nothing was assembled.")
-    if (ex["alertes"], ex["suspects"], ex["benins"]) != (rec["source"]["alerts"], rec["source"]["suspicious"], rec["source"]["benign"]):
-        sys.exit("Monitoring sample report: the sidecar's counts do not recount on its record: run batir-rapport-monitoring.py again. "
-                 "Nothing was assembled.")
+    # .get on both sides: a sidecar or a record without sans_historique is a refusal in words here, never a KeyError traceback
+    if ((ex["alertes"], ex["suspects"], ex["benins"], ex.get("sans_historique"))
+            != (rec["source"]["alerts"], rec["source"]["suspicious"], rec["source"]["benign"], rec["source"].get("sansHistorique"))):
+        sys.exit("Monitoring sample report: the sidecar's counts (alertes, suspects, benins, sans_historique) do not recount on its record: "
+                 "run batir-rapport-monitoring.py again. Nothing was assembled.")
     return ex, rec
 
 
