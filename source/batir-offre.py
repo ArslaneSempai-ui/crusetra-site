@@ -121,8 +121,8 @@ CSS = '''
   .ex-q{font-size:14px;color:var(--sur-pale);line-height:1.55}
   .ex-fin{font-size:15px;line-height:1.65;color:var(--sur-pale);max-width:none;margin:26px 0 0;text-wrap:pretty}
   .ex-fin b{color:var(--sur);font-weight:600}
-  /* a cell's paragraph must keep 45 % of the screen at tablet width (temoin-effondrement) : one column up to 1080 px */
-  @media (max-width:1080px){.ex-grille{grid-template-columns:1fr}}
+  /* a cell's paragraph must keep 45 % of the screen at tablet and small laptop width (temoin-effondrement) : the audit cells and the three offer cards (.cols, with the gap that clears their robots) stack in one column up to 1280 px */
+  @media (max-width:1280px){.ex-grille{grid-template-columns:1fr}.cols{grid-template-columns:1fr;gap:110px;margin-top:130px}}
 
   /* the days : three lanes to scale, the papers on their lane at their date, one line reads the day */
   .jours{padding:80px 0 30px}
@@ -180,7 +180,6 @@ CSS = '''
     .barre{padding:12px 18px;gap:14px}
     .barre nav{display:none}
     .tete{padding-top:100px}
-    .cols{grid-template-columns:1fr;gap:110px;margin-top:130px}
     .axe-boite{padding:24px 18px}
   }
   /* the contact card (Arslane, 13/09 : « pas la peine de les emmener vers toute une autre page »,
