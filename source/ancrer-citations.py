@@ -20,7 +20,7 @@ import sys
 
 ICI = pathlib.Path(__file__).parent
 sys.path.insert(0, str(ICI))
-from outil import OUTILS, ReleveIllisible, entrees_du_releve, verdict_chiffre  # noqa: E402
+from outil import OUTILS, ReleveIllisible, citations_du_releve, entrees_du_releve, verdict_chiffre  # noqa: E402
 
 CITATION = re.compile(r"[A-Za-z0-9_./-]+\.(?:ts|mjs|json|md|js):\d+")
 PAGES = {
@@ -53,16 +53,18 @@ for nom in PAGES[outil_id]:
     citees |= set(CITATION.findall(p.read_text()))
 
 # releve.json : la source de chaque chiffre est une citation comme les autres, tenue par la même garde
+# (a sum declared in releve.json also anchors the last line it reads: citations_du_releve lists it)
 try:
     _entrees, derivations = entrees_du_releve(ICI / "releve.json")
+    du_releve = citations_du_releve(ICI / "releve.json")[outil_id]
 except ReleveIllisible as e:
     sys.exit(str(e))
-du_releve = _entrees[outil_id]
+chiffres = _entrees[outil_id]
 citees |= set(du_releve)
 
 
 def de_qui(c):
-    return f" (releve.json, {', '.join(f'{s} « {n} »' for s, n in du_releve[c])})" if c in du_releve else ""
+    return f" (releve.json, {', '.join(du_releve[c])})" if c in du_releve else ""
 
 
 ancres, fautes = {}, []
@@ -81,7 +83,7 @@ for c in sorted(citees):
         fautes.append(f"{c} : la ligne visée est vide, elle ne porte ni l'ancre ni le chiffre : "
                       f"la citation ne désigne rien{de_qui(c)}")
         continue
-    for section, chiffre in du_releve.get(c, []):
+    for section, chiffre in chiffres.get(c, []):
         raison = verdict_chiffre(chiffre, c, lignes, derivations.get(chiffre))
         if raison:
             fautes.append(f"{c} : {raison} (releve.json, {section} « {chiffre} »)")

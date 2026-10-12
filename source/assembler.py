@@ -1030,7 +1030,10 @@ verifier_comptes(sorted((DOCS / "dossier").glob("*.html")) if (DOCS / "dossier")
 # Le lecteur de releve.json REFUSE ce qu'il ne sait pas placer (forme illisible, dépôt inconnu, dépôt non
 # nommé alors que l'entrée en nomme un autre) : il ne saute rien et ne devine pas (outil.py, ReleveIllisible).
 # The line must also WRITE the figure it is cited for (12 October 2026: several did not, and no guard said so):
-# verdict_chiffre reads the figure on the line, or recomputes it from the numbers a "derivation" names.
+# verdict_chiffre reads the figure on the line in digits, or as the "derivation" of releve.json declares it (the words the
+# line spells, or the numbers it is computed from). The real path says how many figures it read, and verif-final.sh
+# requires that to be the number of figure-bearing references in releve.json: a witness that passes on planted
+# cases says nothing about the real file, and "porte son chiffre" would print whatever the real path did.
 from outil import ReleveIllisible, citations_du_releve, entrees_du_releve, verdict_chiffre  # noqa: E402
 try:
     DU_RELEVE = citations_du_releve(MAQ / "releve.json")
@@ -1045,6 +1048,7 @@ def verifier_citations(pages, ancres_fichier, outil, etiquette, du_releve=None, 
     chiffres = (CHIFFRES_DU_RELEVE[etiquette] if reel else {}) if chiffres is None else chiffres
     derivations = (DERIVATIONS if reel else {}) if derivations is None else derivations
     citees = set()
+    lus = 0   # the figures of releve.json this call read on their line
     for page in pages:
         citees |= set(re.findall(r"[A-Za-z0-9_./-]+\.(?:ts|mjs|json|md|js):\d+",
                                  page.read_text()))
@@ -1088,6 +1092,7 @@ def verifier_citations(pages, ancres_fichier, outil, etiquette, du_releve=None, 
                              else ", contenu introuvable") + de_qui)
             continue
         for section, chiffre in chiffres.get(c, []):
+            lus += 1
             raison = verdict_chiffre(chiffre, c, lignes, derivations.get(chiffre))
             if raison:
                 fautes.append(f"{c} : {raison} (releve.json, {section} « {chiffre} »)")
@@ -1095,8 +1100,9 @@ def verifier_citations(pages, ancres_fichier, outil, etiquette, du_releve=None, 
         sys.exit(f"CITATIONS {etiquette.upper()} QUI NE DISENT PLUS VRAI :\n  " + "\n  ".join(fautes)
                  + f"\n  corriger les JSON, puis régénérer {ancres_fichier.name} (ancrer-citations.py)")
     print(f"  citations {etiquette} vérifiées ligne à ligne contre l'outil : {len(citees)}"
-          + (f" (dont {len(du_releve)} du releve.json : la ligne existe, n'a pas bougé et porte son chiffre)"
-             if du_releve else ""))
+          + (f" (dont {len(du_releve)} du releve.json : la ligne existe, n'a pas bougé et porte son chiffre ; "
+             f"{lus} chiffres du releve.json lus sur leur ligne)" if du_releve else ""))
+    return lus
 
 
 # ── témoin d'abord : la garde de releve.json sait-elle encore rougir ? ───────
@@ -1113,8 +1119,11 @@ def verifier_citations(pages, ancres_fichier, outil, etiquette, du_releve=None, 
 #  4. the figure (12 October 2026): on a planted tool, a figure that is not on its cited line must turn
 #     verifier_citations red, each of the stale cases found on the real file included (a count the line no
 #     longer writes, a line that moved off its figure, a closing brace, a part of a longer number, a hash
-#     fragment, a derived figure nobody declared, a derivation whose numbers or result are wrong), and the
-#     true forms must pass (digits, separators, a glued unit, a word, a decimal comma, a declared derivation).
+#     fragment), a number word nobody declared ("the one that was measured", "eight hundred", "twenty four"),
+#     a derived figure nobody declared, and a derivation whose numbers, result, words, window or last line
+#     are wrong (a number missing, named and not written, written and not named: a fifth model; the last line
+#     read moved: a block that grew); the true forms must pass (digits, separators, a glued unit, a decimal
+#     comma, a declared sum, a declared word).
 def _temoin_releve():
     import contextlib
     import io
@@ -1126,9 +1135,20 @@ def _temoin_releve():
         except (ReleveIllisible, SystemExit):  # un refus, quelle que soit sa forme
             return None
 
-    d_ok = {"ligne": "README.md:1", "portee": 5, "operandes": ["260_905_268", "496_550_525", "90_387_606", "470_268_533"],
+    d_ok = {"ligne": "README.md:1", "portee": 6, "operandes": ["260_905_268", "496_550_525", "90_387_606", "470_268_533"],
             "calcul": "somme", "diviseur": 1000000000, "decimales": 1}
+    d_mot = {"ligne": "README.md:1", "calcul": "mot", "expression": "eight gigabytes"}
     refus = {
+        "word declaration holding another number word": {"derive": {"8": "x : README.md:1"},
+                                                         "derivation": {"8": dict(d_mot, expression="eight hundred gigabytes")}},
+        "word declaration of another figure": {"derive": {"8": "x : README.md:1"},
+                                               "derivation": {"8": dict(d_mot, expression="nine gigabytes")}},
+        "word declaration of twenty four for 20": {"derive": {"20": "x : README.md:1"},
+                                                   "derivation": {"20": dict(d_mot, expression="twenty four packages")}},
+        "word declaration for a figure that is not a whole number": {"derive": {"1.3": "x : README.md:1"},
+                                                                     "derivation": {"1.3": dict(d_mot, expression="one point three")}},
+        "word declaration with a field missing": {"derive": {"8": "x : README.md:1"},
+                                                  "derivation": {"8": {"ligne": "README.md:1", "calcul": "mot"}}},
         "derivation of another line than the one cited": {"derive": {"1.3": "x : README.md:1"},
                                                           "derivation": {"1.3": dict(d_ok, ligne="README.md:2")}},
         "derivation that no entry cites": {"derivation": {"1.3": d_ok}},
@@ -1193,46 +1213,64 @@ def _temoin_releve():
             if passe(citation):
                 sys.exit(f"GARDE CASSÉE : la garde des citations a laissé passer le témoin planté « {nom} » "
                          f"({citation}) : son zéro ne vaut rien")
-    if lu({"derive": {"1.3": "x : README.md:1"}, "derivation": {"1.3": d_ok}}) != {"routing": ["README.md:1"]}:
-        sys.exit("GARDE CASSÉE : the reader of releve.json refuses a true derivation: it would refuse the real one")
+    if lu({"derive": {"1.3": "x : README.md:1"}, "derivation": {"1.3": d_ok}}) != {"routing": ["README.md:1", "README.md:6"]}:
+        sys.exit("GARDE CASSÉE : the reader of releve.json refuses a true sum, or does not anchor its last line: "
+                 "it would refuse or under-guard the real one")
+    if lu({"derive": {"8": "x : README.md:1"}, "derivation": {"8": d_mot}}) != {"routing": ["README.md:1"]}:
+        sys.exit("GARDE CASSÉE : the reader of releve.json refuses a true word declaration: it would refuse the real one")
 
     # 4. the figure on the cited line, played through verifier_citations (the real path) on a planted README.md;
     #    the anchor is the line itself, so only the figure is in question
     bloc = ["export const POIDS = {", "  small: { octets: 260_905_268 },", "  large: { octets: 496_550_525 },",
             "  embSmall: { octets: 90_387_606 },", "  embLarge: { octets: 470_268_533 },", "};"]
 
-    def passe_chiffre(lignes, chiffre, derivation=None, n=1):
+    def passe_chiffre(lignes, chiffre, derivation=None, n=1, ancrees=None):
+        """Plays one figure through verifier_citations on a planted README.md made of `lignes`; the anchors are the
+        lines of `ancrees` (default: the same lines), the last line a sum reads being anchored too."""
+        ancrees = lignes if ancrees is None else ancrees
+        citations = [f"README.md:{n}"]
+        if derivation and derivation["calcul"] == "somme":
+            citations.append(f"README.md:{n + derivation['portee'] - 1}")
         with tempfile.TemporaryDirectory() as d:
             outil_plante = pathlib.Path(d) / "outil"
             outil_plante.mkdir()
             (outil_plante / "README.md").write_text("\n".join(lignes) + "\n")
-            citation = f"README.md:{n}"
             ancres_plantees = pathlib.Path(d) / "ancres.json"
-            ancres_plantees.write_text(_json.dumps({"ancres": {citation: lignes[n - 1].strip()}}))
+            ancres_plantees.write_text(_json.dumps({"ancres": {c: ancrees[int(c.rsplit(":", 1)[1]) - 1].strip()
+                                                               for c in citations}}))
             try:
                 with contextlib.redirect_stdout(io.StringIO()):
                     verifier_citations([], ancres_plantees, outil_plante, "routing",
-                                       du_releve={citation: [f"témoin « {chiffre} »"]},
-                                       chiffres={citation: [("mesure", chiffre)]},
+                                       du_releve={c: [f"témoin « {chiffre} »"] for c in citations},
+                                       chiffres={citations[0]: [("mesure", chiffre)]},
                                        derivations={chiffre: derivation} if derivation else {})
             except SystemExit:
                 return False
             return True
 
     chiffres_fautifs = (
-        ("stale count: the line writes another count", ["**878 tests** across 102 files, counted from the sources"], "867", None),
-        ("stale count in a table row", ["| Permissive | 63 | Attribution. Nothing else. |"], "50", None),
-        ("the figure is on a later line", ["**0 undeclared secrets reachable from `HEAD`**", "", "The sweep read 633 commits:"], "633", None),
-        ("a closing brace", ["},", "  \"engines\": {", "    \"node\": \">=24\""], "24", None),
-        ("a part of a longer number", ["about 25 files, 1.5 s, v5, 2026-05-05"], "5", None),
-        ("a fragment of a hash", ["sealed at `14ae54d`"], "14", None),
-        ("a derived figure nobody declared", bloc, "1.3", None),
-        ("a derivation whose number is not on the lines read", bloc, "1.3", dict(d_ok, portee=4)),
-        ("a derivation whose number changed in the source", bloc, "1.3", dict(d_ok, operandes=["260_905_269"] + d_ok["operandes"][1:])),
-        ("a derivation that gives another figure", bloc, "1.4", d_ok),
+        ("stale count: the line writes another count", ["**878 tests** across 102 files, counted from the sources"], "867", None, None),
+        ("stale count in a table row", ["| Permissive | 63 | Attribution. Nothing else. |"], "50", None, None),
+        ("the figure is on a later line", ["**0 undeclared secrets reachable from `HEAD`**", "", "The sweep read 633 commits:"], "633", None, None),
+        ("a closing brace", ["},", "  \"engines\": {", "    \"node\": \">=24\""], "24", None, None),
+        ("a part of a longer number", ["about 25 files, 1.5 s, v5, 2026-05-05"], "5", None, None),
+        ("a fragment of a hash", ["sealed at `14ae54d`"], "14", None, None),
+        ("a word nobody declared: the one that was measured", ["the package installed is the one that was measured"], "1", None, None),
+        ("eight hundred read as 8", ["about eight hundred names"], "8", None, None),
+        ("eight thousand read as 8", ["about eight thousand names"], "8", None, None),
+        ("two hundred read as 100", ["two hundred tests"], "100", None, None),
+        ("twenty four read as 20", ["twenty four packages"], "20", None, None),
+        ("a declared word that the line does not spell", ["a further eight hundred gigabytes and is"], "8", d_mot, None),
+        ("a derived figure nobody declared", bloc, "1.3", None, None),
+        ("a sum whose window is cut short: a number it names is not read", bloc, "1.3", dict(d_ok, portee=4), None),
+        ("a sum whose number changed in the source", bloc, "1.3", dict(d_ok, operandes=["260_905_269"] + d_ok["operandes"][1:]), None),
+        ("a sum that names a number the lines do not write", bloc, "1.3", dict(d_ok, operandes=d_ok["operandes"] + ["1_000"]), None),
+        ("a sum that gives another figure", bloc, "1.4", d_ok, None),
+        ("a fifth model written in the window", bloc[:5] + ["  embExtra: { octets: 123_456_789 },", "};"], "1.3", d_ok, None),
+        ("a block that grew: the last line read is no longer the one anchored", bloc[:5] + ["  // one more entry to come", "};"], "1.3", d_ok, bloc),
     )
-    for nom, lignes, chiffre, derivation in chiffres_fautifs:
-        if passe_chiffre(lignes, chiffre, derivation):
+    for nom, lignes, chiffre, derivation, ancrees in chiffres_fautifs:
+        if passe_chiffre(lignes, chiffre, derivation, ancrees=ancrees):
             sys.exit(f"GARDE CASSÉE : the citation guard let the planted figure \"{nom}\" pass ({chiffre}): "
                      "its zero is worth nothing")
     chiffres_vrais = (
@@ -1243,11 +1281,10 @@ def _temoin_releve():
         ("a thin space", ["a download of 1\u202f318 MB"], "1318", None),
         ("an underscore", ["octets: 260_905_268 },"], "260905268", None),
         ("a glued unit", ["about 400MB of packages"], "400", None),
-        ("a word", ["The generative ladder is a further eight gigabytes"], "8", None),
-        ("a compound word", ["Node twenty-four or newer"], "24", None),
         ("a decimal comma", ["la valeur p vaut 0,25"], "0.25", None),
         ("a decimal", ["about 1.3 GB of disk"], "1.3", None),
-        ("a declared derivation", bloc, "1.3", d_ok),
+        ("a declared sum", bloc, "1.3", d_ok),
+        ("a declared word", ["The generative ladder is a further eight gigabytes and is"], "8", d_mot),
     )
     for nom, lignes, chiffre, derivation in chiffres_vrais:
         if not passe_chiffre(lignes, chiffre, derivation):

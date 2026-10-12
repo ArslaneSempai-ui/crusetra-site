@@ -68,6 +68,14 @@ grep -Eq "du releve\.json : la ligne existe, n'a pas bougé et porte son chiffre
   echo "REFUS : the routing citation line no longer says that the cited lines hold their figure: the figures of releve.json are not checked on the real path" ; exit 5 ; }
 grep -Eq "[1-9][0-9]* chiffres fautifs plantés rougis" $SORTIE/assemblage.log || {
   echo "REFUS : the releve.json citation witness no longer plants stale figures (assembler.py), the figure guard is unplugged" ; exit 5 ; }
+# the REAL path must have read every figure-bearing reference of releve.json on its line: each tool's citation line
+# says how many figures it read, their sum must equal the number the reader finds in releve.json (read, never typed).
+# "porte son chiffre" above prints whatever the real path did; a count of zero, or short, means the figures are unguarded.
+ATTENDU=$(python3 -c "import outil; e, _ = outil.entrees_du_releve('releve.json'); print(sum(len(q) for c in e.values() for q in c.values()))" 2>/dev/null)
+LUS=$(grep -Eo "[0-9]+ chiffres du releve\.json lus sur leur ligne" $SORTIE/assemblage.log | awk '{s += $1} END {print s + 0}')
+echo "  chiffres de releve.json lus sur leur ligne par le chemin réel : $LUS, attendus : $ATTENDU"
+[ -n "$ATTENDU" ] && [ "$ATTENDU" -gt 0 ] && [ "$LUS" = "$ATTENDU" ] || {
+  echo "REFUS : the real path read $LUS figures of releve.json on their line, the reader finds $ATTENDU figure-bearing references: some are unguarded" ; exit 5 ; }
 
 echo "=== serveur $PORT (127.0.0.1 seulement)"
 # un serveur déjà debout ne se réutilise que s'il sert CE docs/ : la page servie n'est
