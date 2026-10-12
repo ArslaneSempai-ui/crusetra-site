@@ -62,6 +62,12 @@ grep -q "témoin des citations de releve.json" $SORTIE/assemblage.log || {
 # is no longer guarded, whatever the witness says
 grep -Eq "citations routing vérifiées ligne à ligne contre l'outil : [0-9]+ \(dont [1-9][0-9]* du releve\.json" $SORTIE/assemblage.log || {
   echo "REFUS : the routing citation line no longer says \"dont N du releve.json\" (N above zero): the references of releve.json are not checked on the real path" ; exit 5 ; }
+# the figure guard (12 October 2026): the same real-path line must say that the lines hold their figures, and the
+# witness line must carry its planted figure cases; without either, a stale figure of releve.json passes again
+grep -Eq "du releve\.json : la ligne existe, n'a pas bougé et porte son chiffre" $SORTIE/assemblage.log || {
+  echo "REFUS : the routing citation line no longer says that the cited lines hold their figure: the figures of releve.json are not checked on the real path" ; exit 5 ; }
+grep -Eq "[1-9][0-9]* chiffres fautifs plantés rougis" $SORTIE/assemblage.log || {
+  echo "REFUS : the releve.json citation witness no longer plants stale figures (assembler.py), the figure guard is unplugged" ; exit 5 ; }
 
 echo "=== serveur $PORT (127.0.0.1 seulement)"
 # un serveur déjà debout ne se réutilise que s'il sert CE docs/ : la page servie n'est
