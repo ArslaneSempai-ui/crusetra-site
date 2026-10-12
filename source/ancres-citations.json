@@ -43,6 +43,7 @@
     "src/server.ts:728": "serveur.listen(PORT, \"127.0.0.1\", () => {",
     "src/tiers.ts:295": "export const OLLAMA = process.env.OLLAMA_HOST ?? \"http://localhost:11434\";",
     "src/tiers.ts:335": "export const POIDS_MODELES = {",
+    "src/tiers.ts:344": "} as const;",
     "src/tiers.ts:556": "export function exigerHoteLocal(url: string = OLLAMA): void {",
     "src/verifier-rapport.mjs:13": "* Un rapport qui affirme sa propre authenticité n'affirme rien. La vérification doit pouvoir",
     "src/verifier-rapport.mjs:20": "*     node src/verifier-rapport.mjs <rapport.html>",
