@@ -59,6 +59,7 @@
   "80": "repère de l'échelle des intervalles : spans HTML depuis le 31/08",
   "90": "repère de l'échelle des intervalles : spans HTML depuis le 31/08 ; paquets du verrou avec empreinte : SECURITE.md:16 et package-lock.json",
   "100": "repère de l'échelle des intervalles : spans HTML depuis le 31/08",
+  "50": "repère de l'axe vertical des courbes, gradué 0, 50 et 100 : svg des courbes",
   "25": "repère d'échelle des instruments par état : spans HTML depuis le 31/08",
   "40": "repère d'échelle des instruments par état : spans HTML depuis le 31/08",
   "75": "repère d'échelle des instruments par état : spans HTML depuis le 31/08",
@@ -106,7 +107,8 @@
   "16807": "sept paliers puissance cinq champs, recalculé : affiché 16 807 (espace fine)"
  },
  "derivation": {
-  "1.3": {"ligne": "src/tiers.ts:335", "portee": 10, "operandes": ["260_905_268", "496_550_525", "90_387_606", "470_268_533"], "calcul": "somme", "diviseur": 1000000000, "decimales": 1}
+  "1.3": {"ligne": "src/tiers.ts:335", "portee": 10, "operandes": ["260_905_268", "496_550_525", "90_387_606", "470_268_533"], "calcul": "somme", "diviseur": 1000000000, "decimales": 1},
+  "8": {"ligne": "README.md:302", "calcul": "mot", "expression": "eight gigabytes"}
  },
  "graduation": {
   "_": "vide depuis le 31/08 : les repères sont des spans HTML, déclarés en mesure"
