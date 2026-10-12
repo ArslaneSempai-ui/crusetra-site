@@ -1090,9 +1090,11 @@ def verifier_citations(pages, ancres_fichier, outil, etiquette, du_releve=None):
 # ── témoin d'abord : la garde de releve.json sait-elle encore rougir ? ───────
 # « Un zéro qui n'a pas vu son témoin ne vaut rien » : avant de croire les références de releve.json, on
 # plante des fautes et on exige le rouge de chacune, puis le vert des vraies (la garde ne refuse pas tout).
-#  1. le lecteur : un dépôt inconnu, un dépôt non nommé alors que l'entrée en nomme un autre, trois formes
-#     illisibles (« README.md: 302 », « README.md l. 302 », « README.md line 302 ») doivent être REFUSÉS ;
-#     les formes vraies doivent se ranger chez le bon outil ;
+#  1. le lecteur : un dépôt inconnu, un dépôt non nommé alors que l'entrée en nomme un autre (par son nom de
+#     dépôt ou par le nom nu de l'outil), trois formes illisibles (« README.md: 302 », « README.md l. 302 »,
+#     « README.md line 302 ») et une liste de lignes (« README.md:302, 303 ») doivent être REFUSÉS ;
+#     les formes vraies (dont le nom nu de l'outil : « de Screening », « (Screening) », « du dépôt Screening »)
+#     doivent se ranger chez le bon outil ;
 #  2. la comparaison : sur un outil planté, une ligne vide, une ligne déplacée, une ligne sans ancre, une ligne
 #     au-delà de la fin et la ligne 0 doivent faire sortir verifier_citations ; une ligne intacte doit passer ;
 #  3. le lecteur doit rendre au moins une référence du vrai releve.json (un lecteur qui ne trouve rien ne garde rien).
@@ -1114,6 +1116,8 @@ def _temoin_releve():
         "« README.md: 302 »": {"mesure": {"1": "x : README.md: 302"}},
         "« README.md l. 302 »": {"mesure": {"1": "x : README.md l. 302"}},
         "« README.md line 302 »": {"mesure": {"1": "x : README.md line 302"}},
+        "« README.md:302, 303 »": {"mesure": {"1": "x : README.md:302, 303"}},
+        "nom d'outil nu sans dépôt": {"mesure": {"1": "x pour Screening : README.md:1"}},
     }
     for nom, releve in refus.items():
         if lu(releve) is not None:
@@ -1124,6 +1128,9 @@ def _temoin_releve():
         "x : README.md:1 (crusetra-screening)": {"screening": ["README.md:1"]},
         "x : README.md:1, cascade-screening": {"screening": ["README.md:1"]},
         "x : README.md:1 dans Crusetra-Screening": {"screening": ["README.md:1"]},
+        "x : README.md:1 de Screening": {"screening": ["README.md:1"]},
+        "x : README.md:1 (Screening)": {"screening": ["README.md:1"]},
+        "x : README.md:1 du dépôt Screening": {"screening": ["README.md:1"]},
         "x : package.json:2 (releve-entites.json, crusetra-screening)": {"routing": ["package.json:2"]},
         "x : LICENSE:8 et document.json l.36": {"routing": ["LICENSE:8", "document.json:36"]},
     }

@@ -57,6 +57,11 @@ grep -q "films guard held" $SORTIE/assemblage.log || {
 # the releve.json citation witness (12 October 2026): a green build without its line has lost the guard
 grep -q "témoin des citations de releve.json" $SORTIE/assemblage.log || {
   echo "REFUS : the green build no longer carries the releve.json citation witness line (assembler.py), unplugged" ; exit 5 ; }
+# the witness plays on planted entries and passes du_releve itself; the REAL path (verifier_citations reading
+# DU_RELEVE) shows only on the routing line, "(dont N du releve.json", N above zero: without it, releve.json
+# is no longer guarded, whatever the witness says
+grep -Eq "citations routing vérifiées ligne à ligne contre l'outil : [0-9]+ \(dont [1-9][0-9]* du releve\.json" $SORTIE/assemblage.log || {
+  echo "REFUS : the routing citation line no longer says \"dont N du releve.json\" (N above zero): the references of releve.json are not checked on the real path" ; exit 5 ; }
 
 echo "=== serveur $PORT (127.0.0.1 seulement)"
 # un serveur déjà debout ne se réutilise que s'il sert CE docs/ : la page servie n'est
