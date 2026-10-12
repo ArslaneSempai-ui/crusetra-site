@@ -94,7 +94,7 @@ CSS = '''
   .c-qui{font-size:14px;color:var(--sur-pale);min-height:3em;line-height:1.55;border-bottom:1px solid var(--filet);padding-bottom:16px;margin-bottom:16px}
   .c-plus{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:color-mix(in srgb,var(--sur-pale) 70%,transparent);margin-bottom:8px}
   .c-liste{list-style:none;padding:0;display:flex;flex-direction:column;gap:9px;font-size:13.5px;color:var(--sur-pale)}
-  .c-liste li{padding-left:22px;position:relative;line-height:1.5}
+  .c-liste li{padding-left:22px;position:relative;line-height:1.5;max-width:88ch}
   .c-liste li::before{content:"";position:absolute;left:0;top:.5em;width:12px;height:7px;border-left:2px solid var(--vert-vif);border-bottom:2px solid var(--vert-vif);transform:rotate(-45deg)}
   .c-liste b{color:var(--sur)}
   .cta{display:block;text-decoration:none;margin-top:auto;padding-top:26px;font-family:var(--texte);font-size:16px;font-weight:600;color:var(--vert-clair)}
@@ -118,8 +118,8 @@ CSS = '''
   .ex-prix{font-weight:600;font-size:clamp(30px,3vw,42px);letter-spacing:-.02em;line-height:1.05;margin:12px 0 10px;font-variant-numeric:lining-nums tabular-nums}
   .ex-prix small{font-size:.38em;font-weight:400;color:var(--sur-pale);letter-spacing:0;white-space:nowrap}
   .ex-c.haute .ex-prix{color:var(--vert-clair)}
-  .ex-q{font-size:14px;color:var(--sur-pale);line-height:1.55}
-  .ex-fin{font-size:15px;line-height:1.65;color:var(--sur-pale);max-width:none;margin:26px 0 0;text-wrap:pretty}
+  .ex-q{font-size:14px;color:var(--sur-pale);line-height:1.55;max-width:88ch}
+  .ex-fin{font-size:15px;line-height:1.65;color:var(--sur-pale);max-width:88ch;margin:26px 0 0;text-wrap:pretty}
   .ex-fin b{color:var(--sur);font-weight:600}
   /* a cell's paragraph must keep 45 % of the screen at tablet and small laptop width (temoin-effondrement) : the audit cells and the three offer cards (.cols, with the gap that clears their robots) stack in one column up to 1280 px */
   @media (max-width:1280px){.ex-grille{grid-template-columns:1fr}.cols{grid-template-columns:1fr;gap:110px;margin-top:130px}}
@@ -167,8 +167,8 @@ CSS = '''
   .commande-jour button{font:inherit;letter-spacing:inherit;color:var(--vert-clair);background:none;border:1px solid color-mix(in srgb,var(--vert-vif) 45%,transparent);border-radius:8px;padding:8px 14px;cursor:pointer}
   .commande-jour button:hover{background:var(--vert-vif);color:var(--noir-b)}
   html:not(.js) .commande-jour{display:none}
-  /* the closing paragraph runs the whole width of the column : never piled on the left (Arslane, 11/09) */
-  .note-fin{font-size:17px;line-height:1.65;color:var(--sur-pale);max-width:none;margin:34px 0 90px;text-wrap:pretty}
+  /* the closing paragraph was full width, never piled on the left (Arslane, 11/09) ; capped at 88ch since the decision of 2026-10-12 (plafond-texte-engagement-88ch), like the cells and the cards above */
+  .note-fin{font-size:17px;line-height:1.65;color:var(--sur-pale);max-width:88ch;margin:34px 0 90px;text-wrap:pretty}
   .note-fin a{color:var(--sur);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--vert-clair) 50%,transparent)}
   .note-fin b{color:var(--sur);font-weight:600}
 
