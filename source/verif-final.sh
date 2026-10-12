@@ -54,6 +54,9 @@ grep -q "listes tenues" $SORTIE/assemblage.log || {
 # the films switch guard (7 October 2026, FILMS_VISIBLES in outil.py): same jaw
 grep -q "films guard held" $SORTIE/assemblage.log || {
   echo "REFUS : the green build no longer carries the films guard line (assembler.py), unplugged" ; exit 5 ; }
+# the releve.json citation witness (12 October 2026): a green build without its line has lost the guard
+grep -q "témoin des citations de releve.json" $SORTIE/assemblage.log || {
+  echo "REFUS : the green build no longer carries the releve.json citation witness line (assembler.py), unplugged" ; exit 5 ; }
 
 echo "=== serveur $PORT (127.0.0.1 seulement)"
 # un serveur déjà debout ne se réutilise que s'il sert CE docs/ : la page servie n'est
