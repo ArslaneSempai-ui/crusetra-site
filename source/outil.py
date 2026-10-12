@@ -57,12 +57,16 @@ def depot_url(outil_id):
 #    which has none); anything else that looks like a line designation (": 302", " l. 302", " line 302",
 #    "#L302", ":302-310") or a file type the guard does not read ("conf.yaml:12") is refused;
 #  - the repository of a reference is the one named right after it: " de|dans|du <repo>", ", <repo>" or
-#    " (<repo>", case-insensitive, double spaces allowed; <repo> is a GitHub name (crusetra-screening), a
-#    local folder (cascade-screening, cascade) or the prose "Crusetra Screening", and must be in the
+#    " (<repo>", case-insensitive, double spaces allowed, with an optional "dépôt|repo|outil" in front of it
+#    ("du dépôt Screening"); <repo> is a GitHub name (crusetra-screening), a local folder (cascade-screening,
+#    cascade), the prose "Crusetra Screening" or the bare name of a tool ("Screening"), and must be in the
 #    known list built from DEPOTS and OUTILS; a name of the same family that is not in it is refused;
 #  - a reference that names no repository belongs to Routing only if nothing else in its entry names
-#    another tool; otherwise it is refused. A repository named after a file with no line ("releve-entites.json,
-#    crusetra-screening", a sealed record) belongs to that file and says nothing about the references.
+#    another tool (a bare tool name in the prose counts); otherwise it is refused. A repository named after
+#    a file with no line ("releve-entites.json, crusetra-screening", a sealed record) belongs to that file
+#    and says nothing about the references;
+#  - a list of lines ("README.md:302, 303", "... et 303", "... / 303", "...; 303") is refused: one citation
+#    aims at ONE line, and the second is never dropped silently.
 EXTENSIONS = ("ts", "mjs", "json", "md", "js")
 
 
@@ -71,20 +75,22 @@ class ReleveIllisible(ValueError):
 
 
 _OUTILS_NOMS = r"routing|screening|monitoring|scoring|dossier"
-_DEPOT_NOM = (rf"(?:crusetra\s+(?:{_OUTILS_NOMS})|(?:crusetra|cascade)(?:-[A-Za-z0-9]+)*)")  # attached to a reference
-_DEPOT_MENTION = (rf"(?<![\w-])(?:crusetra\s+(?:{_OUTILS_NOMS})|(?:crusetra|cascade)(?:-[A-Za-z0-9]+)+)(?![\w-])")
+_DEPOT_NOM = (rf"(?:crusetra\s+(?:{_OUTILS_NOMS})|(?:crusetra|cascade)(?:-[A-Za-z0-9]+)*|(?:{_OUTILS_NOMS})(?:-[A-Za-z0-9]+)*)")  # attached to a reference
+_DEPOT_MENTION = (rf"(?<![\w./-])(?:crusetra\s+(?:{_OUTILS_NOMS})|(?:crusetra|cascade)(?:-[A-Za-z0-9]+)+|(?:{_OUTILS_NOMS}))(?![\w-]|\.\w)")
+_DEPOT_MOT = r"(?:(?:le\s+|l['\u2019])?(?:dépôt|depot|repo|repository|outil|tool)\s+(?:de\s+|d['\u2019])?)?"
 _FICHIER_RELEVE = re.compile(r"(?<![\w./-])((?:[A-Za-z0-9_][A-Za-z0-9_./-]*\.[A-Za-z]{1,5})|LICENSE)(?![\w-])")
 _REF_STRICTE = re.compile(r"(?::|\sl\.)(\d+)")
-_REF_SUITE = re.compile(r"(?:[-\u2013\u2014]\s?\d|:\d|,\d|\s[-\u2013\u2014]\s\d)")
+_REF_SUITE = re.compile(r"(?:[-\u2013\u2014]\s?\d|:\d|,\s*\d|\s[-\u2013\u2014]\s\d|\s*[;/&+]\s*\d|\s+(?:et|and|ou|or)\s+\d)", re.I)
 _DESIGNATION = re.compile(r"\s*[:#@(]?\s*(?:lignes?|lines?|l\.?)?\s*\d", re.I)
-_ATTACHE = re.compile(rf"(?:\s+(?:de|dans|du)\s+|\s*,\s*|\s*\(\s*)({_DEPOT_NOM})(?![\w-])", re.I)
+_ATTACHE = re.compile(rf"(?:\s+(?:de|dans|du)\s+|\s*,\s*|\s*\(\s*){_DEPOT_MOT}({_DEPOT_NOM})(?![\w-])", re.I)
 _MENTION = re.compile(_DEPOT_MENTION, re.I)
 
 
 def _depots_connus():
-    """{lowercase repository name: tool id}: the GitHub names and the local folders of the tools."""
+    """{lowercase repository name: tool id}: the GitHub names, the local folders and the bare names of the tools."""
     connus = {}
     for oid, depot in DEPOTS.items():
+        connus[oid] = oid
         connus[depot.lower()] = oid
         connus[OUTILS[oid]["outil_chemin"].name.lower()] = oid
         connus[f"crusetra-{oid}"] = oid
