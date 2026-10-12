@@ -1027,24 +1027,37 @@ verifier_comptes(sorted((DOCS / "dossier").glob("*.html")) if (DOCS / "dossier")
 # releve.json cite lui aussi la source de ses chiffres (« … : README.md:259 ») : ces références-là
 # passent par la même garde, avec le chiffre nommé dans le refus (le 12/10, celle du poids de l'échelle
 # générative visait une ligne qui n'a jamais porté ce chiffre, et aucune garde ne lisait ce fichier).
-from outil import citations_du_releve  # noqa: E402
-DU_RELEVE = citations_du_releve(MAQ / "releve.json")
+# Le lecteur de releve.json REFUSE ce qu'il ne sait pas placer (forme illisible, dépôt inconnu, dépôt non
+# nommé alors que l'entrée en nomme un autre) : il ne saute rien et ne devine pas (outil.py, ReleveIllisible).
+from outil import ReleveIllisible, citations_du_releve  # noqa: E402
+try:
+    DU_RELEVE = citations_du_releve(MAQ / "releve.json")
+except ReleveIllisible as _e:
+    sys.exit(str(_e))
 
 
-def verifier_citations(pages, ancres_fichier, outil, etiquette):
+def verifier_citations(pages, ancres_fichier, outil, etiquette, du_releve=None):
     citees = set()
     for page in pages:
         citees |= set(re.findall(r"[A-Za-z0-9_./-]+\.(?:ts|mjs|json|md|js):\d+",
                                  page.read_text()))
-    du_releve = DU_RELEVE[etiquette]
+    du_releve = DU_RELEVE[etiquette] if du_releve is None else du_releve
     citees |= set(du_releve)
     if not citees:
         return
+    # pour les pages, un outil ou des ancres absents sont dits sans arrêter (machine sans le dépôt) ;
+    # pour releve.json c'est un refus : une source de chiffre non vérifiée ne passe pas pour vérifiée
     if not ancres_fichier.exists():
+        if du_releve:
+            sys.exit(f"CITATIONS {etiquette.upper()} DE releve.json NON VÉRIFIÉES : {ancres_fichier.name} absent "
+                     f"({len(du_releve)} références)")
         print(f"  ! citations {etiquette} NON VÉRIFIÉES : {ancres_fichier.name} absent : "
               f"{len(citees)} citées")
         return
     if not outil.exists():
+        if du_releve:
+            sys.exit(f"CITATIONS {etiquette.upper()} DE releve.json NON VÉRIFIÉES : {outil} absent "
+                     f"({len(du_releve)} références)")
         print(f"  ! citations {etiquette} NON VÉRIFIÉES : {outil} absent : {len(citees)} citées")
         return
     ancres = _json.loads(ancres_fichier.read_text())["ancres"]
@@ -1059,7 +1072,7 @@ def verifier_citations(pages, ancres_fichier, outil, etiquette):
             fautes.append(f"{c} : fichier absent de l'outil{de_qui}"); continue
         lignes = f.read_text(errors="replace").splitlines()
         n = int(n)
-        if n > len(lignes):
+        if n < 1 or n > len(lignes):
             fautes.append(f"{c} : au-delà de la fin ({len(lignes)} lignes){de_qui}"); continue
         if lignes[n - 1].strip() != ancres[c]:
             ou = [i + 1 for i, x in enumerate(lignes) if x.strip() == ancres[c]]
@@ -1072,6 +1085,91 @@ def verifier_citations(pages, ancres_fichier, outil, etiquette):
     print(f"  citations {etiquette} vérifiées ligne à ligne contre l'outil : {len(citees)}"
           + (f" (dont {len(du_releve)} du releve.json : la ligne existe, n'est pas vide et n'a pas bougé ; "
              f"que le chiffre y soit, la garde ne le lit pas)" if du_releve else ""))
+
+
+# ── témoin d'abord : la garde de releve.json sait-elle encore rougir ? ───────
+# « Un zéro qui n'a pas vu son témoin ne vaut rien » : avant de croire les références de releve.json, on
+# plante des fautes et on exige le rouge de chacune, puis le vert des vraies (la garde ne refuse pas tout).
+#  1. le lecteur : un dépôt inconnu, un dépôt non nommé alors que l'entrée en nomme un autre, trois formes
+#     illisibles (« README.md: 302 », « README.md l. 302 », « README.md line 302 ») doivent être REFUSÉS ;
+#     les formes vraies doivent se ranger chez le bon outil ;
+#  2. la comparaison : sur un outil planté, une ligne vide, une ligne déplacée, une ligne sans ancre, une ligne
+#     au-delà de la fin et la ligne 0 doivent faire sortir verifier_citations ; une ligne intacte doit passer ;
+#  3. le lecteur doit rendre au moins une référence du vrai releve.json (un lecteur qui ne trouve rien ne garde rien).
+def _temoin_releve():
+    import contextlib
+    import io
+    import tempfile
+
+    def lu(releve):
+        try:
+            return {o: sorted(c) for o, c in citations_du_releve(releve).items() if c}
+        except (ReleveIllisible, SystemExit):  # un refus, quelle que soit sa forme
+            return None
+
+    refus = {
+        "dépôt inconnu": {"mesure": {"1": "x : README.md:1 de crusetra-nulle-part"}},
+        "dépôt non nommé": {"mesure": {"1": "tests de Crusetra Screening : README.md:1"}},
+        "second renvoi sans dépôt": {"mesure": {"1": "x : README.md:1 de crusetra-screening ; package.json:2"}},
+        "« README.md: 302 »": {"mesure": {"1": "x : README.md: 302"}},
+        "« README.md l. 302 »": {"mesure": {"1": "x : README.md l. 302"}},
+        "« README.md line 302 »": {"mesure": {"1": "x : README.md line 302"}},
+    }
+    for nom, releve in refus.items():
+        if lu(releve) is not None:
+            sys.exit(f"GARDE CASSÉE : le lecteur de releve.json a laissé passer le témoin planté « {nom} » : "
+                     "son zéro ne vaut rien")
+    vrais = {
+        "x : README.md:1 de crusetra-screening": {"screening": ["README.md:1"]},
+        "x : README.md:1 (crusetra-screening)": {"screening": ["README.md:1"]},
+        "x : README.md:1, cascade-screening": {"screening": ["README.md:1"]},
+        "x : README.md:1 dans Crusetra-Screening": {"screening": ["README.md:1"]},
+        "x : package.json:2 (releve-entites.json, crusetra-screening)": {"routing": ["package.json:2"]},
+        "x : LICENSE:8 et document.json l.36": {"routing": ["LICENSE:8", "document.json:36"]},
+    }
+    for texte, attendu in vrais.items():
+        if lu({"mesure": {"1": texte}}) != attendu:
+            sys.exit(f"GARDE CASSÉE : le lecteur de releve.json ne range plus « {texte} » chez {attendu} : "
+                     "il refuserait ou dévierait des références vraies")
+
+    with tempfile.TemporaryDirectory() as d:
+        outil_plante = pathlib.Path(d) / "outil"
+        outil_plante.mkdir()
+        (outil_plante / "README.md").write_text("alpha\n\nbeta\n")
+        ancres_plantees = pathlib.Path(d) / "ancres.json"
+        ancres_plantees.write_text(_json.dumps({"ancres": {
+            "README.md:1": "alpha", "README.md:2": "alpha", "README.md:3": "alpha",
+            "README.md:9": "alpha", "README.md:0": "alpha"}}))
+
+        lignes_fautives = (("README.md:2", "ligne vide"), ("README.md:3", "ligne déplacée"),
+                           ("README.md:4", "ligne sans ancre"), ("README.md:9", "au-delà de la fin"),
+                           ("README.md:0", "ligne 0"))
+
+        def passe(citation):
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    verifier_citations([], ancres_plantees, outil_plante, "routing",
+                                       du_releve={citation: ["témoin « planté »"]})
+            except SystemExit:
+                return False
+            return True
+
+        if not passe("README.md:1"):
+            sys.exit("GARDE CASSÉE : la garde des citations refuse une ligne intacte du témoin planté")
+        for citation, nom in lignes_fautives:
+            if passe(citation):
+                sys.exit(f"GARDE CASSÉE : la garde des citations a laissé passer le témoin planté « {nom} » "
+                         f"({citation}) : son zéro ne vaut rien")
+    n_refs = sum(len(c) for c in DU_RELEVE.values())
+    if not n_refs:
+        sys.exit("GARDE CASSÉE : le lecteur n'a trouvé aucune référence dans releve.json : un zéro qui ne lit rien "
+                 "ne garde rien")
+    return n_refs, len(refus), len(lignes_fautives), len(vrais)
+
+
+_n_refs, _n_refus, _n_lignes, _n_vrais = _temoin_releve()
+print(f"  témoin des citations de releve.json : {_n_refs} références lues ; {_n_refus} formes fautives plantées "
+      f"refusées, {_n_lignes} lignes fautives plantées rougies, {_n_vrais} formes vraies passées")
 
 verifier_citations(sorted(DOCS.glob("*.html")) + sorted((DOCS / "routing").glob("*.html")),
                    MAQ / "ancres-citations.json",
