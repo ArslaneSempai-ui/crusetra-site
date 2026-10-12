@@ -121,9 +121,8 @@ CSS = '''
   .ex-q{font-size:14px;color:var(--sur-pale);line-height:1.55}
   .ex-fin{font-size:15px;line-height:1.65;color:var(--sur-pale);max-width:none;margin:26px 0 0;text-wrap:pretty}
   .ex-fin b{color:var(--sur);font-weight:600}
-  @media (max-width:1080px){.ex-grille{grid-template-columns:1fr 1fr}}
-  /* a cell's paragraph must keep 45 % of the screen at tablet width (temoin-effondrement) : one column from 800 px down */
-  @media (max-width:800px){.ex-grille{grid-template-columns:1fr}}
+  /* a cell's paragraph must keep 45 % of the screen at tablet width (temoin-effondrement) : one column up to 1080 px */
+  @media (max-width:1080px){.ex-grille{grid-template-columns:1fr}}
 
   /* the days : three lanes to scale, the papers on their lane at their date, one line reads the day */
   .jours{padding:80px 0 30px}
