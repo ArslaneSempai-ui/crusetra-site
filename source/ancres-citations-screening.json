@@ -1,6 +1,7 @@
 {
   "_": "Pour chaque « Where it lives » des pages screening : le contenu EXACT de la ligne visée dans ~/Documents/cascade-screening. La garde de assembler.py refuse de bâtir si une citation ne pointe plus dessus. Régénérer avec ancrer-citations.py APRÈS un changement volontaire de l'outil, jamais pour faire taire la garde.",
   "ancres": {
+    "README.md:150": "**486 tests** across 64 files, counted from the sources rather than typed here.",
     "src/frontiere.test.ts:20": "const AUTORISES: Record<string, string> = {",
     "src/frontiere.test.ts:45": "test(\"aucun module ne touche le réseau, hors le téléchargeur de listes\", () => {",
     "src/interval.ts:102": "export const ENOUGH = 20;",
