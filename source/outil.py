@@ -19,6 +19,7 @@ import json
 import pathlib
 import re
 import sys
+from collections import Counter
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 _MAISON = pathlib.Path.home() / "Documents"
@@ -68,11 +69,16 @@ def depot_url(outil_id):
 #    and says nothing about the references;
 #  - a list of lines ("README.md:302, 303", "... et 303", "... / 303", "...; 303") is refused: one citation
 #    aims at ONE line, and the second is never dropped silently;
-#  - the FIGURE of the entry must be on the line it cites (verdict_chiffre): as digits, with or without thousands
-#    separators or a glued unit, or as the English word when the line spells it ("eight" for 8); never as a part of
-#    a longer number, a date, a version or a hash. A figure that is derived and cannot appear verbatim is declared in
-#    the "derivation" section with the numbers it is computed from: the guard finds those numbers on the cited line
-#    and the lines after it, and computes the figure again. Nothing is skipped: no declaration, no pass.
+#  - the FIGURE of the entry must be on the line it cites (verdict_chiffre), in DIGITS: with or without thousands
+#    separators or a glued unit; never as a part of a longer number, a date, a version or a hash. No number word is
+#    ever guessed ("the one that was measured" is not a 1, "eight hundred" is not an 8). A figure that is not in digits
+#    on its line is declared, entry by entry, in the "derivation" section, and nothing else passes:
+#      "calcul": "mot"   the exact words the line spells for it ("eight gigabytes"), which must hold the English word
+#                        of the figure and no other number word;
+#      "calcul": "somme" the numbers it is computed from: the lines read (the cited one and the following ones,
+#                        "portee" lines in all) must write THOSE numbers and no other, and the guard computes the
+#                        figure again; the last line read is anchored like any citation, so a block that grows turns it red.
+#    Nothing is skipped: no declaration, no pass.
 EXTENSIONS = ("ts", "mjs", "json", "md", "js")
 
 
@@ -108,33 +114,41 @@ def _nom_de_depot(brut):
 
 
 SECTION_DERIVATION = "derivation"
-_DERIVATION_CLES = ("ligne", "portee", "operandes", "calcul", "diviseur", "decimales")
-_SEPARATEURS = r"[ ,_   ]"   # thousands separators: space, comma, underscore, no-break and thin spaces
+_DERIVATION_CLES = {"somme": ("ligne", "portee", "operandes", "calcul", "diviseur", "decimales"),
+                    "mot": ("ligne", "calcul", "expression")}
+_SEPARATEURS = r"[ ,_\u00a0\u202f\u2009]"   # thousands separators: space, comma, underscore, no-break and thin spaces
 _ENTIER_ECRIT = rf"\d{{1,3}}(?:{_SEPARATEURS}\d{{3}})+|\d+"
 
 
 def _lire_derivations(brut):
-    """The shape of the "derivation" section, nothing more: {figure: {ligne, portee, operandes, calcul, diviseur,
-    decimales}}. Returns (derivations, faults); the content is checked against the source by verdict_chiffre."""
+    """The shape of the "derivation" section, nothing more: {figure: declaration}, a declaration being a "somme"
+    (ligne, portee, operandes, calcul, diviseur, decimales) or a "mot" (ligne, calcul, expression). Returns
+    (derivations, faults); the content is checked against the source by verdict_chiffre."""
     if not isinstance(brut, dict):
         return {}, [f"{SECTION_DERIVATION} : the section must be an object of derivations"]
     derivations, fautes = {}, []
     for chiffre, d in brut.items():
         qui = f"{SECTION_DERIVATION} « {chiffre} »"
-        if not isinstance(d, dict) or sorted(d) != sorted(_DERIVATION_CLES):
-            fautes.append(f"{qui} : an object with exactly {', '.join(_DERIVATION_CLES)}")
+        calcul = d.get("calcul") if isinstance(d, dict) else None
+        if calcul not in _DERIVATION_CLES:
+            fautes.append(f"{qui} : calcul must be {' or '.join(repr(c) for c in _DERIVATION_CLES)}, the only readings the "
+                          "guard repeats")
+            continue
+        if sorted(d) != sorted(_DERIVATION_CLES[calcul]):
+            fautes.append(f"{qui} : a {calcul!r} is an object with exactly {', '.join(_DERIVATION_CLES[calcul])}")
             continue
         mal = []
         if not (isinstance(d["ligne"], str) and re.fullmatch(r"[^\s:]+:[1-9]\d*", d["ligne"])):
             mal.append("ligne must read file:N")
-        if d["calcul"] != "somme":
-            mal.append('calcul must be "somme", the only computation the guard repeats')
-        for cle, mini in (("portee", 1), ("diviseur", 1), ("decimales", 0)):
-            if type(d[cle]) is not int or d[cle] < mini:
-                mal.append(f"{cle} must be an integer, {mini} or more")
-        ops = d["operandes"]
-        if not (isinstance(ops, list) and ops and all(isinstance(o, str) and re.fullmatch(_ENTIER_ECRIT, o) for o in ops)):
-            mal.append("operandes must be a list of whole numbers, written as the source writes them")
+        if calcul == "somme":
+            for cle, mini in (("portee", 1), ("diviseur", 1), ("decimales", 0)):
+                if type(d[cle]) is not int or d[cle] < mini:
+                    mal.append(f"{cle} must be an integer, {mini} or more")
+            ops = d["operandes"]
+            if not (isinstance(ops, list) and ops and all(isinstance(o, str) and re.fullmatch(_ENTIER_ECRIT, o) for o in ops)):
+                mal.append("operandes must be a list of whole numbers, written as the source writes them")
+        else:
+            mal.extend(_mal_dit(chiffre, d["expression"]))
         if mal:
             fautes.append(f"{qui} : {'; '.join(mal)}")
         else:
@@ -142,19 +156,45 @@ def _lire_derivations(brut):
     return derivations, fautes
 
 
+def _mal_dit(chiffre, expression):
+    """Why `expression` cannot be the words a line spells for `chiffre` (nothing if it can): the figure must be a whole
+    number up to 100 and the expression must hold its English word and no other number word."""
+    if not (isinstance(expression, str) and expression.strip()):
+        return ["expression must be the words the line spells, a text"]
+    if not (re.fullmatch(r"\d+", chiffre) and chiffre == str(int(chiffre)) and int(chiffre) <= 100):
+        return ["a figure is spelled in words only if it is a whole number up to 100"]
+    attendus = re.findall(r"[a-z]+", _en_lettres(int(chiffre)))
+    dits = [m for m in re.findall(r"[a-z]+", expression.lower()) if m in _MOTS_DE_NOMBRE]
+    if dits != attendus:
+        return [f"expression must hold the English word of {chiffre} ({' '.join(attendus)}) and no other number word, "
+                f"it holds {' '.join(dits) or 'none'}"]
+    return []
+
+
 def citations_du_releve(source):
     """{outil_id: {"fichier:ligne": ["section « chiffre »", ...]}} for every reference in releve.json
     (a path, or the parsed dict). Raises ReleveIllisible, listing every fault, if any entry cannot be placed."""
-    par_outil, _ = entrees_du_releve(source)
-    return {oid: {c: [f"{section} « {chiffre} »" for section, chiffre in quis] for c, quis in cits.items()}
-            for oid, cits in par_outil.items()}
+    par_outil, _, fins = _lire_releve(source)
+    citations = {oid: {c: [f"{section} « {chiffre} »" for section, chiffre in quis] for c, quis in cits.items()}
+                 for oid, cits in par_outil.items()}
+    for oid, cits in fins.items():
+        for c, quis in cits.items():
+            citations[oid].setdefault(c, []).extend(quis)
+    return citations
 
 
 def entrees_du_releve(source):
     """({outil_id: {"fichier:ligne": [(section, chiffre), ...]}}, {chiffre: derivation}) for releve.json
     (a path, or the parsed dict): the references with the figure each one is cited for, and the derivations declared
-    for the figures that cannot appear verbatim on their line. Raises ReleveIllisible, listing every fault, if an
+    for the figures that are not written in digits on their line. Raises ReleveIllisible, listing every fault, if an
     entry cannot be placed or a derivation is malformed or cites nothing."""
+    par_outil, derivations, _ = _lire_releve(source)
+    return par_outil, derivations
+
+
+def _lire_releve(source):
+    """entrees_du_releve, plus {outil_id: {"fichier:ligne": [who, ...]}}: the last line each "somme" reads, which is
+    anchored like a citation (citations_du_releve lists it), so that a block that grows or moves turns the guard red."""
     connus = _depots_connus()
     releve = source if isinstance(source, dict) else json.loads(pathlib.Path(source).read_text())
     par_outil = {oid: {} for oid in DEPOTS}
@@ -224,69 +264,82 @@ def entrees_du_releve(source):
                     oid = "routing"
                 par_outil[oid].setdefault(citation, []).append((section, chiffre))
             fautes.extend(f"{qui} : {f}" for f in fautes_entree)
+    fins = {oid: {} for oid in DEPOTS}
     for chiffre, d in derivations.items():
-        if not any(c == chiffre and cit == d["ligne"] for cits in par_outil.values()
-                   for cit, quis in cits.items() for _, c in quis):
+        oids = [oid for oid, cits in par_outil.items() for cit, quis in cits.items()
+                if cit == d["ligne"] and any(c == chiffre for _, c in quis)]
+        if not oids:
             fautes.append(f"{SECTION_DERIVATION} « {chiffre} » : no entry of releve.json cites {d['ligne']} for this "
                           "figure, a derivation that serves nothing is refused")
+        elif d["calcul"] == "somme":
+            fichier, n = d["ligne"].rsplit(":", 1)
+            fin = f"{fichier}:{int(n) + d['portee'] - 1}"
+            fins[oids[0]].setdefault(fin, []).append(f"{SECTION_DERIVATION} « {chiffre} », last line read")
     if fautes:
         raise ReleveIllisible("releve.json : références illisibles (la garde refuse, elle ne saute rien et ne devine pas) :\n  "
                               + "\n  ".join(fautes))
-    return par_outil, derivations
+    return par_outil, derivations, fins
 
 
 # The figure on the line it cites. A number is read whole: never the "5" of "25", of "1.5", of "v5", of a date or of a
 # hash ("14ae54d"); it may carry thousands separators and a unit glued to it ("400MB"); a decimal comma is a dot.
-# The words are English ("eight" for 8, "twenty-four" for 24), because the cited files are.
+# Digits only: a word is read only where releve.json declares it (calcul "mot"), never guessed.
 _NOMBRE = re.compile(rf"(?<![\w.,\-])(?P<ent>{_ENTIER_ECRIT})(?P<dec>[.,]\d+)?"
                      r"(?=(?:[KMGT]i?[Bbo]|ms|px|s|h)?(?!\w))(?![.,]\d)(?!-\d)")
 _UNITES = ("zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen "
            "seventeen eighteen nineteen").split()
 _DIZAINES = "_ _ twenty thirty forty fifty sixty seventy eighty ninety".split()
+_MOTS_DE_NOMBRE = set(_UNITES) | set(_DIZAINES[2:]) | {"hundred", "thousand", "million", "billion"}
 
 
 def _en_lettres(n):
+    """The English words of a whole number up to 100: it serves to check a declaration, never to read a line."""
     if n < 20:
         return _UNITES[n]
     if n == 100:
-        return "hundred"
+        return "one hundred"
     d, u = divmod(n, 10)
     return _DIZAINES[d] + (f"-{_UNITES[u]}" if u else "")
 
 
-def _nombres_de(ligne):
-    """Every number the line writes, as plain digits with a dot for the decimals."""
-    lus = set()
+def _jetons(ligne):
+    """[(number, variant or None)] for each number the line writes: plain digits with a dot for the decimals; the
+    variant is the other reading of "1,318" (a French decimal as well as a thousand)."""
     for m in _NOMBRE.finditer(ligne):
         ent, dec = m.group("ent"), m.group("dec")
-        lus.add(re.sub(_SEPARATEURS, "", ent) + ("." + dec[1:] if dec else ""))
-        if not dec and ent.count(",") == 1 and re.fullmatch(r"\d{1,3},\d{3}", ent):
-            lus.add(ent.replace(",", "."))   # "1,318" can be a French decimal as well as a thousand
-    return lus
+        yield (re.sub(_SEPARATEURS, "", ent) + ("." + dec[1:] if dec else ""),
+               ent.replace(",", ".") if not dec and re.fullmatch(r"\d{1,3},\d{3}", ent) else None)
+
+
+def _nombres_de(ligne):
+    """Every number the line writes, in either reading."""
+    return {x for jeton in _jetons(ligne) for x in jeton if x is not None}
 
 
 def chiffre_dans_la_ligne(chiffre, ligne):
-    """True if `ligne` writes `chiffre`, as digits (see _NOMBRE) or as the English word of a whole number up to 100."""
-    if chiffre in _nombres_de(ligne):
-        return True
-    if re.fullmatch(r"\d+", chiffre) and chiffre == str(int(chiffre)) and int(chiffre) <= 100:
-        mot = re.escape(_en_lettres(int(chiffre))).replace(r"\-", "[- ]")
-        return re.search(rf"(?<![\w-]){mot}(?![\w-])", ligne, re.I) is not None
-    return False
+    """True if `ligne` writes `chiffre` in digits (see _NOMBRE)."""
+    return chiffre in _nombres_de(ligne)
+
+
+def _expression_sur_la_ligne(expression, ligne):
+    """True if the line spells exactly these words (whole words, any case, any run of blanks between them)."""
+    motif = r"\s+".join(re.escape(mot) for mot in expression.split())
+    return re.search(rf"(?<![\w-]){motif}(?![\w-])", ligne, re.I) is not None
 
 
 def _recalcul(chiffre, lignes, n, d):
-    """None if the numbers the derivation names are on the lines it reads and give `chiffre`, else the reason."""
+    """None if the lines the derivation reads write exactly the numbers it names and these give `chiffre`, else why."""
     fenetre = lignes[n - 1:n - 1 + d["portee"]]
     if len(fenetre) < d["portee"]:
         return f"the derivation reads {d['portee']} lines from {d['ligne']} and the file ends sooner"
-    lus = set().union(*(_nombres_de(ligne) for ligne in fenetre))
-    ecrits = [re.sub(_SEPARATEURS, "", o) for o in d["operandes"]]
-    absents = [o for o, e in zip(d["operandes"], ecrits) if e not in lus]
-    if absents:
-        return (f"the figure {chiffre} is derived from {', '.join(absents)}, which the {d['portee']} lines read from "
-                f"{d['ligne']} do not write")
-    valeur = (Decimal(sum(int(e) for e in ecrits)) / Decimal(d["diviseur"])).quantize(
+    lus = Counter(x for ligne in fenetre for x, _ in _jetons(ligne))
+    nommes = Counter(re.sub(_SEPARATEURS, "", o) for o in d["operandes"])
+    if lus != nommes:
+        manque, en_trop = nommes - lus, lus - nommes
+        return (f"the {d['portee']} lines read from {d['ligne']} must write the numbers the derivation of {chiffre} "
+                f"names, and only those" + (f"; not written: {', '.join(sorted(manque.elements()))}" if manque else "")
+                + (f"; written and not named: {', '.join(sorted(en_trop.elements()))}" if en_trop else ""))
+    valeur = (Decimal(sum(int(e) for e in nommes.elements())) / Decimal(d["diviseur"])).quantize(
         Decimal(1).scaleb(-d["decimales"]), rounding=ROUND_HALF_UP)
     try:
         egal = valeur == Decimal(chiffre)
@@ -299,15 +352,21 @@ def _recalcul(chiffre, lignes, n, d):
 
 def verdict_chiffre(chiffre, citation, lignes, derivation=None):
     """None if the line `citation` ("file:N") names holds `chiffre`, else the reason. `lignes` are the lines of the
-    cited file, N within them (the callers check that first). A figure declared derived for exactly this line is
-    computed again from the numbers it names; any other figure must be written on the line."""
-    ligne = lignes[int(citation.rsplit(":", 1)[1]) - 1]
+    cited file, N within them (the callers check that first). A figure declared for exactly this line is read as
+    declared (the words it spells, or the numbers it is computed from); any other figure is written on the line in digits."""
+    n = int(citation.rsplit(":", 1)[1])
+    ligne = lignes[n - 1]
     if derivation is not None and derivation["ligne"] == citation:
-        return _recalcul(chiffre, lignes, int(citation.rsplit(":", 1)[1]), derivation)
+        if derivation["calcul"] == "somme":
+            return _recalcul(chiffre, lignes, n, derivation)
+        if _expression_sur_la_ligne(derivation["expression"], ligne):
+            return None
+        return (f"the line does not spell \"{derivation['expression']}\" for the figure {chiffre}: "
+                f"{ligne.strip()[:110]!r}")
     if chiffre_dans_la_ligne(chiffre, ligne):
         return None
-    return (f"the line does not write the figure {chiffre}, as digits or as a word: {ligne.strip()[:110]!r} ; cite the "
-            f"line that writes it, or declare a derived figure in \"{SECTION_DERIVATION}\"")
+    return (f"the line does not write the figure {chiffre} in digits: {ligne.strip()[:110]!r} ; cite the line that "
+            f"writes it, or declare the words it spells or the sum it is computed from in \"{SECTION_DERIVATION}\"")
 
 
 def _canonique(x, racine=True):
