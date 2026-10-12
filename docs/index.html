@@ -1,6 +1,6 @@
 <!doctype html><html lang="en">
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'sha256-7OjE8Ad2WY667NqJQlx1VD1AUWaoQdA8FQWrY7p6sfo=' 'unsafe-hashes' 'sha256-0HZErnRGeXfSSbk/z4SKRVqTv0f0NBJn7UkU3+HNPdI=' 'sha256-IOydWiRWi1igmPoSsye5TDkEobQe/5aVDHX28UA/4Ts=' 'sha256-9g0fN3HsQ+WXOCUD5dKQdXIY2TvGqAMbUifSZhx4rwY=' 'sha256-9zQJQ9B48ZyPwEKZebBBelAuaIv5PhbHt8m+l66EtlA=' 'sha256-ZTITrJ2pUfvT5dkkETXJE/2TX1XuQ5FuXtbB5dwYuw4=' 'sha256-oqSHbAvqS+tXc12Do4qxvEB7Q2Zg+unoLKm4zeSB4oY=' 'sha256-RsYxumAh9nfPWTmIlrgVCjiNkhGgnCcljYhs9mtE4XU=' 'sha256-1u/oLzsbSwtV2qAjDUM+GUhu+UtAl5l6B/92RBCDqZs=' 'sha256-4Cr/W1Ty3qpZzxTisCv3JSkcsIXMraspPJQa9hLwT68=' 'sha256-ra2A1gypctBMmnXRW2s5TnMyKZn6Igh62FqoGc2LGjk=' 'sha256-L2JykKFXe69C7GSUbA2ck5vj+jhfS8rsKgCSlX+9UOY=' 'sha256-S/waUfsy/5V4uijKPM80kAeCleBtxCjMeUmwmXp98w0=' 'sha256-qm1ymCuyj9goSRO0xKI/uxGGEy420yuGBS/VNUtBiJg='; script-src 'sha256-qOhFsq0QMV2REqNwk5hGH5bZE9SkX6gt6yeyKdYPv+U=' 'sha256-q3aZfbGIe9/aiQl5KxhU7u3AShcZhKdzdNDV0BJK5+w='; font-src 'self'; img-src 'self' data:; media-src 'self'; base-uri 'self'; form-action 'none'; connect-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'sha256-tHUZJJeae/Rut3VAU3kw9Bc+45PtidzWkiKl7XIGAjo=' 'unsafe-hashes' 'sha256-0HZErnRGeXfSSbk/z4SKRVqTv0f0NBJn7UkU3+HNPdI=' 'sha256-IOydWiRWi1igmPoSsye5TDkEobQe/5aVDHX28UA/4Ts=' 'sha256-9g0fN3HsQ+WXOCUD5dKQdXIY2TvGqAMbUifSZhx4rwY=' 'sha256-9zQJQ9B48ZyPwEKZebBBelAuaIv5PhbHt8m+l66EtlA=' 'sha256-ZTITrJ2pUfvT5dkkETXJE/2TX1XuQ5FuXtbB5dwYuw4=' 'sha256-oqSHbAvqS+tXc12Do4qxvEB7Q2Zg+unoLKm4zeSB4oY=' 'sha256-RsYxumAh9nfPWTmIlrgVCjiNkhGgnCcljYhs9mtE4XU=' 'sha256-1u/oLzsbSwtV2qAjDUM+GUhu+UtAl5l6B/92RBCDqZs=' 'sha256-4Cr/W1Ty3qpZzxTisCv3JSkcsIXMraspPJQa9hLwT68=' 'sha256-ra2A1gypctBMmnXRW2s5TnMyKZn6Igh62FqoGc2LGjk=' 'sha256-L2JykKFXe69C7GSUbA2ck5vj+jhfS8rsKgCSlX+9UOY=' 'sha256-S/waUfsy/5V4uijKPM80kAeCleBtxCjMeUmwmXp98w0=' 'sha256-qm1ymCuyj9goSRO0xKI/uxGGEy420yuGBS/VNUtBiJg='; script-src 'sha256-qOhFsq0QMV2REqNwk5hGH5bZE9SkX6gt6yeyKdYPv+U=' 'sha256-q3aZfbGIe9/aiQl5KxhU7u3AShcZhKdzdNDV0BJK5+w='; font-src 'self'; img-src 'self' data:; media-src 'self'; base-uri 'self'; form-action 'none'; connect-src 'none'">
 <meta name="referrer" content="no-referrer"><title>Crusetra &#183; measured instruments for compliance</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="canonical" href="https://crusetra.com/">
@@ -485,7 +485,8 @@
   .rapport .r-offre{margin-top:150px}
   .rapport .r-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;align-items:stretch}
   .rapport .r-cols.trois{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
-  @media (max-width:1060px){.rapport .r-cols.trois{grid-template-columns:minmax(0,1fr);gap:108px;max-width:560px;margin-inline:auto}}
+  /* up to 1060 px the offer cards stack (three in Routing, two in Screening), so each card's text keeps 45 % of the screen (temoin-effondrement) */
+  @media (max-width:1060px){.rapport .r-cols,.rapport .r-cols.trois{grid-template-columns:minmax(0,1fr);gap:108px;max-width:560px;margin-inline:auto}}
   .rapport .r-col{position:relative;isolation:isolate;padding:124px 38px 36px;border-radius:18px;
     border:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent);
     background:linear-gradient(180deg,color-mix(in srgb,var(--nuit-a) 64%,transparent),color-mix(in srgb,var(--nuit-c) 86%,transparent));
@@ -574,7 +575,8 @@
   .hero .vers-rapport:hover,.hero .vers-rapport:focus-visible{color:var(--vert-clair);border-color:var(--vert-clair)}
   .hero .vers-rapport span{display:inline-block;transition:transform .3s var(--montee)}.hero .vers-rapport:hover span{transform:translateY(3px)}
   @media (max-width:1060px){.rapport .r-grille{grid-template-columns:minmax(0,1fr);gap:56px}
-    .rapport .r-feuille{position:static;max-width:420px;margin:0 auto}}
+    .rapport .r-feuille{position:static;max-width:420px;margin:0 auto}
+    .rapport .r-sous{max-width:none}}
   @media (max-width:760px){.rapport{padding:84px 0 96px}
     .rapport .r-offre{margin-top:130px}
     .rapport .r-cols{grid-template-columns:minmax(0,1fr);gap:108px}
@@ -761,6 +763,8 @@
     .scene .fiche{position:static;transform:none;width:100%;margin:0}
 
   }
+  /* tablet width: the unfolded list of findings runs in two equal columns, so a long finding keeps 45 % of the screen (temoin-effondrement) */
+  @media (min-width:761px) and (max-width:1080px){.rail ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
   /* entre 1081 et 1220, le plateau est trop petit pour porter ses annotations */
   @media (max-width:1220px){
     .appels,.ap-eti{display:none!important}
@@ -849,7 +853,7 @@
   .carte-ev .ev-pied{display:flex;justify-content:space-between;align-items:baseline;padding:6px 16px 14px;
     font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ev-vif)}
   .carte-ev .ev-pied b{font-weight:500;color:var(--sur-vert);letter-spacing:.06em;text-transform:none;font-size:12.5px;white-space:nowrap}
-  @media (max-width:1100px){.hero-grille{grid-template-columns:minmax(0,1fr);padding:0 8px}.hero-texte{padding-top:0}.eventail{height:auto;padding:24px 0}
+  @media (max-width:1100px){.hero-grille{grid-template-columns:minmax(0,1fr);padding:0 8px}.hero-texte{padding-top:0}.hero-grille .lede{max-width:60ch}.eventail{height:auto;padding:24px 0}
     .carte-ev{position:relative;left:auto;top:auto;margin:0 0 14px;width:100%;transform:none;aspect-ratio:auto}
     .carte-ev:hover{transform:none}.carte-ev .ev-pied{flex-wrap:wrap;gap:6px 14px}.carte-ev .ev-pied b{white-space:nowrap;margin-left:auto}}
 
@@ -890,7 +894,9 @@
   .methode-liens{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:48px;padding-top:22px;border-top:1px solid var(--filet);font-size:14.5px}
   .methode-liens a{color:var(--demi);text-decoration:none;border-bottom:1px solid var(--filet-clair);padding-bottom:3px}
   .methode-liens a:hover{color:var(--encre);border-color:var(--vert-vif)}
-  @media (max-width:980px){.methode-grille{grid-template-columns:minmax(0,1fr)}.methode-scene{max-width:640px}}
+  /* up to 1060 px the steps and the sheet stack, and their paragraphs lengthen with the column, so each keeps 45 % of the screen (temoin-effondrement) */
+  @media (max-width:1060px){.methode-grille{grid-template-columns:minmax(0,1fr)}.methode-scene{max-width:640px}
+    .stations p{max-width:60ch}.methode-note{max-width:640px}}
 
   /* the footer, drawn once for every builder (Arslane, 13/09: the promise and its proof button
      on the left, the count and the hash on the right, the pages in a row under a hairline) */
