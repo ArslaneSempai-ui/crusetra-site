@@ -1024,11 +1024,20 @@ verifier_comptes(sorted((DOCS / "dossier").glob("*.html")) if (DOCS / "dossier")
 # dans un fichier de la bonne taille. On vérifie donc le CONTENU de la ligne.
 # Chaque OUTIL contre SON dépôt et SON fichier d'ancres (ancrer-citations.py les
 # régénère) : les pages rouges citent cascade-screening, les vertes cascade.
+# releve.json cite lui aussi la source de ses chiffres (« … : README.md:259 ») : ces références-là
+# passent par la même garde, avec le chiffre nommé dans le refus (le 12/10, celle du poids de l'échelle
+# générative visait une ligne qui n'a jamais porté ce chiffre, et aucune garde ne lisait ce fichier).
+from outil import citations_du_releve  # noqa: E402
+DU_RELEVE = citations_du_releve(MAQ / "releve.json")
+
+
 def verifier_citations(pages, ancres_fichier, outil, etiquette):
     citees = set()
     for page in pages:
         citees |= set(re.findall(r"[A-Za-z0-9_./-]+\.(?:ts|mjs|json|md|js):\d+",
                                  page.read_text()))
+    du_releve = DU_RELEVE[etiquette]
+    citees |= set(du_releve)
     if not citees:
         return
     if not ancres_fichier.exists():
@@ -1041,25 +1050,28 @@ def verifier_citations(pages, ancres_fichier, outil, etiquette):
     ancres = _json.loads(ancres_fichier.read_text())["ancres"]
     fautes = []
     for c in sorted(citees):
+        de_qui = f" (releve.json, {', '.join(du_releve[c])})" if c in du_releve else ""
         if c not in ancres:
-            fautes.append(f"{c} : aucune ancre déclarée"); continue
+            fautes.append(f"{c} : aucune ancre déclarée{de_qui}"); continue
         chemin, n = c.rsplit(":", 1)
         f = outil / chemin
         if not f.exists():
-            fautes.append(f"{c} : fichier absent de l'outil"); continue
+            fautes.append(f"{c} : fichier absent de l'outil{de_qui}"); continue
         lignes = f.read_text(errors="replace").splitlines()
         n = int(n)
         if n > len(lignes):
-            fautes.append(f"{c} : au-delà de la fin ({len(lignes)} lignes)"); continue
+            fautes.append(f"{c} : au-delà de la fin ({len(lignes)} lignes){de_qui}"); continue
         if lignes[n - 1].strip() != ancres[c]:
             ou = [i + 1 for i, x in enumerate(lignes) if x.strip() == ancres[c]]
             fautes.append(f"{c} : la ligne a changé"
                           + (f", le contenu est en {chemin}:{ou[0]}" if len(ou) == 1
-                             else ", contenu introuvable"))
+                             else ", contenu introuvable") + de_qui)
     if fautes:
         sys.exit(f"CITATIONS {etiquette.upper()} QUI NE DISENT PLUS VRAI :\n  " + "\n  ".join(fautes)
                  + f"\n  corriger les JSON, puis régénérer {ancres_fichier.name} (ancrer-citations.py)")
-    print(f"  citations {etiquette} vérifiées ligne à ligne contre l'outil : {len(citees)}")
+    print(f"  citations {etiquette} vérifiées ligne à ligne contre l'outil : {len(citees)}"
+          + (f" (dont {len(du_releve)} du releve.json : la ligne existe, n'est pas vide et n'a pas bougé ; "
+             f"que le chiffre y soit, la garde ne le lit pas)" if du_releve else ""))
 
 verifier_citations(sorted(DOCS.glob("*.html")) + sorted((DOCS / "routing").glob("*.html")),
                    MAQ / "ancres-citations.json",

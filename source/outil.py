@@ -49,6 +49,31 @@ def depot_url(outil_id):
     return GITHUB + DEPOTS[outil_id]
 
 
+# releve.json states each figure's source in prose ("... : README.md:259"). Those are the same
+# « fichier:ligne » citations the pages carry, so they are held by the same guard: ancrer-citations.py
+# anchors them, verifier_citations (assembler.py) compares them line by line. A reference belongs to
+# Routing unless the text right after it names another repository ("README.md:150 de crusetra-screening");
+# "fichier.json l.36" reads as fichier.json:36; LICENSE has no extension and is cited by name.
+CITATION_RELEVE = re.compile(r"((?:[A-Za-z0-9_./-]+\.(?:ts|mjs|json|md|js)|LICENSE)(?::| l\.)(\d+))"
+                             r"(?: de (crusetra-[a-z]+))?")
+
+
+def citations_du_releve(chemin):
+    """{outil_id: {"fichier:ligne": ["section « chiffre »", ...]}} for every reference in releve.json."""
+    outil_de = {depot: oid for oid, depot in DEPOTS.items()}
+    par_outil = {oid: {} for oid in DEPOTS}
+    for section, entrees in json.loads(pathlib.Path(chemin).read_text()).items():
+        for chiffre, texte in entrees.items():
+            for m in CITATION_RELEVE.finditer(texte):
+                if m.group(3) and m.group(3) not in outil_de:
+                    sys.exit(f"releve.json {section} « {chiffre} » : « {m.group(3)} » n'est pas un dépôt connu "
+                             f"({', '.join(sorted(outil_de))})")
+                oid = outil_de[m.group(3)] if m.group(3) else "routing"
+                citation = re.sub(r"(?::| l\.)\d+$", "", m.group(1)) + ":" + m.group(2)
+                par_outil[oid].setdefault(citation, []).append(f"{section} « {chiffre} »")
+    return par_outil
+
+
 def _canonique(x, racine=True):
     """Le JSON canonique de empreinteDuReleve (cascade-screening/src/empreinte.ts),
     porté en Python : clés triées, la clé `empreinte` exclue À LA RACINE seulement."""
