@@ -19,6 +19,7 @@ import json
 import pathlib
 import re
 import sys
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 _MAISON = pathlib.Path.home() / "Documents"
 
@@ -66,7 +67,12 @@ def depot_url(outil_id):
 #    a file with no line ("releve-entites.json, crusetra-screening", a sealed record) belongs to that file
 #    and says nothing about the references;
 #  - a list of lines ("README.md:302, 303", "... et 303", "... / 303", "...; 303") is refused: one citation
-#    aims at ONE line, and the second is never dropped silently.
+#    aims at ONE line, and the second is never dropped silently;
+#  - the FIGURE of the entry must be on the line it cites (verdict_chiffre): as digits, with or without thousands
+#    separators or a glued unit, or as the English word when the line spells it ("eight" for 8); never as a part of
+#    a longer number, a date, a version or a hash. A figure that is derived and cannot appear verbatim is declared in
+#    the "derivation" section with the numbers it is computed from: the guard finds those numbers on the cited line
+#    and the lines after it, and computes the figure again. Nothing is skipped: no declaration, no pass.
 EXTENSIONS = ("ts", "mjs", "json", "md", "js")
 
 
@@ -101,14 +107,61 @@ def _nom_de_depot(brut):
     return re.sub(r"\s+", "-", brut.strip().lower())
 
 
+SECTION_DERIVATION = "derivation"
+_DERIVATION_CLES = ("ligne", "portee", "operandes", "calcul", "diviseur", "decimales")
+_SEPARATEURS = r"[ ,_   ]"   # thousands separators: space, comma, underscore, no-break and thin spaces
+_ENTIER_ECRIT = rf"\d{{1,3}}(?:{_SEPARATEURS}\d{{3}})+|\d+"
+
+
+def _lire_derivations(brut):
+    """The shape of the "derivation" section, nothing more: {figure: {ligne, portee, operandes, calcul, diviseur,
+    decimales}}. Returns (derivations, faults); the content is checked against the source by verdict_chiffre."""
+    if not isinstance(brut, dict):
+        return {}, [f"{SECTION_DERIVATION} : the section must be an object of derivations"]
+    derivations, fautes = {}, []
+    for chiffre, d in brut.items():
+        qui = f"{SECTION_DERIVATION} « {chiffre} »"
+        if not isinstance(d, dict) or sorted(d) != sorted(_DERIVATION_CLES):
+            fautes.append(f"{qui} : an object with exactly {', '.join(_DERIVATION_CLES)}")
+            continue
+        mal = []
+        if not (isinstance(d["ligne"], str) and re.fullmatch(r"[^\s:]+:[1-9]\d*", d["ligne"])):
+            mal.append("ligne must read file:N")
+        if d["calcul"] != "somme":
+            mal.append('calcul must be "somme", the only computation the guard repeats')
+        for cle, mini in (("portee", 1), ("diviseur", 1), ("decimales", 0)):
+            if type(d[cle]) is not int or d[cle] < mini:
+                mal.append(f"{cle} must be an integer, {mini} or more")
+        ops = d["operandes"]
+        if not (isinstance(ops, list) and ops and all(isinstance(o, str) and re.fullmatch(_ENTIER_ECRIT, o) for o in ops)):
+            mal.append("operandes must be a list of whole numbers, written as the source writes them")
+        if mal:
+            fautes.append(f"{qui} : {'; '.join(mal)}")
+        else:
+            derivations[chiffre] = d
+    return derivations, fautes
+
+
 def citations_du_releve(source):
     """{outil_id: {"fichier:ligne": ["section « chiffre »", ...]}} for every reference in releve.json
     (a path, or the parsed dict). Raises ReleveIllisible, listing every fault, if any entry cannot be placed."""
+    par_outil, _ = entrees_du_releve(source)
+    return {oid: {c: [f"{section} « {chiffre} »" for section, chiffre in quis] for c, quis in cits.items()}
+            for oid, cits in par_outil.items()}
+
+
+def entrees_du_releve(source):
+    """({outil_id: {"fichier:ligne": [(section, chiffre), ...]}}, {chiffre: derivation}) for releve.json
+    (a path, or the parsed dict): the references with the figure each one is cited for, and the derivations declared
+    for the figures that cannot appear verbatim on their line. Raises ReleveIllisible, listing every fault, if an
+    entry cannot be placed or a derivation is malformed or cites nothing."""
     connus = _depots_connus()
     releve = source if isinstance(source, dict) else json.loads(pathlib.Path(source).read_text())
     par_outil = {oid: {} for oid in DEPOTS}
-    fautes = []
+    derivations, fautes = _lire_derivations(releve.get(SECTION_DERIVATION, {}))
     for section, entrees in releve.items():
+        if section == SECTION_DERIVATION:
+            continue
         if not isinstance(entrees, dict):
             fautes.append(f"{section} : une section doit être un objet de chiffres")
             continue
@@ -169,12 +222,92 @@ def citations_du_releve(source):
                                              f"{', '.join(sorted(contexte))} : ajouter « de crusetra-<outil> »")
                         continue
                     oid = "routing"
-                par_outil[oid].setdefault(citation, []).append(qui)
+                par_outil[oid].setdefault(citation, []).append((section, chiffre))
             fautes.extend(f"{qui} : {f}" for f in fautes_entree)
+    for chiffre, d in derivations.items():
+        if not any(c == chiffre and cit == d["ligne"] for cits in par_outil.values()
+                   for cit, quis in cits.items() for _, c in quis):
+            fautes.append(f"{SECTION_DERIVATION} « {chiffre} » : no entry of releve.json cites {d['ligne']} for this "
+                          "figure, a derivation that serves nothing is refused")
     if fautes:
         raise ReleveIllisible("releve.json : références illisibles (la garde refuse, elle ne saute rien et ne devine pas) :\n  "
                               + "\n  ".join(fautes))
-    return par_outil
+    return par_outil, derivations
+
+
+# The figure on the line it cites. A number is read whole: never the "5" of "25", of "1.5", of "v5", of a date or of a
+# hash ("14ae54d"); it may carry thousands separators and a unit glued to it ("400MB"); a decimal comma is a dot.
+# The words are English ("eight" for 8, "twenty-four" for 24), because the cited files are.
+_NOMBRE = re.compile(rf"(?<![\w.,\-])(?P<ent>{_ENTIER_ECRIT})(?P<dec>[.,]\d+)?"
+                     r"(?=(?:[KMGT]i?[Bbo]|ms|px|s|h)?(?!\w))(?![.,]\d)(?!-\d)")
+_UNITES = ("zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen "
+           "seventeen eighteen nineteen").split()
+_DIZAINES = "_ _ twenty thirty forty fifty sixty seventy eighty ninety".split()
+
+
+def _en_lettres(n):
+    if n < 20:
+        return _UNITES[n]
+    if n == 100:
+        return "hundred"
+    d, u = divmod(n, 10)
+    return _DIZAINES[d] + (f"-{_UNITES[u]}" if u else "")
+
+
+def _nombres_de(ligne):
+    """Every number the line writes, as plain digits with a dot for the decimals."""
+    lus = set()
+    for m in _NOMBRE.finditer(ligne):
+        ent, dec = m.group("ent"), m.group("dec")
+        lus.add(re.sub(_SEPARATEURS, "", ent) + ("." + dec[1:] if dec else ""))
+        if not dec and ent.count(",") == 1 and re.fullmatch(r"\d{1,3},\d{3}", ent):
+            lus.add(ent.replace(",", "."))   # "1,318" can be a French decimal as well as a thousand
+    return lus
+
+
+def chiffre_dans_la_ligne(chiffre, ligne):
+    """True if `ligne` writes `chiffre`, as digits (see _NOMBRE) or as the English word of a whole number up to 100."""
+    if chiffre in _nombres_de(ligne):
+        return True
+    if re.fullmatch(r"\d+", chiffre) and chiffre == str(int(chiffre)) and int(chiffre) <= 100:
+        mot = re.escape(_en_lettres(int(chiffre))).replace(r"\-", "[- ]")
+        return re.search(rf"(?<![\w-]){mot}(?![\w-])", ligne, re.I) is not None
+    return False
+
+
+def _recalcul(chiffre, lignes, n, d):
+    """None if the numbers the derivation names are on the lines it reads and give `chiffre`, else the reason."""
+    fenetre = lignes[n - 1:n - 1 + d["portee"]]
+    if len(fenetre) < d["portee"]:
+        return f"the derivation reads {d['portee']} lines from {d['ligne']} and the file ends sooner"
+    lus = set().union(*(_nombres_de(ligne) for ligne in fenetre))
+    ecrits = [re.sub(_SEPARATEURS, "", o) for o in d["operandes"]]
+    absents = [o for o, e in zip(d["operandes"], ecrits) if e not in lus]
+    if absents:
+        return (f"the figure {chiffre} is derived from {', '.join(absents)}, which the {d['portee']} lines read from "
+                f"{d['ligne']} do not write")
+    valeur = (Decimal(sum(int(e) for e in ecrits)) / Decimal(d["diviseur"])).quantize(
+        Decimal(1).scaleb(-d["decimales"]), rounding=ROUND_HALF_UP)
+    try:
+        egal = valeur == Decimal(chiffre)
+    except InvalidOperation:
+        egal = False
+    if not egal:
+        return f"the numbers read from {d['ligne']} give {valeur}, releve.json says {chiffre}"
+    return None
+
+
+def verdict_chiffre(chiffre, citation, lignes, derivation=None):
+    """None if the line `citation` ("file:N") names holds `chiffre`, else the reason. `lignes` are the lines of the
+    cited file, N within them (the callers check that first). A figure declared derived for exactly this line is
+    computed again from the numbers it names; any other figure must be written on the line."""
+    ligne = lignes[int(citation.rsplit(":", 1)[1]) - 1]
+    if derivation is not None and derivation["ligne"] == citation:
+        return _recalcul(chiffre, lignes, int(citation.rsplit(":", 1)[1]), derivation)
+    if chiffre_dans_la_ligne(chiffre, ligne):
+        return None
+    return (f"the line does not write the figure {chiffre}, as digits or as a word: {ligne.strip()[:110]!r} ; cite the "
+            f"line that writes it, or declare a derived figure in \"{SECTION_DERIVATION}\"")
 
 
 def _canonique(x, racine=True):
