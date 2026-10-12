@@ -836,7 +836,7 @@ CSS = '''
     transition:color .2s,border-color .2s}
   .hero .vers-rapport:hover,.hero .vers-rapport:focus-visible{color:var(--vert-clair);border-color:var(--vert-clair)}
   .hero .vers-rapport span{display:inline-block;transition:transform .3s var(--montee)}.hero .vers-rapport:hover span{transform:translateY(3px)}
-  @media (max-width:1060px){.rapport .r-grille{grid-template-columns:minmax(0,1fr);gap:56px}
+  @media (max-width:1100px){.rapport .r-grille{grid-template-columns:minmax(0,1fr);gap:56px}
     .rapport .r-feuille{position:static;max-width:420px;margin:0 auto}
     .rapport .r-sous{max-width:none}}
   @media (max-width:760px){.rapport{padding:84px 0 96px}
