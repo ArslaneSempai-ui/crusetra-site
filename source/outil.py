@@ -51,26 +51,123 @@ def depot_url(outil_id):
 
 # releve.json states each figure's source in prose ("... : README.md:259"). Those are the same
 # « fichier:ligne » citations the pages carry, so they are held by the same guard: ancrer-citations.py
-# anchors them, verifier_citations (assembler.py) compares them line by line. A reference belongs to
-# Routing unless the text right after it names another repository ("README.md:150 de crusetra-screening");
-# "fichier.json l.36" reads as fichier.json:36; LICENSE has no extension and is cited by name.
-CITATION_RELEVE = re.compile(r"((?:[A-Za-z0-9_./-]+\.(?:ts|mjs|json|md|js)|LICENSE)(?::| l\.)(\d+))"
-                             r"(?: de (crusetra-[a-z]+))?")
+# anchors them, verifier_citations (assembler.py) compares them line by line. The reader FAILS CLOSED:
+# whatever it cannot place is refused (ReleveIllisible), never skipped, never sent to a default.
+#  - a reference reads ":N" or " l.N" right after the file name (a name with one of EXTENSIONS, or LICENSE,
+#    which has none); anything else that looks like a line designation (": 302", " l. 302", " line 302",
+#    "#L302", ":302-310") or a file type the guard does not read ("conf.yaml:12") is refused;
+#  - the repository of a reference is the one named right after it: " de|dans|du <repo>", ", <repo>" or
+#    " (<repo>", case-insensitive, double spaces allowed; <repo> is a GitHub name (crusetra-screening), a
+#    local folder (cascade-screening, cascade) or the prose "Crusetra Screening", and must be in the
+#    known list built from DEPOTS and OUTILS; a name of the same family that is not in it is refused;
+#  - a reference that names no repository belongs to Routing only if nothing else in its entry names
+#    another tool; otherwise it is refused. A repository named after a file with no line ("releve-entites.json,
+#    crusetra-screening", a sealed record) belongs to that file and says nothing about the references.
+EXTENSIONS = ("ts", "mjs", "json", "md", "js")
 
 
-def citations_du_releve(chemin):
-    """{outil_id: {"fichier:ligne": ["section « chiffre »", ...]}} for every reference in releve.json."""
-    outil_de = {depot: oid for oid, depot in DEPOTS.items()}
+class ReleveIllisible(ValueError):
+    """releve.json cites a source the guard cannot place."""
+
+
+_OUTILS_NOMS = r"routing|screening|monitoring|scoring|dossier"
+_DEPOT_NOM = (rf"(?:crusetra\s+(?:{_OUTILS_NOMS})|(?:crusetra|cascade)(?:-[A-Za-z0-9]+)*)")  # attached to a reference
+_DEPOT_MENTION = (rf"(?<![\w-])(?:crusetra\s+(?:{_OUTILS_NOMS})|(?:crusetra|cascade)(?:-[A-Za-z0-9]+)+)(?![\w-])")
+_FICHIER_RELEVE = re.compile(r"(?<![\w./-])((?:[A-Za-z0-9_][A-Za-z0-9_./-]*\.[A-Za-z]{1,5})|LICENSE)(?![\w-])")
+_REF_STRICTE = re.compile(r"(?::|\sl\.)(\d+)")
+_REF_SUITE = re.compile(r"(?:[-\u2013\u2014]\s?\d|:\d|,\d|\s[-\u2013\u2014]\s\d)")
+_DESIGNATION = re.compile(r"\s*[:#@(]?\s*(?:lignes?|lines?|l\.?)?\s*\d", re.I)
+_ATTACHE = re.compile(rf"(?:\s+(?:de|dans|du)\s+|\s*,\s*|\s*\(\s*)({_DEPOT_NOM})(?![\w-])", re.I)
+_MENTION = re.compile(_DEPOT_MENTION, re.I)
+
+
+def _depots_connus():
+    """{lowercase repository name: tool id}: the GitHub names and the local folders of the tools."""
+    connus = {}
+    for oid, depot in DEPOTS.items():
+        connus[depot.lower()] = oid
+        connus[OUTILS[oid]["outil_chemin"].name.lower()] = oid
+        connus[f"crusetra-{oid}"] = oid
+    return connus
+
+
+def _nom_de_depot(brut):
+    return re.sub(r"\s+", "-", brut.strip().lower())
+
+
+def citations_du_releve(source):
+    """{outil_id: {"fichier:ligne": ["section « chiffre »", ...]}} for every reference in releve.json
+    (a path, or the parsed dict). Raises ReleveIllisible, listing every fault, if any entry cannot be placed."""
+    connus = _depots_connus()
+    releve = source if isinstance(source, dict) else json.loads(pathlib.Path(source).read_text())
     par_outil = {oid: {} for oid in DEPOTS}
-    for section, entrees in json.loads(pathlib.Path(chemin).read_text()).items():
+    fautes = []
+    for section, entrees in releve.items():
+        if not isinstance(entrees, dict):
+            fautes.append(f"{section} : une section doit être un objet de chiffres")
+            continue
         for chiffre, texte in entrees.items():
-            for m in CITATION_RELEVE.finditer(texte):
-                if m.group(3) and m.group(3) not in outil_de:
-                    sys.exit(f"releve.json {section} « {chiffre} » : « {m.group(3)} » n'est pas un dépôt connu "
-                             f"({', '.join(sorted(outil_de))})")
-                oid = outil_de[m.group(3)] if m.group(3) else "routing"
-                citation = re.sub(r"(?::| l\.)\d+$", "", m.group(1)) + ":" + m.group(2)
-                par_outil[oid].setdefault(citation, []).append(f"{section} « {chiffre} »")
+            qui = f"{section} « {chiffre} »"
+            if not isinstance(texte, str):
+                fautes.append(f"{qui} : la source d'un chiffre doit être un texte, pas {type(texte).__name__}")
+                continue
+            refs, consommes, contexte, fautes_entree = [], set(), set(), []
+            for m in _FICHIER_RELEVE.finditer(texte):
+                nom, reste = m.group(1), texte[m.end():]
+                s = _REF_STRICTE.match(reste)
+                if s:
+                    ext = nom.rsplit(".", 1)[-1] if "." in nom else nom
+                    if nom != "LICENSE" and ext not in EXTENSIONS:
+                        fautes_entree.append(f"« {nom}{s.group(0)} » : le type de fichier .{ext} n'est pas lu par la garde "
+                                             f"({', '.join(EXTENSIONS)}, LICENSE)")
+                        continue
+                    if _REF_SUITE.match(reste, s.end()):
+                        fautes_entree.append(f"« {nom}{reste[:s.end() + 6].strip()} » : une plage ou une liste de lignes "
+                                             "n'est pas lue, une citation vise UNE ligne")
+                        continue
+                    refs.append([f"{nom}:{s.group(1)}", m.end() + s.end(), None])
+                elif _DESIGNATION.match(reste):
+                    fautes_entree.append(f"« {nom}{reste[:12]} » : cela ressemble à une ligne de fichier mais ne se lit pas "
+                                         "(forme admise : fichier:N ou fichier l.N)")
+                else:
+                    virgule = re.match(r"\s*,\s*", reste)  # "(releve-entites.json, crusetra-screening)": a file with no line
+                    if virgule:
+                        mention = _MENTION.match(texte, m.end() + virgule.end())
+                        if mention:
+                            consommes.add(mention.start())
+            for r in refs:
+                a = _ATTACHE.match(texte, r[1])
+                if a:
+                    nom_depot = _nom_de_depot(a.group(1))
+                    consommes.add(a.start(1))
+                    if nom_depot not in connus:
+                        fautes_entree.append(f"« {r[0]} » nomme le dépôt « {a.group(1)} », que la garde ne sait pas placer "
+                                             f"({', '.join(sorted(connus))})")
+                        continue
+                    r[2] = connus[nom_depot]
+                    contexte.add(r[2])
+            for m in _MENTION.finditer(texte):
+                if m.start() in consommes:
+                    continue
+                nom_depot = _nom_de_depot(m.group(0))
+                if nom_depot not in connus:
+                    if refs:
+                        fautes_entree.append(f"l'entrée nomme le dépôt « {m.group(0)} », que la garde ne sait pas placer "
+                                             f"({', '.join(sorted(connus))})")
+                    continue
+                contexte.add(connus[nom_depot])
+            for citation, _, oid in refs:
+                if oid is None:
+                    if contexte - {"routing"}:
+                        fautes_entree.append(f"« {citation} » ne nomme aucun dépôt alors que l'entrée nomme "
+                                             f"{', '.join(sorted(contexte))} : ajouter « de crusetra-<outil> »")
+                        continue
+                    oid = "routing"
+                par_outil[oid].setdefault(citation, []).append(qui)
+            fautes.extend(f"{qui} : {f}" for f in fautes_entree)
+    if fautes:
+        raise ReleveIllisible("releve.json : références illisibles (la garde refuse, elle ne saute rien et ne devine pas) :\n  "
+                              + "\n  ".join(fautes))
     return par_outil
 
 

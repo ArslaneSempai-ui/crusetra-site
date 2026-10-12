@@ -18,7 +18,7 @@ import sys
 
 ICI = pathlib.Path(__file__).parent
 sys.path.insert(0, str(ICI))
-from outil import OUTILS, citations_du_releve  # noqa: E402
+from outil import OUTILS, ReleveIllisible, citations_du_releve  # noqa: E402
 
 CITATION = re.compile(r"[A-Za-z0-9_./-]+\.(?:ts|mjs|json|md|js):\d+")
 PAGES = {
@@ -51,7 +51,10 @@ for nom in PAGES[outil_id]:
     citees |= set(CITATION.findall(p.read_text()))
 
 # releve.json : la source de chaque chiffre est une citation comme les autres, tenue par la même garde
-du_releve = citations_du_releve(ICI / "releve.json")[outil_id]
+try:
+    du_releve = citations_du_releve(ICI / "releve.json")[outil_id]
+except ReleveIllisible as e:
+    sys.exit(str(e))
 citees |= set(du_releve)
 
 
