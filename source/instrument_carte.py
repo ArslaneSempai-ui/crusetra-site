@@ -800,7 +800,7 @@ CSS_ACCUEIL = '''
   .carte-ev .ev-pied{display:flex;justify-content:space-between;align-items:baseline;padding:6px 16px 14px;
     font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ev-vif)}
   .carte-ev .ev-pied b{font-weight:500;color:var(--sur-vert);letter-spacing:.06em;text-transform:none;font-size:12.5px;white-space:nowrap}
-  @media (max-width:1100px){.hero-grille{grid-template-columns:minmax(0,1fr);padding:0 8px}.hero-texte{padding-top:0}.eventail{height:auto;padding:24px 0}
+  @media (max-width:1100px){.hero-grille{grid-template-columns:minmax(0,1fr);padding:0 8px}.hero-texte{padding-top:0}.hero-grille .lede{max-width:60ch}.eventail{height:auto;padding:24px 0}
     .carte-ev{position:relative;left:auto;top:auto;margin:0 0 14px;width:100%;transform:none;aspect-ratio:auto}
     .carte-ev:hover{transform:none}.carte-ev .ev-pied{flex-wrap:wrap;gap:6px 14px}.carte-ev .ev-pied b{white-space:nowrap;margin-left:auto}}
 
@@ -841,7 +841,9 @@ CSS_ACCUEIL = '''
   .methode-liens{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:48px;padding-top:22px;border-top:1px solid var(--filet);font-size:14.5px}
   .methode-liens a{color:var(--demi);text-decoration:none;border-bottom:1px solid var(--filet-clair);padding-bottom:3px}
   .methode-liens a:hover{color:var(--encre);border-color:var(--vert-vif)}
-  @media (max-width:980px){.methode-grille{grid-template-columns:minmax(0,1fr)}.methode-scene{max-width:640px}}
+  /* up to 1060 px the steps and the sheet stack, and their paragraphs lengthen with the column, so each keeps 45 % of the screen (temoin-effondrement) */
+  @media (max-width:1060px){.methode-grille{grid-template-columns:minmax(0,1fr)}.methode-scene{max-width:640px}
+    .stations p{max-width:60ch}.methode-note{max-width:640px}}
 '''
 
 

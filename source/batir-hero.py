@@ -747,7 +747,8 @@ CSS = '''
   .rapport .r-offre{margin-top:150px}
   .rapport .r-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;align-items:stretch}
   .rapport .r-cols.trois{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
-  @media (max-width:1060px){.rapport .r-cols.trois{grid-template-columns:minmax(0,1fr);gap:108px;max-width:560px;margin-inline:auto}}
+  /* up to 1060 px the offer cards stack (three in Routing, two in Screening), so each card's text keeps 45 % of the screen (temoin-effondrement) */
+  @media (max-width:1060px){.rapport .r-cols,.rapport .r-cols.trois{grid-template-columns:minmax(0,1fr);gap:108px;max-width:560px;margin-inline:auto}}
   .rapport .r-col{position:relative;isolation:isolate;padding:124px 38px 36px;border-radius:18px;
     border:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent);
     background:linear-gradient(180deg,color-mix(in srgb,var(--nuit-a) 64%,transparent),color-mix(in srgb,var(--nuit-c) 86%,transparent));
@@ -836,7 +837,8 @@ CSS = '''
   .hero .vers-rapport:hover,.hero .vers-rapport:focus-visible{color:var(--vert-clair);border-color:var(--vert-clair)}
   .hero .vers-rapport span{display:inline-block;transition:transform .3s var(--montee)}.hero .vers-rapport:hover span{transform:translateY(3px)}
   @media (max-width:1060px){.rapport .r-grille{grid-template-columns:minmax(0,1fr);gap:56px}
-    .rapport .r-feuille{position:static;max-width:420px;margin:0 auto}}
+    .rapport .r-feuille{position:static;max-width:420px;margin:0 auto}
+    .rapport .r-sous{max-width:none}}
   @media (max-width:760px){.rapport{padding:84px 0 96px}
     .rapport .r-offre{margin-top:130px}
     .rapport .r-cols{grid-template-columns:minmax(0,1fr);gap:108px}
@@ -941,6 +943,8 @@ CSS = '''
      la séquence se déplie en colonne, comme au téléphone et sans script */
   @media (max-width:1080px){''' + DEPLIE + '''
   }
+  /* tablet width: the unfolded list of findings runs in two equal columns, so a long finding keeps 45 % of the screen (temoin-effondrement) */
+  @media (min-width:761px) and (max-width:1080px){.rail ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
   /* entre 1081 et 1220, le plateau est trop petit pour porter ses annotations */
   @media (max-width:1220px){
     .appels,.ap-eti{display:none!important}
