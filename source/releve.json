@@ -65,7 +65,7 @@
   "75": "repère d'échelle des instruments par état : spans HTML depuis le 31/08",
   "200": "repère d'échelle des instruments par état : spans HTML depuis le 31/08 ; voisins réalistes du jeu 20 (paires différentes), scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening)",
   "878": "tests de Crusetra Routing, comptés depuis les sources : README.md:284 de crusetra-routing, vérifié par la garde de dérive de assembler.py",
-  "486": "tests de Crusetra Screening, comptés depuis les sources : README.md:150 de crusetra-screening, vérifié par la garde de dérive de assembler.py",
+  "602": "tests de Crusetra Screening, comptés depuis les sources : README.md:150 de crusetra-screening, vérifié par la garde de dérive de assembler.py",
   "298": "ligne d'empreinteDuReleve dans src/measure.ts : tenue par la garde des citations",
   "960": "ligne du gel des profils dans src/measure.ts : tenue par la garde des citations",
   "827": "ligne du recalcul 7^5 dans src/readme.ts : tenue par la garde des citations",
