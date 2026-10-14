@@ -54,6 +54,28 @@ grep -q "listes tenues" $SORTIE/assemblage.log || {
 # the films switch guard (7 October 2026, FILMS_VISIBLES in outil.py): same jaw
 grep -q "films guard held" $SORTIE/assemblage.log || {
   echo "REFUS : the green build no longer carries the films guard line (assembler.py), unplugged" ; exit 5 ; }
+# the releve.json citation witness (12 October 2026): a green build without its line has lost the guard
+grep -q "témoin des citations de releve.json" $SORTIE/assemblage.log || {
+  echo "REFUS : the green build no longer carries the releve.json citation witness line (assembler.py), unplugged" ; exit 5 ; }
+# the witness plays on planted entries and passes du_releve itself; the REAL path (verifier_citations reading
+# DU_RELEVE) shows only on the routing line, "(dont N du releve.json", N above zero: without it, releve.json
+# is no longer guarded, whatever the witness says
+grep -Eq "citations routing vérifiées ligne à ligne contre l'outil : [0-9]+ \(dont [1-9][0-9]* du releve\.json" $SORTIE/assemblage.log || {
+  echo "REFUS : the routing citation line no longer says \"dont N du releve.json\" (N above zero): the references of releve.json are not checked on the real path" ; exit 5 ; }
+# the figure guard (12 October 2026): the same real-path line must say that the lines hold their figures, and the
+# witness line must carry its planted figure cases; without either, a stale figure of releve.json passes again
+grep -Eq "du releve\.json : la ligne existe, n'a pas bougé et porte son chiffre" $SORTIE/assemblage.log || {
+  echo "REFUS : the routing citation line no longer says that the cited lines hold their figure: the figures of releve.json are not checked on the real path" ; exit 5 ; }
+grep -Eq "[1-9][0-9]* chiffres fautifs plantés rougis" $SORTIE/assemblage.log || {
+  echo "REFUS : the releve.json citation witness no longer plants stale figures (assembler.py), the figure guard is unplugged" ; exit 5 ; }
+# the REAL path must have read every figure-bearing reference of releve.json on its line: each tool's citation line
+# says how many figures it read, their sum must equal the number the reader finds in releve.json (read, never typed).
+# "porte son chiffre" above prints whatever the real path did; a count of zero, or short, means the figures are unguarded.
+ATTENDU=$(python3 -c "import outil; e, _ = outil.entrees_du_releve('releve.json'); print(sum(len(q) for c in e.values() for q in c.values()))" 2>/dev/null)
+LUS=$(grep -Eo "[0-9]+ chiffres du releve\.json lus sur leur ligne" $SORTIE/assemblage.log | awk '{s += $1} END {print s + 0}')
+echo "  chiffres de releve.json lus sur leur ligne par le chemin réel : $LUS, attendus : $ATTENDU"
+[ -n "$ATTENDU" ] && [ "$ATTENDU" -gt 0 ] && [ "$LUS" = "$ATTENDU" ] || {
+  echo "REFUS : the real path read $LUS figures of releve.json on their line, the reader finds $ATTENDU figure-bearing references: some are unguarded" ; exit 5 ; }
 
 echo "=== serveur $PORT (127.0.0.1 seulement)"
 # un serveur déjà debout ne se réutilise que s'il sert CE docs/ : la page servie n'est
@@ -85,7 +107,7 @@ node $SRC/temoin-rideau.mjs "http://127.0.0.1:$PORT/routing/index.html#tools" ||
 
 echo "=== l'effondrement des blocs de texte (temoin-effondrement.mjs) $(date +%H:%M:%S)"
 # 30/09 : les fiches des trouvailles faisaient 46 px sur téléphone, en ligne, sans qu'aucune garde le dise ;
-# chaque page servie, au téléphone et à la tablette : tout paragraphe d'au moins quinze mots fait au moins 45 % de l'écran
+# every served page, at each width the probe reads by default (its largeurs list): any paragraph of at least fifteen words is at least 45 % of the screen wide
 EPAGES=(); for f in $(cd $SITE/docs && find . -name '*.html' | sed 's#^\./##' | sort); do EPAGES+=("http://127.0.0.1:$PORT/$f"); done
 node $SRC/temoin-effondrement.mjs "${EPAGES[@]}" > $SORTIE/effondrement.log 2>&1 || { tail -4 $SORTIE/effondrement.log | cut -c1-200 ; echo "REFUS : un bloc de texte est écrasé ($SORTIE/effondrement.log)" ; exit 6 ; }
 echo "  $(tail -1 $SORTIE/effondrement.log)"

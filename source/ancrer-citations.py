@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Régénère le fichier d'ancres d'un outil : pour chaque citation « fichier:ligne »
-que les pages bâties portent (« Where it lives »), le contenu EXACT de la ligne
-visée dans le dépôt de l'outil. La garde de assembler.py compare ensuite chaque
-citation à cette ancre, ligne à ligne.
+que les pages bâties portent (« Where it lives ») ET que releve.json porte dans la
+source de ses chiffres, le contenu EXACT de la ligne visée dans le dépôt de l'outil.
+La garde de assembler.py compare ensuite chaque citation à cette ancre, ligne à ligne.
+A releve.json citation whose line does not write its figure (or whose declared computation does
+not give it again) is refused here too: no anchor is set on a line that does not hold the figure.
 
   python3 ancrer-citations.py routing      # pages vertes  → ancres-citations.json
   python3 ancrer-citations.py screening    # pages rouges  → ancres-citations-screening.json
@@ -18,7 +20,7 @@ import sys
 
 ICI = pathlib.Path(__file__).parent
 sys.path.insert(0, str(ICI))
-from outil import OUTILS  # noqa: E402
+from outil import OUTILS, ReleveIllisible, citations_du_releve, entrees_du_releve, verdict_chiffre  # noqa: E402
 
 CITATION = re.compile(r"[A-Za-z0-9_./-]+\.(?:ts|mjs|json|md|js):\d+")
 PAGES = {
@@ -50,21 +52,41 @@ for nom in PAGES[outil_id]:
         sys.exit(f"{nom} absent : bâtir les pages avant d'ancrer")
     citees |= set(CITATION.findall(p.read_text()))
 
+# releve.json : la source de chaque chiffre est une citation comme les autres, tenue par la même garde
+# (a sum declared in releve.json also anchors the last line it reads: citations_du_releve lists it)
+try:
+    _entrees, derivations = entrees_du_releve(ICI / "releve.json")
+    du_releve = citations_du_releve(ICI / "releve.json")[outil_id]
+except ReleveIllisible as e:
+    sys.exit(str(e))
+chiffres = _entrees[outil_id]
+citees |= set(du_releve)
+
+
+def de_qui(c):
+    return f" (releve.json, {', '.join(du_releve[c])})" if c in du_releve else ""
+
+
 ancres, fautes = {}, []
 for c in sorted(citees):
     chemin, n = c.rsplit(":", 1)
     f = depot / chemin
     if not f.exists():
-        fautes.append(f"{c} : fichier absent de {depot}")
+        fautes.append(f"{c} : fichier absent de {depot}{de_qui(c)}")
         continue
     lignes = f.read_text(errors="replace").splitlines()
     n = int(n)
     if n < 1 or n > len(lignes):
-        fautes.append(f"{c} : au-delà de la fin ({len(lignes)} lignes)")
+        fautes.append(f"{c} : au-delà de la fin ({len(lignes)} lignes){de_qui(c)}")
         continue
     if not lignes[n - 1].strip():
-        fautes.append(f"{c} : la ligne visée est vide, la citation ne désigne rien")
+        fautes.append(f"{c} : la ligne visée est vide, elle ne porte ni l'ancre ni le chiffre : "
+                      f"la citation ne désigne rien{de_qui(c)}")
         continue
+    for section, chiffre in chiffres.get(c, []):
+        raison = verdict_chiffre(chiffre, c, lignes, derivations.get(chiffre))
+        if raison:
+            fautes.append(f"{c} : {raison} (releve.json, {section} « {chiffre} »)")
     ancres[c] = lignes[n - 1].strip()
 
 if fautes:
@@ -81,4 +103,5 @@ depot_public = "~/" + str(depot.relative_to(pathlib.Path.home()))
           "changement volontaire de l'outil, jamais pour faire taire la garde."),
     "ancres": ancres,
 }, ensure_ascii=False, indent=2) + "\n")
-print(f"{SORTIE[outil_id]} : {len(ancres)} ancres, {len(PAGES[outil_id])} pages, dépôt {depot}")
+print(f"{SORTIE[outil_id]} : {len(ancres)} ancres ({len(du_releve)} du releve.json), "
+      f"{len(PAGES[outil_id])} pages, dépôt {depot}")

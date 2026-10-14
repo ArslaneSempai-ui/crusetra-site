@@ -8,14 +8,16 @@
 // largeur de l'écran (et 150 px). usage: node temoin-effondrement.mjs <url>…   (Chrome sur 9222)
 // code 1 si un bloc est écrasé ; TEMOIN_EFFONDRE=1 plante une fiche écrasée : le témoin doit rougir.
 const urls = process.argv.slice(2);
-const largeurs = (process.env.TEMOIN_LARGEURS || "375,768").split(",").map(Number);
+// 1000 and 1060 are the widths where the two-column sample-sheet grid squeezed its text column (11 October 2026)
+const largeurs = (process.env.TEMOIN_LARGEURS || "375,768,1000,1060").split(",").map(Number);
 const mesure = async (url, w) => {
   const t = await fetch("http://127.0.0.1:9222/json/new?about:blank", {method: "PUT"}).then(r => r.json());
   const ws = new WebSocket(t.webSocketDebuggerUrl); let id = 0; const pend = new Map();
   const send = (m, p = {}) => new Promise((res, rej) => { const i = ++id; pend.set(i, {res, rej}); ws.send(JSON.stringify({id: i, method: m, params: p})); });
   ws.onmessage = (m) => { const d = JSON.parse(m.data); if (d.id && pend.has(d.id)) { const p = pend.get(d.id); pend.delete(d.id); d.error ? p.rej(new Error(JSON.stringify(d.error))) : p.res(d.result); } };
   await new Promise(r => ws.onopen = r);
-  await send("Page.enable"); await send("Runtime.enable"); await send("Network.setCacheDisabled", {cacheDisabled: true});
+  // Network.enable first, as the other probes do: without it the cache switch is ignored and a rebuilt page is read from the cache
+  await send("Page.enable"); await send("Runtime.enable"); await send("Network.enable"); await send("Network.setCacheDisabled", {cacheDisabled: true});
   await send("Emulation.setDeviceMetricsOverride", {width: w, height: 812, deviceScaleFactor: 1, mobile: w < 700});
   await send("Page.navigate", {url});
   await new Promise(r => setTimeout(r, 2500));
