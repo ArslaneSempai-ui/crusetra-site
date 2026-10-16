@@ -1,0 +1,15 @@
+{
+  "sceau": "13d0ad682c461ac7",
+  "mesure": "2026-10-11",
+  "commit": "8e87d5a",
+  "alertes": 1200,
+  "suspects": 300,
+  "benins": 900,
+  "sans_historique": 1200,
+  "plancher": 0.9,
+  "recommandation": null,
+  "signe": false,
+  "verifie": null,
+  "licence_des_donnees": "CDLA-Sharing-1.0",
+  "source": "cascade-monitoring/examples/amlworld/amlworld-alerts-measured.json"
+}
