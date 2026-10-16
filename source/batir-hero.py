@@ -1962,8 +1962,8 @@ SPECS = {
         palette=PALETTE_RUBIS, nuit=NUIT_RUBIS,
         titre="Sanctions screening against ten lists, measured | Crusetra",
         og_titre="Crusetra Screening: which way of comparing names, and where to set the bar",
-        description="Screen company and vessel names against ten public sanctions lists. A sealed report "
-                    "in 48 hours; accuracy measured on a public test set.",
+        description="Screen company and vessel names against ten public sanctions lists. You get a report "
+                    "in 48 hours. We measure accuracy on a public test set.",
         app="Crusetra Screening",
         app_desc="A sanctions-screening audit: which way of comparing names, and where you "
                  "set the bar, measured on your own alert history. ",
