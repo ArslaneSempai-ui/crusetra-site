@@ -290,7 +290,7 @@ JS = r'''<script>
 '''
 
 PAGE = f'''<!doctype html><html lang="en">
-<meta charset="utf-8"><title>Crusetra &#183; pricing</title>
+<meta charset="utf-8"><title>Pricing: sanctions screening reports and audits | Crusetra</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Crusetra: what an engagement buys">
