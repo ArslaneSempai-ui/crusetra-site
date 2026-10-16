@@ -836,6 +836,11 @@ CSS = '''
   .hero .vers-rapport:hover,.hero .vers-rapport:focus-visible{color:var(--vert-clair);border-color:var(--vert-clair)}
   .hero .vers-rapport span{display:inline-block;transition:transform .3s var(--montee)}.hero .vers-rapport:hover span{transform:translateY(3px)}
   @media (max-width:980px){.rapport .r-grille{grid-template-columns:minmax(0,1fr) minmax(0,300px);gap:44px}}
+  /* 16/10 : the two-card pricing block (Screening) went to one column at 760 px only, so at 768 px (a tablet held
+     upright; 820 and 834 are no better) each card's list items were 270 px wide, 35 % of the screen, and the
+     collapse witness (temoin-effondrement.mjs: 45 % for a block of fifteen words or more) refused. Same single
+     column as the three-card block above 1060 px, kept narrow enough to read. */
+  @media (max-width:900px){.rapport .r-cols{grid-template-columns:minmax(0,1fr);gap:108px;max-width:560px;margin-inline:auto}}
   @media (max-width:760px){.rapport{padding:84px 0 96px}
     .rapport .r-grille{grid-template-columns:minmax(0,1fr);gap:56px}
     .rapport .r-feuille{position:static;max-width:420px;margin:0 auto}
