@@ -1792,10 +1792,10 @@ def batir_accueil():
     acc_champ = re.sub(r"<[^>]+>", "", SCENES[0]["a"])
     acc_fichier = re.sub(r"<[^>]+>", "", SCENES[0]["b"])
     moins_cher = re.sub(r"<[^>]+>", "", SCENES[1]["b"])   # 04/10 : le chiffre, avec son hypothèse dans le dt ; la cote dit l'hypothèse
-    description = ("Crusetra: five instruments, one method. Each tier measured on our public test set, "
-                   "the best trade-off read with its interval, rerun on your machine.")
+    description = ("Sanctions screening, transaction monitoring, risk scoring and extraction audits, each measured "
+                   "on a public test set and rerun on your machine.")
     page = f'''<!doctype html><html lang="en">
-<meta charset="utf-8"><title>Crusetra &#183; measured instruments for compliance</title>
+<meta charset="utf-8"><title>Crusetra &#183; sanctions screening and compliance audits</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Crusetra: {n} instruments, one method">
@@ -1960,10 +1960,10 @@ SPECS = {
         etats=ETATS_PREFIXE["screening"],
         alt_plateau="The sieve tower",
         palette=PALETTE_RUBIS, nuit=NUIT_RUBIS,
-        titre="Crusetra Screening &#183; sanctions screening audit",
+        titre="Sanctions screening against ten lists, measured | Crusetra",
         og_titre="Crusetra Screening: which way of comparing names, and where to set the bar",
-        description="A sanctions-screening audit: which way of comparing names, and where you set "
-                    "the bar, measured on your own alert history.",
+        description="Screen company and vessel names against ten public sanctions lists. A sealed report "
+                    "in 48 hours; accuracy measured on a public test set.",
         app="Crusetra Screening",
         app_desc="A sanctions-screening audit: which way of comparing names, and where you "
                  "set the bar, measured on your own alert history. ",
