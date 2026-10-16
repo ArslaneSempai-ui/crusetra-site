@@ -85,13 +85,13 @@
     },
     {
       "html": "ANALYSE-OFAC-2026-07-14.html",
-      "titre_onglet": "Crusetra &#183; OFAC&#8217;s July 14 shipping sanctions: name variants",
+      "titre_onglet": "OFAC's July 14 shipping sanctions: name variants | Crusetra",
       "fno": "Analysis &#183; 9 October 2026",
       "retour_href": "screening/index.html",
       "retour_texte": "&#8592; Back to Screening",
       "titre": "Name variants to catch in OFAC's July 14 shipping sanctions",
       "lede": "On July 14, 2026, OFAC sanctioned a group of container lines, ship owners and freight firms. If one of these names appears in a file you screen, it may be spelled differently, because shipping papers pass through many hands. Here are the variants we found, and how our screening tool handled them.",
-      "description": "On July 14, 2026, OFAC sanctioned container lines, ship owners and freight firms tied to the Shamkhani network. The name variants in OFAC's own documents, and how our screening tool handled 103 of these names.",
+      "description": "OFAC's July 14, 2026 shipping sanctions: the name variants in its own documents. Our tool found the right entry as a strong match for 96 of 102 names.",
       "sections": [
         {
           "h2": "What OFAC listed",
