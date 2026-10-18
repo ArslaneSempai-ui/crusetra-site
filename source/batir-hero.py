@@ -1714,6 +1714,18 @@ assert "—" not in PAGE, "un cadratin s'est glissé dans la page"
 print("HERO.html", f"{len(PAGE) / 1e3:.0f} ko")
 
 
+# 18/10 (Sunday review, chosen by Arslane): the Screening offer in one line, in the bar that stays at the top of the home page.
+# It is one more row of the bar, so it follows the bar's two states (on the night hero, then on the paper) and never overlaps it.
+CSS_BANDEAU = '''
+  .barre.avec-bandeau{flex-wrap:wrap;row-gap:2px}
+  .bandeau-offre{order:-1;flex:1 0 100%;margin:-4px 0 0;text-align:center;font-size:13.5px;line-height:1.45;color:var(--demi)}
+  .bandeau-offre b{font-weight:600;color:var(--encre)}
+  .bandeau-offre a{color:inherit;text-underline-offset:2px}
+  .barre.sur-nuit .bandeau-offre{color:var(--sur-vert-pale)}
+  .barre.sur-nuit .bandeau-offre b{color:var(--sur-vert)}
+'''
+
+
 def batir_accueil():
     """LA PAGE DE LA MARQUE, à la racine (décision A d'Arslane, 6/09) : un héros court
     qui pose la question commune aux instruments, puis le rideau à pans FERMÉS, puis
@@ -1799,6 +1811,10 @@ def batir_accueil():
     moins_cher = re.sub(r"<[^>]+>", "", SCENES[1]["b"])   # 04/10 : le chiffre, avec son hypothèse dans le dt ; la cote dit l'hypothèse
     description = ("Sanctions screening, transaction monitoring, risk scoring and extraction audits, each measured "
                    "on a public test set and rerun on your machine.")
+    # the banner's every figure and the mail are read from the grid of the pricing page (offre-screening.json), none is typed
+    offre_a = json.loads((BASE / "offre-screening.json").read_text())
+    bandeau = (f'Send a list of up to {offre_a["rapport"]["noms"]:,} names, get a sealed screening report in '
+               f'{offre_a["delai_heures"]} hours for <b>${offre_a["rapport"]["prix_usd"]:,}</b>.')
     page = f'''<!doctype html><html lang="en">
 <meta charset="utf-8"><title>Crusetra &#183; sanctions screening and compliance audits</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1814,8 +1830,9 @@ def batir_accueil():
 <link rel="stylesheet" href="fontes/roboto-mono.css">
 <script type="application/ld+json">{donnees}</script>
 <script>document.documentElement.classList.add("js")</script>
-<style>{CSS}{CSS_ACCUEIL}{CSS_PIED_SITE}.methode{{{tokens_papier}}}</style>
-<header class="barre sur-nuit">
+<style>{CSS}{CSS_ACCUEIL}{CSS_PIED_SITE}{CSS_BANDEAU}.methode{{{tokens_papier}}}</style>
+<header class="barre sur-nuit avec-bandeau">
+  <p class="bandeau-offre">{bandeau} <a href="mailto:{offre_a["contact"]}">{offre_a["contact"]}</a></p>
   <a class="marque" href="ACCUEIL.html">CRUSETRA</a>
   <nav aria-label="Site">
     {chr(10).join(f'    <a href="{o["page_hero"]}">{o["nom"]}</a>' for o in vivants).lstrip()}
