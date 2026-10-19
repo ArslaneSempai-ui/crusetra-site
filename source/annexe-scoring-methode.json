@@ -37,7 +37,7 @@
             "n": "the assumption tests check source and bounds"
           }
         ],
-        "refs": "src/assumptions.ts:81 &#183; src/assumptions.ts:113"
+        "refs": "src/assumptions.ts:83 &#183; src/assumptions.ts:115"
       }
     },
     {
@@ -72,7 +72,7 @@
             "n": "the interval, score-bound and refusal tests run with the rest"
           }
         ],
-        "refs": "src/interval.ts:102 &#183; src/facteur.ts:55 &#183; src/facteur.ts:56"
+        "refs": "src/interval.ts:102 &#183; src/facteur.ts:95 &#183; src/facteur.ts:96"
       }
     }
   ]
