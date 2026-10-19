@@ -37,7 +37,8 @@ DEPOTS = {"routing": "crusetra-routing", "screening": "crusetra-screening",
           "dossier": "crusetra-dossier"}
 DEPOT_SITE = "crusetra-site"   # the site's own repository, under its GitHub name (the local folder keeps cascade-site)
 ORGANISATION = {"@type": "Organization", "@id": f"{SITE_URL}#org", "name": "Crusetra",
-                "url": SITE_URL, "logo": f"{SITE_URL}og.png", "email": CONTACT}
+                "url": SITE_URL, "logo": f"{SITE_URL}apple-touch-icon.png", "email": CONTACT,
+                "sameAs": ["https://www.linkedin.com/company/crusetra/"]}
 # The films shown on the site, by file name in source/films (10 October 2026, Arslane: "vas y fais le").
 # Routing, Dossier and Screening are re-voiced as Crusetra; Monitoring, Scoring and the Routing demo still say
 # "Cascade" and stay hidden (unlinked) until they are remade. A demo shows only when "<tool>-demo" is listed.
