@@ -1735,7 +1735,9 @@ def batir_accueil():
     outils, chacun sous son sceau."""
     vivants = outils_vivants()
     n = NOMBRES.get(len(vivants), str(len(vivants)))
-    graphe = [ORGANISATION]
+    graphe = [ORGANISATION,
+              {"@type": "WebSite", "@id": f"{SITE_URL}#site", "url": SITE_URL, "name": "Crusetra",
+               "inLanguage": "en", "publisher": {"@id": ORGANISATION["@id"]}}]
     for o in vivants:
         graphe.append({"@type": "SoftwareApplication", "name": f"Crusetra {o['nom']}",
                        "url": f"{SITE_URL}{o['sous_dossier']}",
