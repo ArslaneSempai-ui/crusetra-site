@@ -1642,11 +1642,11 @@ PAGE = f'''<!doctype html><html lang="en">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Crusetra: Routing, the extraction cost audit">
-<meta property="og:description" content="Which engine each field of your documents needs: measured on our public test set and on 100 real receipts, rerun on your machine. Nothing reaches us unless you send it.">
+<meta property="og:description" content="Which engine each field of your documents needs, measured on our public test set and on 100 real receipts, rerun on your machine.">
 <meta property="og:url" content="{SITE_URL}routing/">
 <meta property="og:image" content="{SITE_URL}og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="description" content="Which engine each field of your documents needs: measured on our public test set and on 100 real receipts, rerun on your machine. Nothing reaches us unless you send it.">
+<meta name="description" content="Which engine each field of your documents needs, measured on our public test set and on 100 real receipts, rerun on your machine.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M0 0h16L0 16z' fill='%2314251e'/%3E%3Cpath d='M16 0v16H0z' fill='%2323543f'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="fontes/literata.css">
 <link rel="stylesheet" href="fontes/roboto-mono.css">
@@ -2087,7 +2087,7 @@ SPECS = {
         titre="Crusetra Dossier &#183; the assembled audit trail",
         og_titre="Crusetra Dossier: is the whole chain measured, sealed and fresh",
         description="One dossier over the suite&#8217;s four sealed answers: coverage, seals, "
-                    "signatures, freshness and coherence, verified on your machine. ",
+                    "signatures, freshness and coherence, verified on your machine.",
         app="Crusetra Dossier",
         app_desc="One dossier over the suite&#8217;s four sealed answers: coverage, "
                  "seals, signatures, freshness and coherence, verified on your "
