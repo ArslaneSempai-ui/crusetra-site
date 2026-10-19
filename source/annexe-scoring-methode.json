@@ -72,7 +72,7 @@
             "n": "the interval, score-bound and refusal tests run with the rest"
           }
         ],
-        "refs": "src/interval.ts:102 &#183; src/facteur.ts:95 &#183; src/facteur.ts:96"
+        "refs": "src/interval.ts:102 &#183; src/facteur.ts:55 &#183; src/facteur.ts:56"
       }
     }
   ]
