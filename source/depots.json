@@ -1,0 +1,8 @@
+{
+  "_": "The tool repositories the site reads. chemin is relative to the home folder; ref is what the checkout's HEAD must equal (depots.py refuses otherwise). Override paths on one machine in depots.local.json (gitignored), never here.",
+  "routing": {"chemin": "Documents/cascade", "ref": "origin/main"},
+  "screening": {"chemin": "Documents/cascade-screening", "ref": "origin/main"},
+  "monitoring": {"chemin": "Documents/cascade-monitoring", "ref": "origin/main"},
+  "scoring": {"chemin": "Documents/cascade-scoring", "ref": "origin/main"},
+  "dossier": {"chemin": "Documents/cascade-dossier", "ref": "origin/main"}
+}

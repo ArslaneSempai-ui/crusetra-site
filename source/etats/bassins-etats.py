@@ -53,7 +53,7 @@ from outil import OUTILS, lire_releve_scelle      # noqa: E402
 
 SKILL = os.path.join(os.path.expanduser("~"), ".claude", "skills", "design-arslane")
 HDRI = os.path.join(SKILL, "assets", "hdri")
-DEPOT_BLEU = os.path.join(os.path.expanduser("~"), "Documents", "cascade-monitoring")
+DEPOT_BLEU = str(OUTILS["monitoring"]["outil_chemin"])   # depots.json / depots.local.json
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--etat", type=int, required=True, choices=[1, 2, 3, 4, 5])

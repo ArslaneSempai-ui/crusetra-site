@@ -7,9 +7,11 @@ record), and source/rendus/rapport-routing.webp (page 1). The assembler refuses 
 the record."""
 import json, pathlib, subprocess, sys
 BASE = pathlib.Path(__file__).parent
-MAISON = pathlib.Path.home() / "Documents"
+import depots
+MAISON = pathlib.Path.home() / "Documents"   # the private tooling (portes), not a tool repo
+ROUTING = depots.chemin("routing")   # HEAD on its configured ref (depots.json)
 # the public copy once PR #10 is merged into main; until then, the identical private copy (same seal, checked below)
-PUBLIC = MAISON / "cascade" / "examples" / "cord-receipts" / "cord-labels-grouped-measured.json"
+PUBLIC = ROUTING / "examples" / "cord-receipts" / "cord-labels-grouped-measured.json"
 PRIVE = MAISON / "cascade-portes" / "routing" / "cord-labels-grouped-measured.json"
 RECORD = PUBLIC if PUBLIC.exists() else PRIVE
 RENDU = MAISON / "cascade-portes" / "outils" / "rapport-routing.py"
@@ -24,7 +26,7 @@ subprocess.run([sys.executable, str(RENDU), str(RECORD), str(tmp), "--data", DAT
                 "--fontes", "../fontes", "--client", f"Sample: {json.loads(RECORD.read_text())['source']['cases']} receipts of the CORD v2 test split"], check=True, capture_output=True)
 SIGNE = BASE / "rapports" / "routing-sample-report.html"
 subprocess.run(["node", str(MAISON / "cascade-portes" / "outils" / "signer-rapport.mjs"), str(tmp), str(SIGNE)], check=True)
-VERIF = subprocess.run(["node", str(MAISON / "cascade" / "src" / "verifier-rapport.mjs"), str(SIGNE)], capture_output=True, text=True)
+VERIF = subprocess.run(["node", str(ROUTING / "src" / "verifier-rapport.mjs"), str(SIGNE)], capture_output=True, text=True)
 if VERIF.returncode != 0 or "Signature valid" not in VERIF.stdout:
     sys.exit(f"the signed sample report does not verify:\n{VERIF.stdout}{VERIF.stderr}")
 pdf, webp = BASE / "rapports" / "routing-sample-report.pdf", BASE / "rendus" / "rapport-routing.webp"

@@ -16,8 +16,9 @@ PDF renders), the sidecar .json (both seals, dates, counts read from the records
 (page 1). The assembler refuses a sidecar whose seals no longer match the records."""
 import json, pathlib, shutil, subprocess, sys
 BASE = pathlib.Path(__file__).parent
-MAISON = pathlib.Path.home() / "Documents"
-RECORD = MAISON / "cascade-screening" / "exemple" / "contreparties-exemple.screening.json"
+import depots
+MAISON = pathlib.Path.home() / "Documents"   # the private tooling (portes, equipe), not a tool repo
+RECORD = depots.chemin("screening") / "exemple" / "contreparties-exemple.screening.json"
 RENDU = MAISON / "cascade-portes" / "outils" / "rapport.py"
 PDF_MJS = MAISON / "equipe-cascade" / "pieces" / "pdf.mjs"
 d = json.loads(RECORD.read_text())

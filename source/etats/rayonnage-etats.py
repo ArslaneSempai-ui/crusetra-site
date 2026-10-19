@@ -51,7 +51,7 @@ from outil import OUTILS, lire_releve_scelle      # noqa: E402
 from scene_commune import Scene, matiere, boite, cylindre, boite_du_sujet  # noqa: E402, boite_des
 from scene_commune import boite_des  # noqa: E402 — les cibles nommées (9/09)
 
-DEPOT = os.path.join(os.path.expanduser("~"), "Documents", "cascade-scoring")
+DEPOT = str(OUTILS["scoring"]["outil_chemin"])   # depots.json / depots.local.json
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--etat", type=int, required=True, choices=[1, 2, 3, 4, 5])

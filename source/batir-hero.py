@@ -31,7 +31,8 @@ import re
 import sys
 
 BASE = pathlib.Path(__file__).parent
-OUTIL = pathlib.Path.home() / "Documents" / "cascade"
+import depots
+OUTIL = depots.chemin("routing")   # HEAD on its configured ref, or a named refusal
 
 # ── les sources, avec témoins : pas de source, pas de page ───────────────────
 if not (OUTIL / "landing.json").exists():
@@ -1496,7 +1497,7 @@ def _section_rapport_routing():
     relevé, ou si un prix du JSON ne se lit pas dans la section."""
     off = json.loads((BASE / "offre-routing.json").read_text())
     ex = json.loads((BASE / "rapports" / "routing-sample-report.json").read_text())
-    pub = pathlib.Path.home() / "Documents" / ex["source"]
+    pub = depots.resoudre(ex["source"])
     rec_p = pub if pub.exists() else pathlib.Path.home() / "Documents" / "cascade-portes" / "routing" / "cord-labels-grouped-measured.json"
     rec = json.loads(rec_p.read_text())
     if rec["empreinte"] != ex["sceau"]:
@@ -1539,7 +1540,7 @@ def _section_rapport_routing():
     # --exact), le fichier -with-text.csv que les outils de texte écrivent, tessdata -- --prime une fois (tailles lues dans le
     # manifeste du dépôt, src/tessdata.ts, jamais tapées), la voie des exports bruts, Node 24, la liste à virgules, et « not
     # signed » (le relevé porte une empreinte de contenu ; c'est la page du rapport qui n'est pas signée).
-    _tess = (pathlib.Path.home() / "Documents" / "cascade" / "src" / "tessdata.ts").read_text()
+    _tess = (OUTIL / "src" / "tessdata.ts").read_text()
     _octets = [int(x.replace("_", "")) for x in re.findall(r"octets:\s*([\d_]+)", _tess)]
     if len(_octets) < 2:
         sys.exit("src/tessdata.ts du dépôt cascade ne porte plus les tailles des deux fichiers de langue : le pas 1 ne peut pas les citer")
@@ -2361,7 +2362,7 @@ def _section_rapport(o):
         return ""
     off = json.loads((BASE / "offre-screening.json").read_text())
     ex = json.loads((BASE / "rapports" / "screening-sample-report.json").read_text())
-    rec = json.loads((pathlib.Path.home() / "Documents" / ex["source"]).read_text())
+    rec = json.loads(depots.resoudre(ex["source"]).read_text())
     if rec["empreinte"] != ex["sceau"]:
         sys.exit(f"le rapport exemple porte le scellé {ex['sceau']} mais le relevé public porte {rec['empreinte']} : "
                  "relancer batir-rapport-exemple.py")

@@ -73,7 +73,9 @@ if fautes:
 
 # le dépôt s'écrit relatif à la maison (~) : le site promet le caviardage des chemins
 # locaux et sa garde de poussée refuse un /Users/… dans un fichier publié
-depot_public = "~/" + str(depot.relative_to(pathlib.Path.home()))
+# the tracked default path (depots.json), not the machine's override: the published text must not change with depots.local.json
+import depots  # noqa: E402
+depot_public = "~/" + json.loads(depots.DEFAUT.read_text())[outil_id]["chemin"]
 (ICI / SORTIE[outil_id]).write_text(json.dumps({
     "_": (f"Pour chaque « Where it lives » des pages {outil_id} : le contenu EXACT de la "
           f"ligne visée dans {depot_public}. La garde de assembler.py refuse de bâtir si une "

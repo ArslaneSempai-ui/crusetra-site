@@ -31,6 +31,10 @@ SITE = MAQ.parent
 DOCS = SITE / "docs"
 sys.path.insert(0, str(MAQ))
 from outil import SITE_URL as BASE_URL, CONTACT, GITHUB, DEPOT_SITE, depot_url  # written once, in outil.py
+# THE TOOL REPOSITORIES, GUARDED FIRST (depots.json, depots.local.json): every repo the build reads must
+# have its HEAD on its configured ref (origin/main) before a single count or cited line is taken from it.
+import depots
+_DEPOTS = depots.garder_tous()
 # Le chemin sous lequel le site est servi se déduit de l'URL : « /cascade-site/ »
 # aujourd'hui, « / » le jour du domaine propre. Trois usages en dépendent (la
 # base de la 404, l'icône tactile, le contrôle de liens) : ils lisent tous ICI.
@@ -776,7 +780,7 @@ _signe = MAQ / "rapports" / "routing-sample-report.html"
 if not _signe.exists():
     sys.exit("source/rapports/routing-sample-report.html absent : relancer batir-rapport-routing.py (la page signée)")
 shutil.copy(_signe, DOCS / "rapports" / _signe.name)
-_v = subprocess.run(["node", str(pathlib.Path.home() / "Documents" / "cascade" / "src" / "verifier-rapport.mjs"), str(DOCS / "rapports" / _signe.name)],
+_v = subprocess.run(["node", str(_DEPOTS["routing"]["chemin"] / "src" / "verifier-rapport.mjs"), str(DOCS / "rapports" / _signe.name)],
                     capture_output=True, text=True)
 if _v.returncode != 0 or "Signature valid" not in _v.stdout:
     sys.exit(f"la page signée SERVIE ne vérifie pas :\n{_v.stdout}{_v.stderr}")
@@ -795,7 +799,7 @@ print("  " + _v.stdout.strip().splitlines()[0].strip() + " (routing-sample-repor
 # quotes that signed file, never a renamed version of it. rapport-exemple.html was signed on 3 September and says
 # « cascade's own held-out corpus »; the FAQ had turned it into « Crusetra's ». The signed file cannot be re-signed to
 # follow the brand, so the page follows the file (or says « our own », which names nobody).
-_exemple_signe = (pathlib.Path.home() / "Documents" / "cascade" / "rapport-exemple.html").read_text()
+_exemple_signe = (_DEPOTS["routing"]["chemin"] / "rapport-exemple.html").read_text()
 def _corpus_mal_cite(texte):
     import html as _h
     return [m.group(0) for m in re.finditer(r"\b[A-Z][\w-]*['\u2019]s own (?:synthetic )?held-out corpus", _h.unescape(texte))
@@ -990,6 +994,8 @@ def verifier_comptes(pages, depot, etiquette):
         return
     comptes = {n for n, _ in publie}
     fichiers = {f for _, f in publie if f}
+    if depot.exists():
+        depots.garder(etiquette, ("README.md",), _DEPOTS)
     if not depot.exists():
         print(f"  ! compte de tests {etiquette} NON VÉRIFIÉ : {depot} absent : "
               f"le site publie {sorted(comptes)} / {sorted(fichiers)}")
@@ -1006,15 +1012,15 @@ def verifier_comptes(pages, depot, etiquette):
     print(f"  compte de tests {etiquette} vérifié : {vrai_n} tests")
 
 verifier_comptes(sorted(DOCS.glob("*.html")) + sorted((DOCS / "routing").glob("*.html")),
-                 pathlib.Path.home() / "Documents" / "cascade" / "README.md", "routing")
+                 _DEPOTS["routing"]["chemin"] / "README.md", "routing")
 verifier_comptes(sorted((DOCS / "screening").glob("*.html")) if (DOCS / "screening").exists() else [],
-                 pathlib.Path.home() / "Documents" / "cascade-screening" / "README.md", "screening")
+                 _DEPOTS["screening"]["chemin"] / "README.md", "screening")
 verifier_comptes(sorted((DOCS / "monitoring").glob("*.html")) if (DOCS / "monitoring").exists() else [],
-                 pathlib.Path.home() / "Documents" / "cascade-monitoring" / "README.md", "monitoring")
+                 _DEPOTS["monitoring"]["chemin"] / "README.md", "monitoring")
 verifier_comptes(sorted((DOCS / "scoring").glob("*.html")) if (DOCS / "scoring").exists() else [],
-                 pathlib.Path.home() / "Documents" / "cascade-scoring" / "README.md", "scoring")
+                 _DEPOTS["scoring"]["chemin"] / "README.md", "scoring")
 verifier_comptes(sorted((DOCS / "dossier").glob("*.html")) if (DOCS / "dossier").exists() else [],
-                 pathlib.Path.home() / "Documents" / "cascade-dossier" / "README.md", "dossier")
+                 _DEPOTS["dossier"]["chemin"] / "README.md", "dossier")
 
 # ── la garde des citations : « Where it lives » doit encore dire vrai ────────
 # Le site invite un relecteur bancaire à OUVRIR chaque chemin. Une citation qui
@@ -1038,6 +1044,7 @@ def verifier_citations(pages, ancres_fichier, outil, etiquette):
     if not outil.exists():
         print(f"  ! citations {etiquette} NON VÉRIFIÉES : {outil} absent : {len(citees)} citées")
         return
+    depots.garder(etiquette, sorted({c.rsplit(":", 1)[0] for c in citees}), _DEPOTS)
     ancres = _json.loads(ancres_fichier.read_text())["ancres"]
     fautes = []
     for c in sorted(citees):
@@ -1063,19 +1070,19 @@ def verifier_citations(pages, ancres_fichier, outil, etiquette):
 
 verifier_citations(sorted(DOCS.glob("*.html")) + sorted((DOCS / "routing").glob("*.html")),
                    MAQ / "ancres-citations.json",
-                   pathlib.Path.home() / "Documents" / "cascade", "routing")
+                   _DEPOTS["routing"]["chemin"], "routing")
 verifier_citations(sorted((DOCS / "screening").glob("*.html")) if (DOCS / "screening").exists() else [],
                    MAQ / "ancres-citations-screening.json",
-                   pathlib.Path.home() / "Documents" / "cascade-screening", "screening")
+                   _DEPOTS["screening"]["chemin"], "screening")
 verifier_citations(sorted((DOCS / "monitoring").glob("*.html")) if (DOCS / "monitoring").exists() else [],
                    MAQ / "ancres-citations-monitoring.json",
-                   pathlib.Path.home() / "Documents" / "cascade-monitoring", "monitoring")
+                   _DEPOTS["monitoring"]["chemin"], "monitoring")
 verifier_citations(sorted((DOCS / "scoring").glob("*.html")) if (DOCS / "scoring").exists() else [],
                    MAQ / "ancres-citations-scoring.json",
-                   pathlib.Path.home() / "Documents" / "cascade-scoring", "scoring")
+                   _DEPOTS["scoring"]["chemin"], "scoring")
 verifier_citations(sorted((DOCS / "dossier").glob("*.html")) if (DOCS / "dossier").exists() else [],
                    MAQ / "ancres-citations-dossier.json",
-                   pathlib.Path.home() / "Documents" / "cascade-dossier", "dossier")
+                   _DEPOTS["dossier"]["chemin"], "dossier")
 
 # ── la garde de la voix (VOIX.md) : la copy SERVIE, motif par motif ──────────
 # Témoin planté d'abord, comme pour les liens : une page zz aux restes bannis DOIT
