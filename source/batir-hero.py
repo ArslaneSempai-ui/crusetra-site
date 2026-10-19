@@ -1603,6 +1603,7 @@ def _section_rapport_routing():
     <span class="fl" aria-hidden="true">&#8594;</span></a></div>
   {essai}
   <p class="liens"><a class="lien-e" href="{pdf}" download>Download the sample report <span aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{signe}">Verify the signed report <span aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{exemple}">See the labels, the OCR text and the vendor outputs <span aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{releve}">Open the sealed record <span aria-hidden="true">&#8594;</span></a></p>
+  <p class="r-note">The repository history was rewritten on 19 October 2026 to remove internal files: the commit cited in the signed report, 7e82950, is now 4e39242, and the code it measured is unchanged.</p>
 </div></section>
 <script>
 (() => {{
