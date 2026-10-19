@@ -37,6 +37,8 @@ mkdir -p "$(dirname "$JOURNAL")" 2>/dev/null
 # un chemin de session avec le nom de l'utilisateur, dans un script de source/. Retirer
 # le fichier de HEAD ne le retire pas des objets : ce qui part ne revient pas. Le
 # contrôle porte donc sur ce qui PARTIRAIT, pas sur l'arbre de travail.
+PORTEES=$(mktemp)
+cat > "$PORTEES"
 while read -r ref_local sha_local ref_dist sha_dist; do
   [ "$sha_local" = "0000000000000000000000000000000000000000" ] && continue
   case "$sha_dist" in
@@ -59,7 +61,16 @@ while read -r ref_local sha_local ref_dist sha_dist; do
     echo "  → git push --no-verify   passe outre, et publie. Il n'y a pas de retour." >&2
     exit 1
   fi
-done
+done < "$PORTEES"
+
+# Pre-push gate (behind base, README figures, the CI suite). The script path comes from this
+# clone's local git config (`git config crusetra.avantpush <path>`); unset means skip, so CI and
+# other machines are unaffected. A push that only deletes refs has nothing to prove.
+AVANT_PUSH=$(git config --get crusetra.avantpush 2>/dev/null)
+if [ -n "$AVANT_PUSH" ] && { grep -qv '^[^ ]* 0\{40,64\} ' "$PORTEES" || [ ! -s "$PORTEES" ]; }; then
+  node "$AVANT_PUSH" "$(git rev-parse --show-toplevel)" "${AVANT_PUSH_BASE:-origin/main}" || { rm -f "$PORTEES"; exit 1; }
+fi
+rm -f "$PORTEES"
 
 # ─── POUSSER DEMANDE L'ACCORD D'ARSLANE, À CHAQUE FOIS ───
 #
