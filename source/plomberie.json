@@ -96,7 +96,7 @@
         {
           "h2": "What OFAC listed",
           "html": [
-            "<p>That day OFAC <a href=\"https://ofac.treasury.gov/recent-actions/20260714\">added 54 entries to its Specially Designated Nationals List (SDN List)</a>, covering 10 people, 24 companies and 20 ships. Treasury's <a href=\"https://home.treasury.gov/news/press-releases/sb0562\">press release</a> ties them to the shipping network of [name removed], which it calls \"a major force behind Iran's oil exports.\"</p>",
+            "<p>That day OFAC <a href=\"https://ofac.treasury.gov/recent-actions/20260714\">added 54 entries to its Specially Designated Nationals List (SDN List)</a>, covering 10 people, 24 companies and 20 ships. Treasury's <a href=\"https://home.treasury.gov/news/press-releases/sb0562\">press release</a> ties them to an Iranian shipping network, which it calls \"a major force behind Iran's oil exports.\"</p>",
             "<p>The release names Sea Lead Shipping PTE. Ltd. of Singapore and three of its subsidiaries. Sea Lead managed and operated three ships that OFAC lists as container ships. Treasury also says a We Freight group provided \"transportation intermediary services\" to the network's container shipping. A <a href=\"https://ofac.treasury.gov/media/932746/download?inline\">2024 note from Treasury, Commerce and Justice</a> explains that OFAC can fine a firm under US jurisdiction even if it did not know, or have reason to know, that a deal was prohibited.</p>"
           ]
         },
