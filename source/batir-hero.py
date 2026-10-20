@@ -31,7 +31,8 @@ import re
 import sys
 
 BASE = pathlib.Path(__file__).parent
-OUTIL = pathlib.Path.home() / "Documents" / "cascade"
+import depots
+OUTIL = depots.chemin("routing")   # HEAD on its configured ref, or a named refusal
 
 # ── les sources, avec témoins : pas de source, pas de page ───────────────────
 if not (OUTIL / "landing.json").exists():
@@ -836,6 +837,11 @@ CSS = '''
   .hero .vers-rapport:hover,.hero .vers-rapport:focus-visible{color:var(--vert-clair);border-color:var(--vert-clair)}
   .hero .vers-rapport span{display:inline-block;transition:transform .3s var(--montee)}.hero .vers-rapport:hover span{transform:translateY(3px)}
   @media (max-width:980px){.rapport .r-grille{grid-template-columns:minmax(0,1fr) minmax(0,300px);gap:44px}}
+  /* 16/10 : the two-card pricing block (Screening) went to one column at 760 px only, so at 768 px (a tablet held
+     upright; 820 and 834 are no better) each card's list items were 270 px wide, 35 % of the screen, and the
+     collapse witness (temoin-effondrement.mjs: 45 % for a block of fifteen words or more) refused. Same single
+     column as the three-card block above 1060 px, kept narrow enough to read. */
+  @media (max-width:900px){.rapport .r-cols{grid-template-columns:minmax(0,1fr);gap:108px;max-width:560px;margin-inline:auto}}
   @media (max-width:760px){.rapport{padding:84px 0 96px}
     .rapport .r-grille{grid-template-columns:minmax(0,1fr);gap:56px}
     .rapport .r-feuille{position:static;max-width:420px;margin:0 auto}
@@ -1491,7 +1497,7 @@ def _section_rapport_routing():
     relevé, ou si un prix du JSON ne se lit pas dans la section."""
     off = json.loads((BASE / "offre-routing.json").read_text())
     ex = json.loads((BASE / "rapports" / "routing-sample-report.json").read_text())
-    pub = pathlib.Path.home() / "Documents" / ex["source"]
+    pub = depots.resoudre(ex["source"])
     rec_p = pub if pub.exists() else pathlib.Path.home() / "Documents" / "cascade-portes" / "routing" / "cord-labels-grouped-measured.json"
     rec = json.loads(rec_p.read_text())
     if rec["empreinte"] != ex["sceau"]:
@@ -1534,7 +1540,7 @@ def _section_rapport_routing():
     # --exact), le fichier -with-text.csv que les outils de texte écrivent, tessdata -- --prime une fois (tailles lues dans le
     # manifeste du dépôt, src/tessdata.ts, jamais tapées), la voie des exports bruts, Node 24, la liste à virgules, et « not
     # signed » (le relevé porte une empreinte de contenu ; c'est la page du rapport qui n'est pas signée).
-    _tess = (pathlib.Path.home() / "Documents" / "cascade" / "src" / "tessdata.ts").read_text()
+    _tess = (OUTIL / "src" / "tessdata.ts").read_text()
     _octets = [int(x.replace("_", "")) for x in re.findall(r"octets:\s*([\d_]+)", _tess)]
     if len(_octets) < 2:
         sys.exit("src/tessdata.ts du dépôt cascade ne porte plus les tailles des deux fichiers de langue : le pas 1 ne peut pas les citer")
@@ -1598,6 +1604,7 @@ def _section_rapport_routing():
     <span class="fl" aria-hidden="true">&#8594;</span></a></div>
   {essai}
   <p class="liens"><a class="lien-e" href="{pdf}" download>Download the sample report <span aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{signe}">Verify the signed report <span aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{exemple}">See the labels, the OCR text and the vendor outputs <span aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{releve}">Open the sealed record <span aria-hidden="true">&#8594;</span></a></p>
+  <p class="r-note">The repository history was rewritten on 19 October 2026 to remove internal files: the commit cited in the signed report, 7e82950, is now 4e39242, and the code it measured is unchanged.</p>
 </div></section>
 <script>
 (() => {{
@@ -1635,11 +1642,11 @@ PAGE = f'''<!doctype html><html lang="en">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Crusetra: Routing, the extraction cost audit">
-<meta property="og:description" content="Which engine each field of your documents needs: measured on our public test set and on 100 real receipts, rerun on your machine. Nothing reaches us unless you send it.">
+<meta property="og:description" content="Which engine each field of your documents needs, measured on our public test set and on 100 real receipts, rerun on your machine.">
 <meta property="og:url" content="{SITE_URL}routing/">
 <meta property="og:image" content="{SITE_URL}og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="description" content="Which engine each field of your documents needs: measured on our public test set and on 100 real receipts, rerun on your machine. Nothing reaches us unless you send it.">
+<meta name="description" content="Which engine each field of your documents needs, measured on our public test set and on 100 real receipts, rerun on your machine.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M0 0h16L0 16z' fill='%2314251e'/%3E%3Cpath d='M16 0v16H0z' fill='%2323543f'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="fontes/literata.css">
 <link rel="stylesheet" href="fontes/roboto-mono.css">
@@ -1709,6 +1716,18 @@ assert "—" not in PAGE, "un cadratin s'est glissé dans la page"
 print("HERO.html", f"{len(PAGE) / 1e3:.0f} ko")
 
 
+# 18/10 (Sunday review, chosen by Arslane): the Screening offer in one line, in the bar that stays at the top of the home page.
+# It is one more row of the bar, so it follows the bar's two states (on the night hero, then on the paper) and never overlaps it.
+CSS_BANDEAU = '''
+  .barre.avec-bandeau{flex-wrap:wrap;row-gap:2px}
+  .bandeau-offre{order:-1;flex:1 0 100%;margin:-4px 0 0;text-align:center;font-size:13.5px;line-height:1.45;color:var(--demi)}
+  .bandeau-offre b{font-weight:600;color:var(--encre)}
+  .bandeau-offre a{color:inherit;text-underline-offset:2px}
+  .barre.sur-nuit .bandeau-offre{color:var(--sur-vert-pale)}
+  .barre.sur-nuit .bandeau-offre b{color:var(--sur-vert)}
+'''
+
+
 def batir_accueil():
     """LA PAGE DE LA MARQUE, à la racine (décision A d'Arslane, 6/09) : un héros court
     qui pose la question commune aux instruments, puis le rideau à pans FERMÉS, puis
@@ -1716,7 +1735,9 @@ def batir_accueil():
     outils, chacun sous son sceau."""
     vivants = outils_vivants()
     n = NOMBRES.get(len(vivants), str(len(vivants)))
-    graphe = [ORGANISATION]
+    graphe = [ORGANISATION,
+              {"@type": "WebSite", "@id": f"{SITE_URL}#site", "url": SITE_URL, "name": "Crusetra",
+               "inLanguage": "en", "publisher": {"@id": ORGANISATION["@id"]}}]
     for o in vivants:
         graphe.append({"@type": "SoftwareApplication", "name": f"Crusetra {o['nom']}",
                        "url": f"{SITE_URL}{o['sous_dossier']}",
@@ -1792,10 +1813,14 @@ def batir_accueil():
     acc_champ = re.sub(r"<[^>]+>", "", SCENES[0]["a"])
     acc_fichier = re.sub(r"<[^>]+>", "", SCENES[0]["b"])
     moins_cher = re.sub(r"<[^>]+>", "", SCENES[1]["b"])   # 04/10 : le chiffre, avec son hypothèse dans le dt ; la cote dit l'hypothèse
-    description = ("Crusetra: five instruments, one method. Each tier measured on our public test set, "
-                   "the best trade-off read with its interval, rerun on your machine.")
+    description = ("Sanctions screening, transaction monitoring, risk scoring and extraction audits, each measured "
+                   "on a public test set and rerun on your machine.")
+    # the banner's every figure and the mail are read from the grid of the pricing page (offre-screening.json), none is typed
+    offre_a = json.loads((BASE / "offre-screening.json").read_text())
+    bandeau = (f'Send a list of up to {offre_a["rapport"]["noms"]:,} names, get a sealed screening report in '
+               f'{offre_a["delai_heures"]} hours for <b>${offre_a["rapport"]["prix_usd"]:,}</b>.')
     page = f'''<!doctype html><html lang="en">
-<meta charset="utf-8"><title>Crusetra &#183; measured instruments for compliance</title>
+<meta charset="utf-8"><title>Crusetra &#183; sanctions screening and compliance audits</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Crusetra: {n} instruments, one method">
@@ -1809,8 +1834,9 @@ def batir_accueil():
 <link rel="stylesheet" href="fontes/roboto-mono.css">
 <script type="application/ld+json">{donnees}</script>
 <script>document.documentElement.classList.add("js")</script>
-<style>{CSS}{CSS_ACCUEIL}{CSS_PIED_SITE}.methode{{{tokens_papier}}}</style>
-<header class="barre sur-nuit">
+<style>{CSS}{CSS_ACCUEIL}{CSS_PIED_SITE}{CSS_BANDEAU}.methode{{{tokens_papier}}}</style>
+<header class="barre sur-nuit avec-bandeau">
+  <p class="bandeau-offre">{bandeau} <a href="mailto:{offre_a["contact"]}">{offre_a["contact"]}</a></p>
   <a class="marque" href="ACCUEIL.html">CRUSETRA</a>
   <nav aria-label="Site">
     {chr(10).join(f'    <a href="{o["page_hero"]}">{o["nom"]}</a>' for o in vivants).lstrip()}
@@ -1960,10 +1986,10 @@ SPECS = {
         etats=ETATS_PREFIXE["screening"],
         alt_plateau="The sieve tower",
         palette=PALETTE_RUBIS, nuit=NUIT_RUBIS,
-        titre="Crusetra Screening &#183; sanctions screening audit",
+        titre="Sanctions screening against ten lists, measured | Crusetra",
         og_titre="Crusetra Screening: which way of comparing names, and where to set the bar",
-        description="A sanctions-screening audit: which way of comparing names, and where you set "
-                    "the bar, measured on your own alert history.",
+        description="Screen company and vessel names against ten public sanctions lists. You get a report "
+                    "in 48 hours. We measure accuracy on a public test set.",
         app="Crusetra Screening",
         app_desc="A sanctions-screening audit: which way of comparing names, and where you "
                  "set the bar, measured on your own alert history. ",
@@ -2061,7 +2087,7 @@ SPECS = {
         titre="Crusetra Dossier &#183; the assembled audit trail",
         og_titre="Crusetra Dossier: is the whole chain measured, sealed and fresh",
         description="One dossier over the suite&#8217;s four sealed answers: coverage, seals, "
-                    "signatures, freshness and coherence, verified on your machine. ",
+                    "signatures, freshness and coherence, verified on your machine.",
         app="Crusetra Dossier",
         app_desc="One dossier over the suite&#8217;s four sealed answers: coverage, "
                  "seals, signatures, freshness and coherence, verified on your "
@@ -2338,7 +2364,7 @@ def _section_rapport(o):
         return ""
     off = json.loads((BASE / "offre-screening.json").read_text())
     ex = json.loads((BASE / "rapports" / "screening-sample-report.json").read_text())
-    rec = json.loads((pathlib.Path.home() / "Documents" / ex["source"]).read_text())
+    rec = json.loads(depots.resoudre(ex["source"]).read_text())
     if rec["empreinte"] != ex["sceau"]:
         sys.exit(f"le rapport exemple porte le scellé {ex['sceau']} mais le relevé public porte {rec['empreinte']} : "
                  "relancer batir-rapport-exemple.py")

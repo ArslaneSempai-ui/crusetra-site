@@ -12,9 +12,9 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
-import { homedir } from "node:os";
+import { depot } from "./depots.mjs";
 
-const OUTIL = join(homedir(), "Documents", "cascade");
+const OUTIL = depot("routing");
 const ICI = fileURLToPath(new URL(".", import.meta.url));
 
 const { ASSUMPTIONS, pricePerThousandExtractions } = await import(join(OUTIL, "src", "assumptions.ts"));

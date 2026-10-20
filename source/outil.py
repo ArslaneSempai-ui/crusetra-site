@@ -20,7 +20,10 @@ import pathlib
 import re
 import sys
 
-_MAISON = pathlib.Path.home() / "Documents"
+import depots
+
+# the tool repositories come from depots.json / depots.local.json and are refused unless on their ref
+_DEPOTS = depots.garder_tous()
 
 # THE HOUSE ADDRESSES, WRITTEN ONCE (Crusetra, waves 2 and 3, 6 October 2026). The domain was
 # typed on 31 lines in 9 builders, and a rename always missed one. The builders, the assembler
@@ -37,7 +40,8 @@ DEPOTS = {"routing": "crusetra-routing", "screening": "crusetra-screening",
           "dossier": "crusetra-dossier"}
 DEPOT_SITE = "crusetra-site"   # the site's own repository, under its GitHub name (the local folder keeps cascade-site)
 ORGANISATION = {"@type": "Organization", "@id": f"{SITE_URL}#org", "name": "Crusetra",
-                "url": SITE_URL, "logo": f"{SITE_URL}og.png", "email": CONTACT}
+                "url": SITE_URL, "logo": f"{SITE_URL}apple-touch-icon.png", "email": CONTACT,
+                "sameAs": ["https://www.linkedin.com/company/crusetra/"]}
 # The films shown on the site, by file name in source/films (10 October 2026, Arslane: "vas y fais le").
 # Routing, Dossier and Screening are re-voiced as Crusetra; Monitoring, Scoring and the Routing demo still say
 # "Cascade" and stay hidden (unlinked) until they are remade. A demo shows only when "<tool>-demo" is listed.
@@ -142,11 +146,11 @@ OUTILS = {
         "palette": PALETTE_VERTE,
         "favicon_accent": "%2323543f",
         "robots": ("robot-penche.webp", "robot-agrippe.webp"),
-        "releve": _MAISON / "cascade" / "landing.json",     # pas de scellé : garde d'absence seule (historique)
+        "releve": _DEPOTS["routing"]["chemin"] / "landing.json",     # pas de scellé : garde d'absence seule (historique)
         # le RELEVÉ SCELLÉ du vert (son relevé de référence, marqué et re-scellé le 8/09) : la
         # source unique du sceau que les pages vertes citent ; landing.json reste le fichier de chiffres
-        "releve_scelle": _MAISON / "cascade" / "profiles-2026-08-20-coeur-rendu.json",
-        "outil_chemin": _MAISON / "cascade",
+        "releve_scelle": _DEPOTS["routing"]["chemin"] / "profiles-2026-08-20-coeur-rendu.json",
+        "outil_chemin": _DEPOTS["routing"]["chemin"],
         "depot": depot_url("routing"),
         # le rideau (deuxième écran) : ce que le pan de CET outil dit de lui, sur
         # TOUTE page ; ses teintes vivent ici parce que la page rubis aliase la
@@ -172,11 +176,11 @@ OUTILS = {
         "palette": PALETTE_RUBIS,
         "favicon_accent": "%237a1f2e",
         "robots": ("robot-rubis-penche.webp", "robot-rubis-agrippe.webp"),
-        "releve": _MAISON / "cascade-screening" / "releve-public.json",  # scellé, vérifié par lire_releve_scelle
+        "releve": _DEPOTS["screening"]["chemin"] / "releve-public.json",  # scellé, vérifié par lire_releve_scelle
         # le relevé du matcher de sociétés et navires (releve-entites.json, scellé et signé dans l'outil) :
         # la section « Company and vessel names » de la page s'y branche par son scellé, comme le héros
-        "releve_entites": _MAISON / "cascade-screening" / "releve-entites.json",
-        "outil_chemin": _MAISON / "cascade-screening",
+        "releve_entites": _DEPOTS["screening"]["chemin"] / "releve-entites.json",
+        "outil_chemin": _DEPOTS["screening"]["chemin"],
         "depot": depot_url("screening"),
         "page_hero": "HERO-SCREENING.html",
         "etiquette": "Screening &#183; name matching",
@@ -200,8 +204,8 @@ OUTILS = {
         "palette": PALETTE_LAPIS,
         "favicon_accent": "%231f3f7a",
         "robots": ("robot-lapis-penche.webp", "robot-lapis-montre.webp"),
-        "releve": _MAISON / "cascade-monitoring" / "releve-public.json",  # scellé, vérifié par lire_releve_scelle
-        "outil_chemin": _MAISON / "cascade-monitoring",
+        "releve": _DEPOTS["monitoring"]["chemin"] / "releve-public.json",  # scellé, vérifié par lire_releve_scelle
+        "outil_chemin": _DEPOTS["monitoring"]["chemin"],
         # le dépôt n'existe pas encore en ligne : lien mort jusqu'au push d'Arslane,
         # exactement comme le rouge avant le sien
         "depot": depot_url("monitoring"),
@@ -229,8 +233,8 @@ OUTILS = {
         "palette": PALETTE_AMETHYSTE,
         "favicon_accent": "%234b2a7a",
         "robots": ("robot-amethyste-penche.webp", "robot-amethyste-pese.webp"),
-        "releve": _MAISON / "cascade-scoring" / "releve-public.json",   # scellé par le lot A-L4 (à venir) : l'entrée reste gated par manques()
-        "outil_chemin": _MAISON / "cascade-scoring",
+        "releve": _DEPOTS["scoring"]["chemin"] / "releve-public.json",   # scellé par le lot A-L4 (à venir) : l'entrée reste gated par manques()
+        "outil_chemin": _DEPOTS["scoring"]["chemin"],
         "depot": depot_url("scoring"),
         "page_hero": "HERO-SCORING.html",
         "etiquette": "Scoring &#183; risk rating",
@@ -252,8 +256,8 @@ OUTILS = {
         "palette": PALETTE_ONYX,
         "favicon_accent": "%231c1c22",
         "robots": ("robot-onyx-penche.webp", "robot-onyx-tient.webp"),
-        "releve": _MAISON / "cascade-dossier" / "releve-public.json",   # scellé 2497928ec273023c (D1 lu + D2 mesuré)
-        "outil_chemin": _MAISON / "cascade-dossier",
+        "releve": _DEPOTS["dossier"]["chemin"] / "releve-public.json",   # scellé 2497928ec273023c (D1 lu + D2 mesuré)
+        "outil_chemin": _DEPOTS["dossier"]["chemin"],
         "depot": depot_url("dossier"),
         "page_hero": "HERO-DOSSIER.html",
         "etiquette": "Dossier &#183; the audit dossier",

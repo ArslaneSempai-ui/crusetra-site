@@ -72,7 +72,7 @@ if args.demo:
     print("[escalier] DEMO : jeu déclaré, aucune valeur mesurée ; interdit sur le site", flush=True)
 else:
     chemin_releve = args.releve or (OUTILS["dossier"]["releve"] if "dossier" in OUTILS else
-                                    os.path.join(os.path.expanduser("~"), "Documents", "cascade-dossier", "releve-public.json"))
+                                    os.path.join(OUTILS["dossier"]["outil_chemin"], "releve-public.json"))
     R = lire_releve_scelle(os.path.expanduser(str(chemin_releve)))
     # le relevé du Dossier (lot D2) écrit l'état atteint par son NOM : « none » quand aucun
     # contrôle ne tient, sinon le plus haut tenu sans trou ; une question sans rapport n'a

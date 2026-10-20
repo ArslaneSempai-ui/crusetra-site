@@ -18,9 +18,9 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
-import { homedir } from "node:os";
+import { depot } from "./depots.mjs";
 
-const OUTIL = join(homedir(), "Documents", "cascade-dossier");
+const OUTIL = depot("dossier");
 const ICI = fileURLToPath(new URL(".", import.meta.url));
 
 const { scelleIntact } = await import(join(OUTIL, "src", "empreinte.ts"));
