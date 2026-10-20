@@ -836,6 +836,11 @@ CSS = '''
   .hero .vers-rapport:hover,.hero .vers-rapport:focus-visible{color:var(--vert-clair);border-color:var(--vert-clair)}
   .hero .vers-rapport span{display:inline-block;transition:transform .3s var(--montee)}.hero .vers-rapport:hover span{transform:translateY(3px)}
   @media (max-width:980px){.rapport .r-grille{grid-template-columns:minmax(0,1fr) minmax(0,300px);gap:44px}}
+  /* 16/10 : the two-card pricing block (Screening) went to one column at 760 px only, so at 768 px (a tablet held
+     upright; 820 and 834 are no better) each card's list items were 270 px wide, 35 % of the screen, and the
+     collapse witness (temoin-effondrement.mjs: 45 % for a block of fifteen words or more) refused. Same single
+     column as the three-card block above 1060 px, kept narrow enough to read. */
+  @media (max-width:900px){.rapport .r-cols{grid-template-columns:minmax(0,1fr);gap:108px;max-width:560px;margin-inline:auto}}
   @media (max-width:760px){.rapport{padding:84px 0 96px}
     .rapport .r-grille{grid-template-columns:minmax(0,1fr);gap:56px}
     .rapport .r-feuille{position:static;max-width:420px;margin:0 auto}
@@ -1709,6 +1714,18 @@ assert "—" not in PAGE, "un cadratin s'est glissé dans la page"
 print("HERO.html", f"{len(PAGE) / 1e3:.0f} ko")
 
 
+# 18/10 (Sunday review, chosen by Arslane): the Screening offer in one line, in the bar that stays at the top of the home page.
+# It is one more row of the bar, so it follows the bar's two states (on the night hero, then on the paper) and never overlaps it.
+CSS_BANDEAU = '''
+  .barre.avec-bandeau{flex-wrap:wrap;row-gap:2px}
+  .bandeau-offre{order:-1;flex:1 0 100%;margin:-4px 0 0;text-align:center;font-size:13.5px;line-height:1.45;color:var(--demi)}
+  .bandeau-offre b{font-weight:600;color:var(--encre)}
+  .bandeau-offre a{color:inherit;text-underline-offset:2px}
+  .barre.sur-nuit .bandeau-offre{color:var(--sur-vert-pale)}
+  .barre.sur-nuit .bandeau-offre b{color:var(--sur-vert)}
+'''
+
+
 def batir_accueil():
     """LA PAGE DE LA MARQUE, à la racine (décision A d'Arslane, 6/09) : un héros court
     qui pose la question commune aux instruments, puis le rideau à pans FERMÉS, puis
@@ -1792,10 +1809,14 @@ def batir_accueil():
     acc_champ = re.sub(r"<[^>]+>", "", SCENES[0]["a"])
     acc_fichier = re.sub(r"<[^>]+>", "", SCENES[0]["b"])
     moins_cher = re.sub(r"<[^>]+>", "", SCENES[1]["b"])   # 04/10 : le chiffre, avec son hypothèse dans le dt ; la cote dit l'hypothèse
-    description = ("Crusetra: five instruments, one method. Each tier measured on our public test set, "
-                   "the best trade-off read with its interval, rerun on your machine.")
+    description = ("Sanctions screening, transaction monitoring, risk scoring and extraction audits, each measured "
+                   "on a public test set and rerun on your machine.")
+    # the banner's every figure and the mail are read from the grid of the pricing page (offre-screening.json), none is typed
+    offre_a = json.loads((BASE / "offre-screening.json").read_text())
+    bandeau = (f'Send a list of up to {offre_a["rapport"]["noms"]:,} names, get a sealed screening report in '
+               f'{offre_a["delai_heures"]} hours for <b>${offre_a["rapport"]["prix_usd"]:,}</b>.')
     page = f'''<!doctype html><html lang="en">
-<meta charset="utf-8"><title>Crusetra &#183; measured instruments for compliance</title>
+<meta charset="utf-8"><title>Crusetra &#183; sanctions screening and compliance audits</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Crusetra: {n} instruments, one method">
@@ -1809,8 +1830,9 @@ def batir_accueil():
 <link rel="stylesheet" href="fontes/roboto-mono.css">
 <script type="application/ld+json">{donnees}</script>
 <script>document.documentElement.classList.add("js")</script>
-<style>{CSS}{CSS_ACCUEIL}{CSS_PIED_SITE}.methode{{{tokens_papier}}}</style>
-<header class="barre sur-nuit">
+<style>{CSS}{CSS_ACCUEIL}{CSS_PIED_SITE}{CSS_BANDEAU}.methode{{{tokens_papier}}}</style>
+<header class="barre sur-nuit avec-bandeau">
+  <p class="bandeau-offre">{bandeau} <a href="mailto:{offre_a["contact"]}">{offre_a["contact"]}</a></p>
   <a class="marque" href="ACCUEIL.html">CRUSETRA</a>
   <nav aria-label="Site">
     {chr(10).join(f'    <a href="{o["page_hero"]}">{o["nom"]}</a>' for o in vivants).lstrip()}
@@ -1960,10 +1982,10 @@ SPECS = {
         etats=ETATS_PREFIXE["screening"],
         alt_plateau="The sieve tower",
         palette=PALETTE_RUBIS, nuit=NUIT_RUBIS,
-        titre="Crusetra Screening &#183; sanctions screening audit",
+        titre="Sanctions screening against ten lists, measured | Crusetra",
         og_titre="Crusetra Screening: which way of comparing names, and where to set the bar",
-        description="A sanctions-screening audit: which way of comparing names, and where you set "
-                    "the bar, measured on your own alert history.",
+        description="Screen company and vessel names against ten public sanctions lists. You get a report "
+                    "in 48 hours. We measure accuracy on a public test set.",
         app="Crusetra Screening",
         app_desc="A sanctions-screening audit: which way of comparing names, and where you "
                  "set the bar, measured on your own alert history. ",
