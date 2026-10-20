@@ -20,7 +20,7 @@
             "n": "measures your fields and your rules as tiers"
           }
         ],
-        "refs": "src/your-cases.ts:18 &#183; src/your-cases.ts:437"
+        "refs": "src/your-cases.ts:18 &#183; src/your-cases.ts:436"
       }
     },
     {
@@ -60,7 +60,7 @@
             "n": "checks hash and revision before writing"
           }
         ],
-        "refs": "README.md:109 &#183; README.md:120"
+        "refs": "README.md:111 &#183; README.md:122"
       }
     },
     {
@@ -78,7 +78,7 @@
             "n": "fails if a client value reaches the returned file (with the model weights on the machine)"
           }
         ],
-        "refs": "src/crusetra.test.ts:3557 &#183; src/your-cases.ts:1918"
+        "refs": "src/crusetra.test.ts:3557 &#183; src/your-cases.ts:1917"
       }
     },
     {
@@ -103,7 +103,7 @@
             "n": "prints the conclusion from our public test set, with no install"
           }
         ],
-        "refs": "src/premiere-reponse.mjs:10 &#183; README.md:259"
+        "refs": "src/premiere-reponse.mjs:10 &#183; README.md:271"
       }
     },
     {
@@ -116,7 +116,7 @@
     {
       "h2": "&#8220;Why should we believe these figures?&#8221;",
       "html": [
-        "<p>Because they are <b>recomputed, locked by a content hash, signed, and retracted when wrong</b>. The test suite first checks that the README, the record behind the landing page and the validation dossier still match the code. It then runs <b>867 tests across 100 files, counted from the sources</b>. The security and license documents are generated, marked as such, and fail the suite when they drift. Each measurement record carries a content hash, and a hand&#8209;edited one is refused. Reports are signed, the public key lives in the repository, and a script there checks any report against it without depending on us. An example report ships in the repository as <code>rapport-exemple.html</code>, so the check can be run before anything is bought. It was issued with that key on our own held-out corpus, the cases we keep apart for testing.</p>",
+        "<p>Because they are <b>recomputed, locked by a content hash, signed, and retracted when wrong</b>. The test suite first checks that the README, the record behind the landing page and the validation dossier still match the code. It then runs <b>880 tests across 103 files, counted from the sources</b>. The security and license documents are generated, marked as such, and fail the suite when they drift. Each measurement record carries a content hash, and a hand&#8209;edited one is refused. Reports are signed, the public key lives in the repository, and a script there checks any report against it without depending on us. An example report ships in the repository as <code>rapport-exemple.html</code>, so the check can be run before anything is bought. It was issued with that key on our own held-out corpus, the cases we keep apart for testing.</p>",
         "<p>A retraction file lists <b>each published conclusion that turned out to be wrong</b>. The secret sweep goes through 633 commits and looks for 20 forms of secret. It reports 0 undeclared secrets reachable from HEAD, the current state of the repository.</p>"
       ],
       "verif": {
@@ -132,7 +132,7 @@
             "n": "recomputes each published figure against the sources"
           }
         ],
-        "refs": "src/verifier-rapport.mjs:20 &#183; README.md:236"
+        "refs": "src/verifier-rapport.mjs:20 &#183; README.md:238"
       }
     }
   ],

@@ -240,7 +240,7 @@ MENUS = [
     ("securite", "Security &amp; data handling", "Each place the tool touches.", "ANNEXE-SECURITE.html"),
     ("questions", "Questions", "Eight objections a bank's reviewers actually raise.", "ANNEXE-QUESTIONS.html"),
     ("terms", "Terms of engagement", "What the grant allows, for how long, and what a client buys.", "ANNEXE-TERMS.html"),
-    ("privacy", "Privacy", "The tool collects no data. What you send us for a report, and how long it is kept.", "ANNEXE-PRIVACY.html"),
+    ("privacy", "Privacy", "What you send us for a report, what we keep, and for how long.", "ANNEXE-PRIVACY.html"),
     ("accessibilite", "Accessibility", "Usable by keyboard, by screen reader, and with motion turned off.", "ANNEXE-ACCESSIBILITE.html"),
 ]
 
@@ -1823,7 +1823,7 @@ def batir_accueil():
 <section class="hero">
   <div class="hero-grille">
     <div class="hero-texte">
-      <h1 class="h1 entree">Compliance decisions you can prove.</h1>
+      <h1 class="h1 entree">Compliance checks you can show.</h1>
       <p class="lede entree">Crusetra turns compliance decisions into measurable evidence: tested against our public test set, reproducible on your own data, and open to inspection.</p>
       <dl class="ledger entree" aria-label="The routing instrument, in figures">
         <div><dt><i class="pt" aria-hidden="true"></i>routing, mean accuracy per field</dt><dd>{acc_champ}</dd></div>
@@ -2392,7 +2392,7 @@ def _section_rapport(o):
     <h2 class="h2">Send us your list, and within {off["delai_heures"]} hours it comes back screened and sealed.</h2>
     <ol class="r-pas">
       <li><span><b>You send</b> a CSV or a spreadsheet with a column of company and vessel names, and the IMO number of a vessel when you have it.</span></li>
-      <li><span><b>We screen</b> each name against ten public sources: OFAC SDN, the OFAC consolidated (non-SDN) lists, the US Consolidated Screening List (its Commerce and State lists), the UN Security Council list, the EU financial sanctions list, the UK Sanctions List, the vessels the EU designates in Annex XLII of Regulation 833/2014, Australia's DFAT Consolidated List, the Consolidated Canadian Autonomous Sanctions List and New Zealand's Russia Sanctions Register, each as downloaded on the date the report states.</span></li>
+      <li><span><b>We screen</b> each name against ten public sources: OFAC SDN, the OFAC consolidated (non-SDN) lists, the US Consolidated Screening List (its Commerce and State lists), the UN Security Council list, the EU financial sanctions list, the UK Sanctions List, the vessels the EU designates in Annex XLII of Regulation 833/2014, Australia's DFAT Consolidated List, the Consolidated Canadian Autonomous Sanctions List and New Zealand's Russia Sanctions Register, each as downloaded on the date the report states. Crusetra is not affiliated with or endorsed by any of their publishers.</span></li>
       <li><span><b>You receive</b> a PDF, a spreadsheet and the sealed record: each candidate with its list entry and the words that matched, the dates of the lists, and a seal anyone can check with one command, <code>npm run sceller -- &lt;record&gt;.screening.json --check</code>.</span></li>
     </ol>
   </div>
@@ -2417,7 +2417,7 @@ def _section_rapport(o):
         <p class="r-eti">Weekly re-screen</p>
         <p class="r-montant"><span class="r-n" data-v="{rc[0]["prix_usd_mois"]}">{usd(rc[0]["prix_usd_mois"])}</span><small class="r-unite">a month, up to {rc[0]["noms"]:,} names</small></p>
         <p class="r-sous">The same list, screened again each week against the lists of that week.</p>
-        <ul class="r-inclus"><li><b>{SEMAINES}</b> sealed reports a year</li><li>Each report opens with what changed since the last one</li><li>Billed monthly, or yearly with {off["annuel"]}</li><li>Stop any time: it runs to the end of the month or year paid, no refund</li></ul>
+        <ul class="r-inclus"><li><b>{SEMAINES}</b> sealed reports a year</li><li>Each report opens with what changed since the last one</li><li>Billed monthly, or yearly with {off["annuel"]}</li><li>Stop any time: it runs to the end of the period paid, no refund</li></ul>
       </article>
     </div>
     <div class="r-taille">
@@ -2593,7 +2593,7 @@ def batir_outil_catalogue(o, spec):
         (*spec["annexe_securite"], is_ + iq2),
         ("Terms of engagement", "What the grant allows, for how long, and what a client buys.",
          lien(o, "ANNEXE-TERMS.html"), _icone_tuile(o, spec, "terms")[0] + _icone_tuile(o, spec, "terms")[1]),
-        ("Privacy", "The tool collects no data. What you send us for a report, and how long it is kept.",
+        ("Privacy", "What you send us for a report, what we keep, and for how long.",
          lien(o, "ANNEXE-PRIVACY.html"), _icone_tuile(o, spec, "privacy")[0] + _icone_tuile(o, spec, "privacy")[1]),
         ("Accessibility", "Usable by keyboard, by screen reader, and with motion turned off.",
          lien(o, "ANNEXE-ACCESSIBILITE.html"), _icone_tuile(o, spec, "accessibilite")[0] + _icone_tuile(o, spec, "accessibilite")[1]),

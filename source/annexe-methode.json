@@ -43,7 +43,7 @@
             "n": "measures your reviewers: accuracy per field, agreement between them, seconds per record"
           }
         ],
-        "refs": "src/optimise.ts:379 &#183; src/readme.ts:849"
+        "refs": "src/optimise.ts:379 &#183; src/readme.ts:851"
       }
     },
     {
@@ -127,7 +127,7 @@
             "n": "measures fresh records against the frozen baseline, gives one answer per field, and hashes the new report"
           }
         ],
-        "refs": "src/measure.ts:946 &#183; src/your-cases.ts:1901"
+        "refs": "src/measure.ts:946 &#183; src/your-cases.ts:1900"
       }
     }
   ],

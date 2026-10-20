@@ -2,8 +2,8 @@
   "_": "Contenu de la page Privacy. Faits de la passe du 31 août 2026 (tasks/w7nrsoqna.output). Chaque limite déclarée par le dépôt est reprise à côté du mécanisme (le test des fetch par motif, l'échantillonnage plancher, la liste de racines du caviardage, les binaires natifs non-greppables).",
   "objet": "rendus/etats/objet-privacy.webp",
   "titre": "Where your data can and cannot go, item by item.",
-  "lede": "Here is where your data can reach and where it cannot. It covers the tests that keep the network shut, the folder that never enters a repository, the scrubbing on what travels, and each mechanism's limit. Each limit listed here is one the source itself states. The last section says what you send us when you order a report, and how long it is kept.",
-  "description": "An inventory of the tests that keep the network shut, the folder no repository sees, the scrubbing on what travels, and the limit of each; then what you send us for a report, and how long it is kept.",
+  "lede": "Here is where your data can reach and where it cannot. The first sections cover the tools you run yourself: the tests that keep the network shut, the folder that never enters a repository, the scrubbing on what travels, and each mechanism's limit. Each limit listed there is one the source itself states. The sections after them cover what reaches us: who we are, what we hold about clients, site visitors and people we write to first, why, for how long, who handles it for us, and how to use your rights.",
+  "description": "What the tools keep on your machine, and what reaches us: who we are, what we hold about clients, visitors and people we write to, why, for how long, who handles it, and your rights.",
   "sections": [
     {
       "h2": "No telemetry, and a test enforces it",
@@ -13,14 +13,14 @@
       ],
       "verif": {
         "t": "Verify the allow-list test",
-        "p": "The suite fails if any source file gains a network destination outside the list of two entries.",
+        "p": "The suite fails if any source file gains a network destination outside the list of three entries.",
         "cmd": [
           {
             "c": "npm test",
             "n": "fails on any new outbound destination"
           }
         ],
-        "refs": "src/crusetra.test.ts:1066 &#183; src/crusetra.test.ts:1095"
+        "refs": "src/crusetra.test.ts:1066 &#183; src/crusetra.test.ts:1094"
       }
     },
     {
@@ -80,12 +80,64 @@
       ]
     },
     {
+      "h2": "Who is responsible, and how to reach us",
+      "html": [
+        "<p><b>HS Industries LLC</b>, a Wyoming limited liability company (file no. 2026-002073840), decides why and how the personal data described below is used: it is the controller. Its postal address is 1550 Wilson Blvd, Ste 700 PMB 599, Arlington, VA 22209, USA. For any question or request about your data, write to <a href=\"mailto:contact@crusetra.com\">contact@crusetra.com</a>.</p>"
+      ]
+    },
+    {
       "h2": "What you send us for a report",
       "html": [
         "<p>Two services run on our side, and for them you do send us something. For a <b>Screening report</b>, you email a list of company and vessel names, with the IMO number of a vessel when you have it: a CSV, a spreadsheet, or names in the body of the mail. For a <b>Routing free test</b>, you email the measured record the tool wrote beside your CSV, the file ending in <code>-measured.json</code>: counts, a right, wrong or blank verdict per case and field, your file's name and its SHA-256 hash, and the prices and volume you declared. In both cases nothing else is asked for, and no document of yours is.</p>",
-        "<p>What we receive is used for that report and for nothing else. Once the report is sent, your file and the mails that carried it go to the trash and are permanently deleted within 30 days. A weekly re-screen subscriber's list is kept for the re-screen and goes the same way when the paid period ends.</p>",
-        "<p>When you pay, the payment runs through <b>Stripe</b>, which processes it for HS Industries LLC. The checkout asks for your email, your company name and your billing address, and a tax ID if you want it on the invoice. Stripe keeps your card details: we see the card brand and its last four digits, never the full number. We use these details to invoice you and for our accounts.</p>",
-        "<p><b>HS Industries LLC</b> is responsible for this processing. Write to <a href=\"mailto:contact@crusetra.com\">contact@crusetra.com</a> to ask what we hold about you, to have it deleted earlier, or to object.</p>"
+        "<p><b>Why, and on what basis.</b> We use what you send, and your email address, only to produce the report or test you asked for. The basis is the contract, or the steps you asked us to take before one (UK and EU GDPR, Art. 6(1)(b)).</p>",
+        "<p><b>How long.</b> Once the report is sent, your file and the mails that carried it go to the trash and are deleted within 30 days of going there. A weekly re-screen subscriber's list is kept for the re-screen and goes the same way when the paid period ends.</p>"
+      ]
+    },
+    {
+      "h2": "When you buy",
+      "html": [
+        "<p>When you pay by card, the payment runs through <b>Stripe</b>, which processes it for HS Industries LLC. The checkout asks for your email, your company name and your billing address, and a tax ID if you want it on the invoice. Stripe keeps your card details: we see the card brand and its last four digits, never the full number. When you pay an invoice by bank transfer, our bank, <b>Mercury</b>, sees the payer's name and account. We keep your name, email, company, billing address, invoices, payments and any signed engagement letter.</p>",
+        "<p><b>Why, and on what basis.</b> To deliver what you bought and invoice you, under the contract (Art. 6(1)(b)); to keep our accounts, on our legitimate interest in meeting US tax and accounting rules (Art. 6(1)(f)).</p>",
+        "<p><b>How long.</b> Invoices, payment records and signed letters: as long as US tax and accounting rules require. Other mails about an order go the same way as the files you send for a report.</p>"
+      ]
+    },
+    {
+      "h2": "Visiting this site",
+      "html": [
+        "<p>This site sets <b>no cookies</b> and runs no analytics, tracking or forms. It is static files served by <b>GitHub Pages</b>. Like any web host, GitHub receives your IP address and browser details when you load a page and keeps them in its own logs, under its own privacy statement; we do not see those logs. If you arrive through an older address of ours, <b>Cloudflare</b> handles the redirect and sees the same details. The basis is our legitimate interest in serving the site and keeping it secure (Art. 6(1)(f)). GitHub and Cloudflare keep those logs under their own rules.</p>"
+      ]
+    },
+    {
+      "h2": "If we wrote to you first",
+      "html": [
+        "<p>We write to people at companies that may need what we make: customs brokers, ocean freight forwarders and NVOCCs, payment and crypto firms, and companies that read receipts and invoices at volume. If you got a mail from us before you ever wrote to us, this is what we hold and why.</p>",
+        "<ul><li><b>Where we got your address.</b> From a public source: the company's entry in a public register (the US Customs and Border Protection list of permitted customs brokers, or the Federal Maritime Commission list of licensed ocean transportation intermediaries), or the company's own website. We buy no address lists and use no people&#8209;search tools.</li><li><b>What we hold.</b> Your work email address; your name and job title when the source gives them; your company's name, city and phone; the page where we found the address; one line on what the company does; our mails and your replies.</li><li><b>Why, and on what basis.</b> To offer you a service that fits your work, on our legitimate interest in offering our services to businesses (Art. 6(1)(f)). We weighed it against yours: we write only to work addresses that a company or a public register published, about your job, three times at most (a first mail and two short follow&#8209;ups), with no tracking pixel and no tracked link, and we stop when you ask.</li><li><b>How long.</b> 12 months after our last mail if you do not reply. If you ask us to stop, we keep only your address, on a stop list, so that we never write to it again.</li><li><b>Your right to object.</b> You can object to these mails at any time, without giving a reason. Reply &#8220;stop&#8221; to any of our mails or write to <a href=\"mailto:contact@crusetra.com\">contact@crusetra.com</a>. We stop within 10 business days at the latest.</li></ul>"
+      ]
+    },
+    {
+      "h2": "Who handles it for us",
+      "html": [
+        "<ul><li><b>Proton</b> (Switzerland): our mailbox. Your mails, attached lists, and the invoices and letters we send.</li><li><b>Stripe</b> (United States): card payments.</li><li><b>Mercury</b> (United States): our bank, for payments by transfer.</li><li><b>GitHub</b> (United States): hosts this site and our public code. No client or prospect list is ever put there.</li><li><b>Cloudflare</b> (United States): our domain names, and the redirect from older addresses.</li><li><b>Apple iCloud</b> (United States): a dated backup of our client register, invoices and signed letters.</li><li><b>Anthropic</b> (United States): the AI assistant we work with can read mail excerpts and, when a report is prepared, the names you sent and the report. The screening itself runs offline on our own machine.</li><li><b>Google Gmail</b> (United States): an earlier mailbox that sent some first mails in September 2026 and receives the replies to them.</li></ul>",
+        "<p>We sell no personal data. We disclose it to an authority only where the law requires it.</p>"
+      ]
+    },
+    {
+      "h2": "Transfers to the United States",
+      "html": [
+        "<p>HS Industries LLC is in the United States, and so are most of the providers above (Proton is in Switzerland). If you are in the United Kingdom or the European Economic Area, your data is therefore handled in the United States, whose law may not protect it as UK or EU law does.</p>"
+      ]
+    },
+    {
+      "h2": "Your rights",
+      "html": [
+        "<p>Under UK and EU data protection law you can ask us for a copy of what we hold about you, and ask us to correct it, delete it, limit its use, or send it to you in a portable form. You can object to any use based on our legitimate interest, and to direct marketing <b>at any time</b>, without giving a reason: we then stop. Write to <a href=\"mailto:contact@crusetra.com\">contact@crusetra.com</a> or to the postal address above. We answer within one month.</p>",
+        "<p>You can also complain to a data protection authority: in the United Kingdom, the Information Commissioner's Office (ico.org.uk); in the EU, the authority of the country where you live or work.</p>"
+      ]
+    },
+    {
+      "h2": "This page",
+      "html": [
+        "<p>Version 2026-10-21. This version adds who is responsible, the basis and retention for each use, who handles your data, the transfer to the United States, the notice for people we write to first, and your rights.</p>"
       ]
     }
   ],

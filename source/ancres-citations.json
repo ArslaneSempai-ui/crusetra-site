@@ -1,18 +1,18 @@
 {
   "_": "Pour chaque « Where it lives » des pages routing : le contenu EXACT de la ligne visée dans ~/Documents/cascade. La garde de assembler.py refuse de bâtir si une citation ne pointe plus dessus. Régénérer avec ancrer-citations.py APRÈS un changement volontaire de l'outil, jamais pour faire taire la garde.",
   "ancres": {
-    "README.md:109": "Every file is checked against its SHA-256 and against the revision this repository pins,",
-    "README.md:120": "Under that flag the library is told not to reach the network at all. If a model is missing it",
-    "README.md:236": "A vendor bills per page, once, whatever the number of fields taken from it, so the audit",
-    "README.md:259": "| [`rules-example.json`](rules-example.json) | an example `--rules` file for `measure:yours`: one regular expression per column of your CSV, the whole match is the value; copy it, keep the columns you have |",
+    "README.md:111": "Every file is checked against its SHA-256 and against the revision this repository pins,",
+    "README.md:122": "Under that flag the library is told not to reach the network at all. If a model is missing it",
+    "README.md:238": "A vendor bills per page, once, whatever the number of fields taken from it, so the audit",
+    "README.md:271": "| [`rules-example.json`](rules-example.json) | an example `--rules` file for `measure:yours`: one regular expression per column of your CSV, the whole match is the value; copy it, keep the columns you have |",
     "VALIDATION.md:28": "**This file does not certify anything.** It assembles what a reviewer needs in order to",
     "contrainte.json:34": "\"msMedianeNonTransportableFamineMemoire\": 235,",
     "egress.json:12": "\"verdict\": \"no connection observed for the whole pass\",",
-    "package.json:60": "\"engines\": {",
+    "package.json:62": "\"engines\": {",
     "rapports/2026-08-22-contrainte-de-sortie.md:17": "**Every count is identical to the digit across both passes. Every duration moved,",
     "src/corpus.ts:164": "export type Split = \"training\" | \"dev\" | \"heldout\";",
     "src/crusetra.test.ts:1066": "const SORTIES_AUTORISEES = [",
-    "src/crusetra.test.ts:1095": "/*",
+    "src/crusetra.test.ts:1094": "test(\"aucun appel sortant n'a été ajouté hors de la liste\", () => {",
     "src/crusetra.test.ts:3557": "*/",
     "src/crusetra.test.ts:48": "test(\"les trois moitiés du corpus ne partagent aucune formulation\", () => {",
     "src/egress.ts:343": "return a.includes(\"/\") && !a.startsWith(\"src/\") ? \"<file>\" : a;",
@@ -26,7 +26,7 @@
     "src/poids.test.ts:129": "test(\"hors ligne, un modèle absent est refusé AVANT tout téléchargement, avec sa sortie\", () => {",
     "src/poids.ts:68": "return createHash(\"sha256\").update(readFileSync(chemin)).digest(\"hex\");",
     "src/premiere-reponse.mjs:10": "* Ce fichier n'a AUCUNE dépendance. Il lit les relevés scellés livrés avec le dépôt et rend",
-    "src/readme.ts:849": "compte se calcule donc ici, là où le profil existe, et ne peut plus vieillir",
+    "src/readme.ts:851": "compte se calcule donc ici, là où le profil existe, et ne peut plus vieillir",
     "src/sceller.ts:13": "* CE QUE POSER UN SCELLÉ VEUT DIRE, ET IL FAUT QUE CE SOIT DÉSAGRÉABLE À LIRE : vous",
     "src/server.ts:530": "const venueDAilleurs = origineEtrangere(req);",
     "src/server.ts:728": "serveur.listen(PORT, \"127.0.0.1\", () => {",
@@ -35,9 +35,9 @@
     "src/verifier-rapport.mjs:13": "* Un rapport qui affirme sa propre authenticité n'affirme rien. La vérification doit pouvoir",
     "src/verifier-rapport.mjs:20": "*     node src/verifier-rapport.mjs <rapport.html>",
     "src/your-cases.ts:18": "* is a field to extract**, named by its header. Three columns of expected answers means",
-    "src/your-cases.ts:1901": "npm run measure:yours -- --cases=your-file.csv [--rules=rules.json] [--sorties=a.json --sorties=b.json] [--llm]",
-    "src/your-cases.ts:1918": "--sorties  a JSON of the OUTCOMES your own chain was graded to, never the values it",
-    "src/your-cases.ts:2476": "* compare cas par cas et ne recommande qu'à l'intérieur d'une marge déclarée.",
-    "src/your-cases.ts:437": "return q.provenance === \"deduite\" ? `What is the ${nomSur(champ)}?` : q.texte;"
+    "src/your-cases.ts:1900": "npm run measure:yours -- --cases=your-file.csv [--rules=rules.json] [--sorties=a.json --sorties=b.json] [--llm]",
+    "src/your-cases.ts:1917": "--sorties  a JSON of the OUTCOMES your own chain was graded to, never the values it",
+    "src/your-cases.ts:2475": "* compare cas par cas et ne recommande qu'à l'intérieur d'une marge déclarée.",
+    "src/your-cases.ts:436": "return q.provenance === \"deduite\" ? `What is the ${nomSur(champ)}?` : q.texte;"
   }
 }
