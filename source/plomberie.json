@@ -72,7 +72,7 @@
         {
           "h2": "What this site does to visitors: nothing",
           "html": [
-            "<p><b>No cookies, no analytics, no tracking, no forms.</b> The scripts on this site do two things only. The main screen keeps its animation and the browser tab title in step with each other. The appendix pages open their sections when you print. You can switch the scripts off and the site still works. Each number shown here has a stated source, and the file that states each source is public, next to this page: <a href=\"releve.json\"><b>releve.json</b></a>. Those numbers come from our public test set, a file we froze. A content hash is a code that identifies a file by its contents. The one in the masthead, the band at the top of the page, is the content hash of that frozen file.</p>"
+            "<p><b>No cookies, no analytics, no tracking, no forms.</b> GitHub, which serves it, keeps its own access logs: see <a href=\"privacy.html\">Privacy</a>. The scripts on this site do two things only. The main screen keeps its animation and the browser tab title in step with each other. The appendix pages open their sections when you print. You can switch the scripts off and the site still works. Each number shown here has a stated source, and the file that states each source is public, next to this page: <a href=\"releve.json\"><b>releve.json</b></a>. Those numbers come from our public test set, a file we froze. A content hash is a code that identifies a file by its contents. The one in the masthead, the band at the top of the page, is the content hash of that frozen file.</p>"
           ]
         },
         {
