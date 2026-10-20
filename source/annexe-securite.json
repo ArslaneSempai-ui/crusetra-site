@@ -55,7 +55,7 @@
             "n": "prints your Node version, to compare with the minimum above"
           }
         ],
-        "refs": "package.json:60 &#183; src/tiers.ts:295"
+        "refs": "package.json:62 &#183; src/tiers.ts:295"
       }
     },
     {
@@ -98,7 +98,7 @@
       "html": [
         "<p>The tool <b>watches itself run</b>. It samples open connections during a measurement and publishes what it saw. That record states its own limit. Sampling can catch a connection that was open. <b>It cannot prove that none was.</b> The guarantee on this page is the guarded code path and the test that checks it. The observation does not carry that guarantee.</p>",
         "<p>A content hash cannot promise <b>permanence</b> either. A public record that carries its content hash proves what was measured on that day's cases and nothing beyond them. <code>recertify</code> measures again on fresh records, flags drift in the input, says for each field whether the result holds or moved, and re&#8209;computes the report's content hash. It runs on the validity period you declare, every ninety days by default.</p>",
-        "<p>The figures on this page are checked the same way as the rest of this site. The sentence <b>867 tests across 100 files</b> is generated from the sources and re&#8209;checked on each test run, so a stale figure cannot pass unnoticed.</p>"
+        "<p>The figures on this page are checked the same way as the rest of this site. The sentence <b>878 tests across 102 files</b> is generated from the sources and re&#8209;checked on each test run, so a stale figure cannot pass unnoticed.</p>"
       ],
       "verif": {
         "t": "Measure the drift",
