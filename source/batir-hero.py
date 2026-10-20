@@ -2417,7 +2417,7 @@ def _section_rapport(o):
         <p class="r-eti">Weekly re-screen</p>
         <p class="r-montant"><span class="r-n" data-v="{rc[0]["prix_usd_mois"]}">{usd(rc[0]["prix_usd_mois"])}</span><small class="r-unite">a month, up to {rc[0]["noms"]:,} names</small></p>
         <p class="r-sous">The same list, screened again each week against the lists of that week.</p>
-        <ul class="r-inclus"><li><b>{SEMAINES}</b> sealed reports a year</li><li>Each report opens with what changed since the last one</li><li>Billed monthly, or yearly with {off["annuel"]}</li><li>Stop any time: it runs to the end of the month or year paid, no refund</li></ul>
+        <ul class="r-inclus"><li><b>{SEMAINES}</b> sealed reports a year</li><li>Each report opens with what changed since the last one</li><li>Billed monthly, or yearly with {off["annuel"]}</li><li>Stop any time: it runs to the end of the period paid, no refund</li></ul>
       </article>
     </div>
     <div class="r-taille">

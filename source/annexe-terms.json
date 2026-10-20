@@ -2,7 +2,7 @@
   "_": "Contenu de la page Terms of Engagement. Faits de la passe du 31 août 2026 (tasks/w7nrsoqna.output). Interdits par cette passe : citer entre guillemets une clause « a report can conclude change nothing » (n'existe pas mot pour mot : les trois équivalents citables sont utilisés à la place) ; citer la propriété du rapport comme un fait de dépôt (tranchée le 28/08 mais documentée dans le dépôt privé : à énoncer comme engagement, sans citation).",
   "objet": "rendus/etats/objet-terms.webp",
   "titre": "What the license grants, and for how long.",
-  "lede": "The terms below are short because they are real. They cover the thirty-day grant, the four tiers of the extraction cost audit, the public license, and the deliverable. A thirty-day grant is written into the license file, anyone can read the public license, and anyone can verify a deliverable. We also commit that the answer may go against us and recommend that you keep what you have. Where a term lives in the source, this page gives its path.",
+  "lede": "The terms below are short because they are real. They cover the thirty-day grant, the four tiers of the extraction cost audit, the public license, the deliverable, and the limits we accept. A thirty-day grant is written into the license file, anyone can read the public license, and anyone can verify a deliverable. We also commit that the answer may go against us and recommend that you keep what you have. Where a term lives in the source, this page gives its path.",
   "description": "A thirty-day grant written into the license file, a public license anyone can read, a deliverable anyone can verify, and the path to each term.",
   "sections": [
     {
@@ -36,6 +36,15 @@
       ]
     },
     {
+      "h2": "What a screening report is not",
+      "html": [
+        "<p><b>A screening aid, not a clearance.</b> The Screening report and the weekly re-screen are a screening aid. They list names on your list that may match an entry on a public sanctions list, for your compliance officer to check. A report is not a legal clearance, a sanctions determination, a compliance opinion or legal advice. It does not decide, and it does not screen who owns or controls a party.</p>",
+        "<p><b>No candidate does not mean not sanctioned.</b> A name that comes back with no candidate is not cleared. We measure what the matcher misses and publish it: in our own test of 4 October 2026, 151 of 469 spelling variants of real company names (GLEIF register), about a third (32 percent), were missed even at the possible level, and a name written very differently from its list entry can get through. A vessel sent without its IMO number can be missed if it was renamed.</p>",
+        "<p><b>Results depend on the list dates.</b> Each report states the date on which each of the ten sources it used was downloaded. A result holds only for the lists as they stood on those dates. A designation, a change or a removal published after them is not in that report; on a weekly re-screen it appears in the next report.</p>",
+        "<p><b>Your decisions stay yours.</b> You remain responsible for your own compliance decisions: whether to deal with a party, which further checks to run, and what to report to any authority.</p>"
+      ]
+    },
+    {
       "h2": "How the three levels of the license work",
       "html": [
         "<p>The public license is <b>PolyForm Noncommercial</b>. Under it, anyone may read, study, fork (copy the source) and use the tool for noncommercial purposes, with no time limit. An organization that evaluates the tool gets the thirty days above. A client gets a negotiated commercial license. The public license itself states that <b>it is not what a client buys</b>.</p>",
@@ -57,7 +66,7 @@
             "n": "the conclusion, with what would reverse it"
           }
         ],
-        "refs": "src/your-cases.ts:2476 &#183; VALIDATION.md:28"
+        "refs": "src/your-cases.ts:2475 &#183; VALIDATION.md:28"
       }
     },
     {
@@ -79,9 +88,20 @@
       }
     },
     {
+      "h2": "Liability, law, and who we sell to",
+      "html": [
+        "<p><b>Business customers only.</b> Every service on this page is sold only to businesses and other organizations, for their trade, business or profession, and never to consumers.</p>",
+        "<p><b>Limitation of liability.</b> To the extent the law allows, the total liability of HS Industries LLC for any claim arising from a service is limited to the fees you paid for that service in the 12 months before the claim. This applies to every service on this page: the Routing Snapshot, Audit and Quarterly audit, the Screening report and weekly re-screen, the campaign and the license. A free test is given as is, at no charge, and to the extent the law allows HS Industries LLC accepts no liability for it.</p>",
+        "<p><b>No indirect damages.</b> HS Industries LLC is not liable for indirect, incidental, special or consequential damages, including lost profits, lost business, fines or penalties imposed on you, or the cost of a decision you made on a report.</p>",
+        "<p><b>Fraud and willful misconduct.</b> The limits above do not apply to fraud or willful misconduct, or where the law does not allow them.</p>",
+        "<p><b>Law and courts.</b> These terms, and every order under them, are governed by the law of the State of Wyoming, without regard to its conflict-of-laws rules. Any dispute goes to the state or federal courts located in Wyoming, and both parties accept their jurisdiction. The seller is <b>HS Industries LLC</b>, a Wyoming limited liability company, file no. 2026-002073840. Where an engagement letter differs from this page, the letter governs.</p>",
+        "<p>This section is version 2026-10-21. An order is governed by the version in force on the date it was accepted.</p>"
+      ]
+    },
+    {
       "h2": "Settled before signature",
       "html": [
-        "<p>The payment schedule above applies to every engagement and subscription. The remaining terms of a paid engagement (when and how each invoice is paid, confidentiality, audit rights, change of control, precedence, and the rights in the produced report) are settled in the engagement letter, <b>written before signature, with no renegotiation after delivery</b>. They are business terms, so this page names them without quoting them. The letter is the document your counsel receives.</p>",
+        "<p>The payment schedule above applies to every engagement and subscription. The Screening report and the weekly re-screen use a one-page letter that you accept before we start; it repeats the limits above. The remaining terms of a paid engagement (when and how each invoice is paid, confidentiality, audit rights, change of control, precedence, and the rights in the produced report) are settled in the engagement letter, <b>written before signature, with no renegotiation after delivery</b>. They are business terms, so this page names them without quoting them. The letter is the document your counsel receives.</p>",
         "<p>One rule from the public license already binds the evaluation period. The output of an evaluation run is <b>internal to your organization</b>. External publication is excluded from the first day.</p>"
       ]
     }

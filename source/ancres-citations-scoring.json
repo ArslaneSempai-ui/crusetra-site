@@ -1,8 +1,8 @@
 {
   "_": "Pour chaque « Where it lives » des pages scoring : le contenu EXACT de la ligne visée dans ~/Documents/cascade-scoring. La garde de assembler.py refuse de bâtir si une citation ne pointe plus dessus. Régénérer avec ancrer-citations.py APRÈS un changement volontaire de l'outil, jamais pour faire taire la garde.",
   "ancres": {
-    "src/assumptions.ts:113": "export const TABLES_STATUS: Record<keyof Tables, Provenance> = {",
-    "src/assumptions.ts:81": "export const TABLES: Tables = {",
+    "src/assumptions.ts:115": "export const TABLES_STATUS: Record<keyof Tables, Provenance> = {",
+    "src/assumptions.ts:83": "export const TABLES: Tables = {",
     "src/dossier.ts:11": "* le rapport n'en cite que le verdict, par review_id.",
     "src/dossiers-etiquetes.json:2": "\"_\": \"The authored half of the amethyst (Scoring) public record: dossiers written family by family, each with its declared nature and a one-sentence reason. No real person, no real company, and no official risk list copied: countries are plausible ISO codes spread across ordinary jurisdictions, and every risk-bearing fact lives in the dossier's own declared fields (opaqueJurisdiction, ownershipLayers, ratios), never in a country name. The set earns its keep through the twins: domestic-sme mirrors shell-layers with every layer named, local-shop mirrors cash-intensive with turnover on its declaration, salaried mirrors undeclared-turnover at ratio one, retiree mirrors pep-relative without the flag, foreign-student mirrors remote-newcomer-burst at stipend scale, seasonal-exporter mirrors offshore-structure without the opacity. What separates each twin is in the fields, never only in the label, and a test pins it structurally.\",",
     "src/dossiers-etiquetes.test.ts:65": "test(\"aucune liste officielle recopiée : les faits de risque vivent dans les champs, pas dans les pays\", () => {",
