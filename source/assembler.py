@@ -744,6 +744,8 @@ for w in (MAQ / "fontes").glob("literata-*.woff2"):
     shutil.copy(w, DOCS / "fontes" / w.name)
 shutil.copy(MAQ / "fontes" / "roboto-mono.css", DOCS / "fontes" / "roboto-mono.css")
 shutil.copy(MAQ / "fontes" / "roboto-mono.woff2", DOCS / "fontes" / "roboto-mono.woff2")
+# SIL OFL 1.1 condition 2: every copy of the fonts ships with the notices and the license text.
+shutil.copy(MAQ / "fontes" / "OFL.txt", DOCS / "fontes" / "OFL.txt")
 (DOCS / "rendus" / "etats").mkdir(parents=True)
 for w in (MAQ / "rendus" / "etats").glob("objet-*.webp"):
     shutil.copy(w, DOCS / "rendus" / "etats" / w.name)
@@ -1282,7 +1284,7 @@ for f in MAQ.iterdir():
         if f.name == "fontes":
             (SRC / "fontes").mkdir()
             for w in f.iterdir():
-                if w.name.startswith("literata"):
+                if w.name.startswith("literata") or w.name == "OFL.txt":
                     shutil.copy(w, SRC / "fontes" / w.name)
         else:
             shutil.copytree(f, SRC / f.name,
