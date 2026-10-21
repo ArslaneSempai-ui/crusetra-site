@@ -54,13 +54,13 @@
         {
           "h2": "Who publishes this",
           "html": [
-            "<p>This site, and the tool it describes, are published by <b>Arslane Chaouche</b>, the licensor named in the first line of the license file that ships with the tool. The company that contracts and invoices the paid engagements is <b>HS Industries LLC</b>, a Wyoming limited liability company (file no. 2026-002073840), 1550 Wilson Blvd, Ste 700 PMB 599, Arlington, VA 22209, USA. Write to <a href=\"mailto:contact@crusetra.com\"><b>contact@crusetra.com</b></a> for an engagement letter, a vendor-onboarding questionnaire, or a security concern about the tool; the same address receives all three.</p>"
+            "<p>This site, and the tool it describes, are published by <b>Arslane Chaouche</b>, the licensor named in the first line of the license file that ships with the tool. The company that contracts and invoices the paid engagements is <b>HS Industries LLC</b>, a Wyoming limited liability company entered in the register of the Wyoming Secretary of State under file no. 2026-002073840, run from Athens, Greece, and reachable by post at 1550 Wilson Blvd, Ste 700 PMB 599, Arlington, VA 22209, USA. Write to <a href=\"mailto:contact@crusetra.com\"><b>contact@crusetra.com</b></a> for an engagement letter, a vendor-onboarding questionnaire, or a security concern about the tool; the same address receives all three.</p>"
           ]
         },
         {
           "h2": "Under which licenses",
           "html": [
-            "<p>The tool is licensed <b>PolyForm Noncommercial</b>, with a thirty&#8209;day Evaluation Grant, a right to evaluate the tool that is written into the license file. The full terms are in <b>Appendix D</b>. The text and figures of this site are by the same author. The typeface is <b>Literata</b>, by TypeTogether, under the SIL Open Font License, and it is served from this site's own files. The objects pictured on the appendix pages were modeled for this site by its author.</p>"
+            "<p>The tool is licensed <b>PolyForm Noncommercial</b>, with a thirty&#8209;day Evaluation Grant, a right to evaluate the tool that is written into the license file. The full terms are in <b>Appendix D</b>. The text and figures of this site are by the same author. The typefaces are <b>Literata</b>, by TypeTogether, and <b>Roboto Mono</b>, by the Roboto Mono Project Authors, both under the SIL Open Font License 1.1, served from this site's own files with the <a href=\"fontes/OFL.txt\">license text</a>. The objects pictured on the appendix pages were modeled for this site by its author.</p>"
           ]
         },
         {

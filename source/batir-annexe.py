@@ -22,6 +22,7 @@ CE QUI CHANGE (harmonisation du 4 septembre, appliquée aux 8 pages)
 import importlib.util
 import json
 import pathlib
+import re
 import sys
 
 BASE = pathlib.Path(__file__).parent
@@ -355,6 +356,10 @@ def section(sec, ouvert=False):
               f'<i></i><i></i><i></i><span>run it yourself</span></div>'
               f'<div class="term-corps">{lignes}</div></div>{refs}</div>')
     dc = f' data-commun="{sec["commun"]}"' if sec.get("commun") else ""
+    # An optional anchor other pages and mails link to (privacy.html#written-first).
+    if sec.get("id"):
+        assert re.fullmatch(r"[a-z][a-z0-9-]*", sec["id"]), sec["id"]
+        dc = f' id="{sec["id"]}"' + dc
     return (f'<details{" open" if ouvert else ""}{dc}>'
             f'<summary><span class="cr" aria-hidden="true">&#9656;</span>{sec["h2"]}'
             f'</summary><div class="sec-corps">{corps}{ap}</div></details>')
