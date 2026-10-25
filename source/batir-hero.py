@@ -4119,11 +4119,8 @@ def batir_outil_catalogue(o, spec):
     else:
         instrument_affiche = affiche_html(_sorte, RELEVE, FINDINGS, spec["instrument_page"], spec["instrument_eti"], spec["instrument_sub"], _robot,
                                           note="" if o["id"] == "dossier" else _note_outil(spec, RELEVE, FINDINGS), tarif=lien(o, "ENGAGEMENT.html"))
-        couture_html = f'''<div class="couture" aria-hidden="true"><div class="colonne">
-  <span class="filet"></span>
-  <span class="sceau-c">measured, then frozen &#183; content hash {SCEAU_O}</span>
-  <span class="filet"></span>
-</div></div>'''
+        # 25/10 evening (Arslane): the ticker replaces the paper seam on every tool page, not on Screening only
+        couture_html = couture_defile("measured, then frozen", SCEAU_O)
     # 25/10: the four catalogue pages open on the living hero Arslane picked (HEROS_VIVANTS); a tool without one
     # keeps the plain hero with its commands
     hero_css, hero_html = HEROS_VIVANTS.get(o["id"], ("", None))
