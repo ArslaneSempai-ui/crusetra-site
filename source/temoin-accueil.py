@@ -137,8 +137,26 @@ def relever(html, hero_routing, findings_dossier):
         dire("le lede porte un cadratin")
     if "hero-cue" in avant_rideau:
         dire("le hero-cue vit encore sur le premier écran")
-    if re.search(r'<img[^>]*robot-[a-z-]+\.webp', avant_rideau):
+    # the hero itself carries no robot; the lit robot of the night sky above it is Arslane's decision of 25/10 (G)
+    hero_sec = avant_rideau[avant_rideau.find('<section class="hero"'):]
+    if re.search(r'<img[^>]*robot-[a-z-]+\.webp', hero_sec):
         dire("un robot vit sur le héros de l'accueil : la décision n'y en met aucun")
+
+    # G. the night sky (Arslane, 25/10, concept A "dive"): once, above the hero, on the home only; its headline is
+    # title 1 word for word, all white, the three verbs lit by a glow and by no colour
+    ciels = re.findall(r'<section class="cl"', html)
+    if len(ciels) != 1 or html.find('<section class="cl"') > html.find("<main>"):
+        dire(f"ciel : {len(ciels)} night sky section(s) above the hero, one expected")
+    titre = re.search(r'<h2 class="cl-titre">(.*?)</h2>', html, re.S)
+    if not titre or re.sub(r"<[^>]+>", "", titre.group(1)).strip() != "Compliance decisions you can test, reproduce and inspect.":
+        dire("ciel : the headline is not title 1, « Compliance decisions you can test, reproduce and inspect. »")
+    elif re.findall(r"<(\w+)", titre.group(1)) != ["b", "b", "b"] or [_nu(x) for x in re.findall(r"<b>(.*?)</b>", titre.group(1))] != ["test", "reproduce", "inspect"]:
+        dire("ciel : the headline's highlights are not the three verbs test, reproduce, inspect")
+    regle = re.search(r"\.cl-titre b\{([^}]*)\}", html)
+    if not regle or re.search(r"vert|#57b184|#a5f7cb", regle.group(1)) or "color:#fff" not in regle.group(1) or "text-shadow" not in regle.group(1):
+        dire("ciel : the three verbs are not white with a glow (pas en vert, Arslane 25/10)")
+    if 'class="cl"' in hero_routing or "cl-vol" in hero_routing:
+        dire("ciel : a tool page carries the night sky, only the home does")
     return fautes
 
 
@@ -157,9 +175,15 @@ def temoin(html, hero, fd):
          "ne se retrouve pas sur le héros routing", "le chiffre déplacé"),
         (re.sub(r'<p class="lede[^"]*"[^>]*>.*?</p>', "", html, count=1, flags=re.S), "lede", "le lede retiré"),
         (html.replace("</main>", '<nav class="methode-liens"><a href="x">x</a></nav></main>', 1), "rangée de liens", "la rangée remise"),
+        (html.replace('<section class="hero">', '<section class="hero"><img src="rendus/robot-x.webp" alt="">', 1), "un robot vit", "un robot sur le héros"),
+        (html.replace('<section class="cl"', '<section class="cx"', 1), "ciel :", "le ciel retiré"),
+        (html.replace("<b>reproduce</b>", "<b>rerun</b>", 1), "ciel :", "le titre réécrit"),
+        (html.replace("<b>inspect</b>", "inspect", 1), "ciel :", "un verbe éteint"),
+        (html.replace(".cl-titre b{", ".cl-titre b{color:var(--vert-vif);", 1).replace("color:#fff;text-shadow", "text-shadow", 1), "ciel :", "les verbes en vert"),
     ]
-    for mue, attendu, nom in mutations:
-        fautes = relever(mue, hero, fd)
+    mutations.append((html, "ciel :", "le ciel sur une page outil", hero + '<section class="cl"></section>'))
+    for mue, attendu, nom, *h in mutations:
+        fautes = relever(mue, h[0] if h else hero, fd)
         if not any(attendu in f for f in fautes):
             sys.exit(f"GARDE CASSÉE : {nom} ne rougit plus (aucune faute ne parle de "
                      f"« {attendu} ») — aucun relevé n'est rendu (code 2)")
@@ -177,4 +201,4 @@ if __name__ == "__main__":
             print("  ROUGE", f)
         sys.exit(f"{len(fautes)} refus : l'accueil ne tient pas ses affirmations")
     print("témoin de l'accueil : le grand livre recompose son sceau, l'éventail suit le rideau, "
-          "la méthode cite le dossier — et les six mutations rougissent encore")
+          "la méthode cite le dossier, le ciel tient son titre blanc, et les douze mutations rougissent encore")

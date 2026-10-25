@@ -743,12 +743,16 @@ CSS_ACCUEIL = '''
     min-height:auto;padding:150px 0 80px}
   /* la grille du premier écran, SYMÉTRIQUE (Arslane, 10/09) : deux colonnes de largeur connue, centrées
      ensemble, un gouffre entre elles plus large que tout espace interne ; les marges extérieures se valent */
-  .hero-grille{display:grid;grid-template-columns:minmax(360px,460px) minmax(0,600px);gap:clamp(48px,7.4vw,106px);
+  /* 25/10: the fan column keeps 38vw (up to 520px) of its own; with a bare 0 minimum the wide text column took 700px
+     and the fanned cards ran 43 to 75px past the screen at 1150 and 1280 (verif-final, sonde-site.mjs) */
+  .hero-grille{display:grid;grid-template-columns:minmax(480px,700px) minmax(min(520px,38vw),540px);gap:clamp(48px,7.4vw,106px);
     align-items:start;justify-content:center;max-width:none;margin:0 auto;padding:0 65px 0 48px;position:relative;text-align:left}
   /* LE GRAND LIVRE (Arslane, 10/09, D1) : un titre court, six lignes libellé / valeur au poids des
      grilles des cartes, la commande en dernière ; le bloc pend du haut de l'éventail (le panel des
      cinq regards : un bloc centré à côté d'un objet est le héros de gabarit) */
-  .hero-grille .h1{text-align:left;margin:0;max-width:14ch;font-size:clamp(30px,3.1vw,44px);line-height:1.06;letter-spacing:-.015em}
+  .hero-grille .h1{text-align:left;margin:0;max-width:none;font-size:clamp(46px,4.9vw,72px);line-height:1;letter-spacing:-.025em}
+  /* the poster title (Arslane, 25/10): two giant lines, the answer in green */
+  .hero-grille .h1 em{font-style:normal;color:var(--vert-vif)}
   /* le titre monte (Arslane, 08/09). Mesuré avant de bouger : la barre finit à 77, l'éventail
      commence à 96, et le titre tombait à 168 parce que la colonne de texte s'enfonçait de 72.
      À 36, il se pose à 132 : trente-six pixels plus haut, toujours quarante-cinq sous la
@@ -756,7 +760,7 @@ CSS_ACCUEIL = '''
   .hero-texte{padding-top:36px}
   /* le sous-titre (relecture du 8/09, rouvert par Arslane le 13/09 : le lede revient sous le titre) :
      aligné à gauche comme le grand livre, 44 caractères de large, une couleur en retrait */
-  .hero-grille .lede{margin:16px 0 0;max-width:44ch;font-size:16px;line-height:1.55;color:var(--sur-vert-pale);text-align:left;text-wrap:pretty}
+  .hero-grille .lede{margin:16px 0 0;max-width:62ch;font-size:20px;line-height:1.45;color:var(--sur-vert-pale);text-align:left;text-wrap:pretty}
   .ledger{margin:26px 0 0}
   .ledger div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;min-height:38px;padding:9px 0;
     border-bottom:1px solid color-mix(in srgb,var(--sur-vert) 10%,transparent)}

@@ -35,9 +35,9 @@
     "src/verifier-rapport.mjs:13": "* Un rapport qui affirme sa propre authenticité n'affirme rien. La vérification doit pouvoir",
     "src/verifier-rapport.mjs:20": "*     node src/verifier-rapport.mjs <rapport.html>",
     "src/your-cases.ts:18": "* is a field to extract**, named by its header. Three columns of expected answers means",
-    "src/your-cases.ts:1900": "npm run measure:yours -- --cases=your-file.csv [--rules=rules.json] [--sorties=a.json --sorties=b.json] [--llm]",
-    "src/your-cases.ts:1917": "--sorties  a JSON of the OUTCOMES your own chain was graded to, never the values it",
-    "src/your-cases.ts:2475": "* compare cas par cas et ne recommande qu'à l'intérieur d'une marge déclarée.",
-    "src/your-cases.ts:436": "return q.provenance === \"deduite\" ? `What is the ${nomSur(champ)}?` : q.texte;"
+    "src/your-cases.ts:1901": "npm run measure:yours -- --cases=your-file.csv [--rules=rules.json] [--sorties=a.json --sorties=b.json] [--llm]",
+    "src/your-cases.ts:1918": "--sorties  a JSON of the OUTCOMES your own chain was graded to, never the values it",
+    "src/your-cases.ts:2476": "* compare cas par cas et ne recommande qu'à l'intérieur d'une marge déclarée.",
+    "src/your-cases.ts:437": "return q.provenance === \"deduite\" ? `What is the ${nomSur(champ)}?` : q.texte;"
   }
 }

@@ -49,6 +49,13 @@ for(const s of document.querySelectorAll('main > section, main > nav, body > sec
     if(c.display==='none'||c.visibility==='hidden'||c.position==='fixed')continue;
     const r=el.getBoundingClientRect();
     if(!r.height)continue;
+    // a box clipped by an ancestor inside the section paints only within that ancestor (25/10: the home's night sky
+    // zooms a 2400 px plate inside a 100vh stage with overflow:hidden); the ancestor is itself measured, so a clip box
+    // that grows out of its section is still refused
+    let clip=false;for(let p=el.parentElement;p&&p!==s.parentElement;p=p.parentElement){const q=getComputedStyle(p);
+      if(/(hidden|clip)/.test(q.overflowY)&&/(hidden|clip)/.test(q.overflowX)){const rp=p.getBoundingClientRect();
+        if(Math.max(ha-(rp.top+scrollY),(rp.bottom+scrollY)-ba)<=${HORS_SECTION}){clip=true;break}}}
+    if(clip)continue;
     const dep=Math.round(Math.max(ha-(r.top+scrollY),(r.bottom+scrollY)-ba));
     if(dep>o.haut)o.haut=dep;
     if(dep>${HORS_SECTION}&&o.hors.length<5)o.hors.push(((el.className||el.tagName).toString().split(' ')[0]).slice(0,28)
@@ -92,19 +99,21 @@ await send("Network.setCacheDisabled", { cacheDisabled: true });
 // première, ou refuse la seconde, elle ne rend RIEN : un zéro sans témoin ne prouve rien, et
 // c'est précisément un banc vert qui a laissé passer ce défaut en production.
 const PIXEL = "data:image/gif;base64,R0lGODlhZABkAIAAAP///wAAACH5BAEAAAAALAAAAABkAGQAAAIrhI+py+0Po5y02ouz3rz7D4biSJbmiabqyrbuC8fyTNf2jef6zvf+DwwKBwUAOw==";
-const temoin = (avecRegle) => "data:text/html," + encodeURIComponent(
+// (25/10) two more: the faulty image inside a clipping box that stays in its section paints nothing outside (not seen);
+// the same box left to grow (no height) carries the overflow out of the section itself (seen)
+const temoin = (avecRegle, coffre = "") => "data:text/html," + encodeURIComponent(
   "<!doctype html><meta charset=utf-8><style>*{margin:0}"
   + (avecRegle ? "img{height:auto}" : "")
-  + ".v{width:60px;aspect-ratio:1.42/1}section{height:400px;overflow:visible}</style>"
-  + "<main><section><img class=v width=1600 height=1152 src='" + PIXEL + "'></section></main>");
-for (const [avecRegle, doitVoir] of [[false, true], [true, false]]) {
+  + ".v{width:60px;aspect-ratio:1.42/1}section{height:400px;overflow:visible}.k{overflow:hidden" + (coffre === "tenu" ? ";height:300px" : "") + "}</style>"
+  + "<main><section>" + (coffre ? "<div class=k>" : "") + "<img class=v width=1600 height=1152 src='" + PIXEL + "'>" + (coffre ? "</div>" : "") + "</section></main>");
+for (const [avecRegle, doitVoir, coffre] of [[false, true], [true, false], [false, false, "tenu"], [false, true, "libre"]]) {
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
-  await send("Page.navigate", { url: temoin(avecRegle) });
+  await send("Page.navigate", { url: temoin(avecRegle, coffre) });
   await new Promise((r) => setTimeout(r, 400));
   const o = JSON.parse((await send("Runtime.evaluate", { expression: PROBE, returnByValue: true })).result.value);
   const vu = o.hors.length > 0;
   if (vu !== doitVoir) {
-    console.error(`GARDE CASSÉE : sur la page témoin ${avecRegle ? "SAINE" : "FAUTIVE"}, la sonde `
+    console.error(`GARDE CASSÉE : sur la page témoin ${avecRegle ? "SAINE" : "FAUTIVE"}${coffre ? " (clip box " + coffre + ")" : ""}, la sonde `
       + `${vu ? "a vu" : "n'a rien vu"} (dépassement max ${o.haut}px).\n`
       + "  La sonde du deuxième axe ne mesure plus ce qu'elle annonce ; son zéro ne vaudrait rien.");
     process.exit(2);

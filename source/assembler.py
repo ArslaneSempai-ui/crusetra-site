@@ -746,6 +746,13 @@ shutil.copy(MAQ / "fontes" / "roboto-mono.css", DOCS / "fontes" / "roboto-mono.c
 shutil.copy(MAQ / "fontes" / "roboto-mono.woff2", DOCS / "fontes" / "roboto-mono.woff2")
 # SIL OFL 1.1 condition 2: every copy of the fonts ships with the notices and the license text.
 shutil.copy(MAQ / "fontes" / "OFL.txt", DOCS / "fontes" / "OFL.txt")
+# the home's night sky (25/10, ciel_accueil.py): the stills and loops batir-hero.py names, copied by name, each one required
+sys.path.insert(0, str(MAQ))
+from ciel_accueil import FICHIERS as _CIEL
+(DOCS / "ciel").mkdir()
+for _f in _CIEL:
+    shutil.copy(MAQ / "ciel" / _f, DOCS / "ciel" / _f)
+print(f"  ciel : {len(_CIEL)} fichiers, {sum((MAQ / 'ciel' / f).stat().st_size for f in _CIEL) // 1024} Ko")
 (DOCS / "rendus" / "etats").mkdir(parents=True)
 for w in (MAQ / "rendus" / "etats").glob("objet-*.webp"):
     shutil.copy(w, DOCS / "rendus" / "etats" / w.name)
