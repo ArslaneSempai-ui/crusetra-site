@@ -52,6 +52,7 @@ N_TESTS, N_FICHIERS = _m.group(1), _m.group(2)
 from outil import SCEAU_ROUTING, etiquette_sur_objet, SEUIL_OBJET, etiquettes_qui_se_recouvrent, barre_site, CSS_BARRE_SITE, CSS_PIED_SITE, OUTILS, pied_html, n_tests
 from outil import SITE_URL, ORGANISATION   # the house address, written once in outil.py
 from outil import FILMS_VISIBLES   # the films switch, written once in outil.py
+from ciel_accueil import CSS_CIEL, JS_CIEL, JS_TETE, ciel_html   # the home's night sky (25/10)
 from instrument_carte import (CSS_AFFICHE, affiche_html, CSS_ACCUEIL, eventail_html, methode_html,   # l'affiche (10/09), l'accueil (10/09)
                               _svg_courbes, _svg_paliers, _svg_horloge)
 SCEAU = SCEAU_ROUTING   # lu dans le relevé scellé du vert, jamais tapé (8/09)
@@ -385,6 +386,9 @@ CSS = '''
   .h1.h1-long{font-size:clamp(34px,4.6vw,64px);max-width:24ch}
   .h1{font-size:clamp(44px,7vw,92px);font-weight:600;letter-spacing:-.02em;line-height:1.02;
     text-wrap:balance;max-width:14ch}
+  /* two wide lines instead of four (Arslane, 25/10, retouch pin 1 on Routing), the answer in green */
+  .h1.h1-deux{font-size:clamp(40px,4.2vw,62px);max-width:24ch;line-height:1.05}
+  .h1-deux em{font-style:normal;color:var(--vert-vif)}
   .lede{font-size:clamp(16px,1.35vw,19px);color:var(--demi);max-width:78ch;line-height:1.6;text-wrap:balance}
   .lede b{color:var(--encre)}
   .commande{background:var(--nuit-b);color:var(--sur-vert);border:1px solid color-mix(in srgb,var(--vert-vif) 40%,transparent);
@@ -449,9 +453,17 @@ CSS = '''
      l'ancre #tools se pose SOUS la barre (scroll-margin-top) : dans les deux cas la bande visible
      va du bord haut du rideau aux étiquettes (160), et le titre de 27 est au milieu :
      (160 - 27) / 2 = 66. Centré sur l'axe, il n'en bouge pas. */
-  .rideau-titre{position:absolute;top:66px;left:0;right:0;z-index:2;text-align:center;padding:0 24px;
-    font-family:var(--texte);font-size:22px;font-weight:600;letter-spacing:-.01em;line-height:1.2;
-    color:var(--sur-vert)}
+  /* edge to edge with a hairline in the middle (Arslane, 25/10, retouch pin 4): the same mono voice as the
+     columns' labels, so the title belongs to what sits under it */
+  .rideau-titre{position:absolute;top:66px;left:0;right:0;z-index:2;display:flex;align-items:center;gap:24px;
+    padding:0 48px;font-family:var(--mono,ui-monospace,monospace);font-size:12px;font-weight:400;
+    letter-spacing:.14em;text-transform:uppercase;line-height:1.2;color:var(--sur-vert-pale)}
+  /* five dots in place of the hairline (Arslane, 25/10, pinned note on /monitoring/): one per instrument, in card
+     order, each in its card ring colour (--pan-vif); the current tool's dot a little larger. Decorative. */
+  .rideau-points{flex:1;display:flex;justify-content:center;align-items:center;gap:10px}
+  .rideau-points i{display:block;width:6px;height:6px;border-radius:50%;background:var(--c);
+    box-shadow:0 0 8px color-mix(in srgb,var(--c) 55%,transparent)}
+  .rideau-points i.ici{width:9px;height:9px;box-shadow:0 0 12px color-mix(in srgb,var(--c) 75%,transparent)}
   /* les cinq boutons « Open… » sur UNE ligne : les pans partent du haut et le bouton est
      poussé en bas (Arslane, 10/09 : « mets-les à la même ligne, là c'est éparpillé ») */
   .pan{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;
@@ -497,6 +509,20 @@ CSS = '''
   /* le titre du rideau ne remonte PAS avec le reste : la barre posée mesure 77 px, et à
      70 il passait dessous (vu en capture, 13/09). Il reste à 84. */
   .pan[aria-current] .p-ouvrir{border-style:dashed;color:var(--sur-vert-pale)}
+  /* THE CURRENT TOOL (Arslane, 25/10: not everyone can read "you are here"). Its card wears a 3 px ring of
+     its own colour (--pan-vif, the tool's --accent-vif) with a soft glow of the same colour, its robot is
+     raised and lit, and a filled dot takes the place of the "Open" button. Colour is never the only cue:
+     the ring, the raised robot and the dot are shapes. Ring against the pans' nights, measured 25/10:
+     3.25:1 at worst (rubis on the rubis night). */
+  .pan[aria-current]{box-shadow:inset 0 0 0 3px var(--pan-vif),
+      inset 0 0 44px 4px color-mix(in srgb,var(--pan-vif) 34%,transparent)}
+  .pan[aria-current]::before{opacity:.85}
+  .rideau.vu .pan[aria-current] img,.rideau:not(.vu) .pan[aria-current] img{transform:translateY(-12px) scale(1.04);
+    filter:drop-shadow(0 20px 36px rgba(0,0,0,.55)) drop-shadow(0 0 22px color-mix(in srgb,var(--pan-vif) 55%,transparent))}
+  .pan[aria-current] .p-eti{text-shadow:0 0 18px color-mix(in srgb,var(--pan-vif) 80%,transparent)}
+  .pan .p-ici{border:0;padding:10px 0;display:flex;align-items:center;justify-content:center}
+  .p-point{display:block;width:14px;height:14px;border-radius:50%;background:var(--pan-vif);
+    box-shadow:0 0 0 4px color-mix(in srgb,var(--pan-vif) 28%,transparent),0 0 16px 2px color-mix(in srgb,var(--pan-vif) 60%,transparent)}
   /* le survol d'un pan (Arslane, 6/09) : un halo de SA couleur qui suit la souris,
      le robot qui se soulève, la question qui monte d'un souffle, l'autre pan qui
      s'assombrit ; au clavier, le focus donne le même halo, centré */
@@ -519,7 +545,8 @@ CSS = '''
      n'a rien de spécial ») : les pans arrivent des deux côtés quand le rideau
      entre dans la vue, et s'écartent au clic avant d'ouvrir l'outil ; sans script,
      rien ne bouge et les pans sont des liens */
-  .rideau{overflow:hidden;background:var(--ouverture,var(--papier))}   /* derrière les pans : la nuit de l'outil qu'on ouvre */
+  .rideau{overflow:hidden;overflow:clip;background:var(--ouverture,var(--papier))}   /* clip (25/10): a.pan.cote-d slid past 390 px while it animated */
+    /* derrière les pans : la nuit de l'outil qu'on ouvre */
   /* l'ancre #tools se pose SOUS la barre posée (77 px), pas dessous : le rideau entier se voit en
      arrivant par un robot, comme en descendant depuis l'accueil ; sous 1080 la barre est dans le
      flux et ne recouvre rien, l'ancre reprend le bord */
@@ -694,6 +721,17 @@ CSS = '''
   .couture .filet{flex:1;border-top:3px double var(--filet)}
   .couture .sceau-c{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
     text-transform:uppercase;color:var(--pale);white-space:nowrap}
+  /* 25/10 (Arslane, look C kept in the retouch session): no cream band; the seam's line repeated in a slow ticker
+     with faded edges between two hairlines, on the page's own night; still under prefers-reduced-motion */
+  .couture.defile{background:linear-gradient(180deg,var(--nuit-c),color-mix(in srgb,var(--nuit-a) 70%,var(--nuit-c)));padding:0}
+  .couture.defile .colonne{display:block;max-width:none;padding:0}
+  .cz3{overflow:hidden;border-top:1px solid color-mix(in srgb,var(--sur-vert) 14%,transparent);border-bottom:1px solid color-mix(in srgb,var(--sur-vert) 14%,transparent);
+    padding:18px 0;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+  .cz3 div{display:inline-block;white-space:nowrap;font:500 12px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;
+    color:var(--sur-vert-pale);animation:cz3 60s linear infinite}
+  .cz3 em{font-style:normal;color:var(--vert-clair)}
+  @keyframes cz3{to{transform:translateX(-50%)}}
+  @media (prefers-reduced-motion:reduce){.cz3 div{animation:none}}
 
   /* l'instrument */
   .instrument{padding:110px 0 120px;color:var(--sur-vert);
@@ -930,7 +968,7 @@ CSS = '''
   @media (max-width:700px){
     .rideau{grid-template-columns:1fr}
     .pan{padding-top:84px}
-    .rideau-titre{top:39px;font-size:19px}   /* deux lignes de 23 (46) dans 124 : 39 dessus, 39 dessous */
+    .rideau-titre{top:39px;padding:0 20px;gap:14px}
     .rideau-titre+.pan{padding-top:124px}
     /* au téléphone, une commande coupée par un ascenseur horizontal se lit
        comme une commande cassée : elle se replie, entière */
@@ -1038,6 +1076,8 @@ JS = '''
       // la page suivante s'ouvre au même endroit de l'écran, les robots reviennent à leur place
       // et SEUL LE DESSOUS a changé. La docstring de choix_outils() promettait déjà cette ancre
       // pendant que le code ne la posait plus.
+      // 25/10 (Arslane): "can it bring us back to the top so we see the hero screens?" The link now carries
+      // no fragment: the next page opens at its top, on its living hero.
       setTimeout(() => { location.href = pan.href; }, 380);
     }));
   }
@@ -1061,14 +1101,15 @@ JS = '''
     if (jauge) jauge.style.height = (p * 100).toFixed(1) + "%";
     poser(Math.min(scenes.length - 1, Math.floor(p * scenes.length)));
   }
-  addEventListener("scroll", surScroll, {passive: true});
+  // the home has no .sequence: surScroll threw on every scroll above 1080 px (measured 25/10, console)
+  if (seq) addEventListener("scroll", surScroll, {passive: true});
   jalons.forEach((j, k) => j.addEventListener("click", () => {
     // le milieu du palier d'arrivée (le scrub tient la dernière image sur la seconde moitié)
     const r = seq.offsetTop + (seq.offsetHeight - innerHeight) * ((k + 0.75) / scenes.length);
     scrollTo({top: innerWidth <= 1080 ? scenes[k].offsetTop - 90 : r,
               behavior: reduit ? "auto" : "smooth"});
   }));
-  poser(0); surScroll();
+  poser(0); if (seq) surScroll();
 '''
 # the player script ships only with the films (FILMS_VISIBLES, outil.py)
 JS_LECTEUR = '''  // LE LECTEUR DU FILM (27/09) : sans script la vidéo porte ses commandes natives d'emblée ;
@@ -1172,7 +1213,8 @@ def choix_outils(outil):
     page d'un outil, son pan est marqué aria-current. Un pan par outil de la table,
     chacun dans SES couleurs (posées en variables sur le pan : la page rubis aliase
     la palette, et le pan vert doit y rester vert), avec son robot, sa question et
-    « Open X ». Cliquer un pan mène à SA page, ancrée sur sa séquence 3D (#findings, 30/09).
+    « Open X ». Cliquer un pan mène à SA page, EN HAUT, sur son héros vivant (Arslane, 25/10 ;
+    du 30/09 au 25/10 le lien portait #findings et la page s'ouvrait sur sa séquence 3D).
     Le script (JS) ajoute l'entrée des pans au défilement et l'ouverture du rideau au
     clic ; sans script, ce sont des liens. Grille auto-fit : un troisième robot
     prendra sa place sans qu'on touche ici. Les classes cote-g / cote-d disent de
@@ -1194,13 +1236,19 @@ def choix_outils(outil):
                  f'<span class="p-d">{o["pitch"]}</span>\n')
         if outil is not None and o["id"] == outil["id"]:
             pans += (f'\n  <div class="pan {cote}" style="{style}" aria-current="page">{corps}'
-                     f'<span class="p-ouvrir">You are here &#183; {o["nom"]}</span></div>')
+                     # 25/10 (Arslane): the current tool is told by its ring, its lit robot and a filled
+                     # dot, not by words few people read; the words stay for screen readers only.
+                     f'<span class="p-ouvrir p-ici"><span class="p-point" aria-hidden="true"></span>'
+                     f'<span class="sr">You are here &#183; {o["nom"]}</span></span></div>')
         else:
-            pans += (f'\n  <a class="pan {cote}" style="{style}" href="{prefixe}{o["page_hero"]}#findings">{corps}'
+            pans += (f'\n  <a class="pan {cote}" style="{style}" href="{prefixe}{o["page_hero"]}">{corps}'
                      f'<span class="p-ouvrir">Open {o["nom"]} <span aria-hidden="true">&#8594;</span></span></a>')
     n = NOMBRES.get(len(outils), str(len(outils)))
+    points = "".join(f'<i{" class=\"ici\"" if outil is not None and o["id"] == outil["id"] else ""} style="--c:{o["vif"]}"></i>'
+                     for o in outils)
     return (f'<nav class="rideau" id="tools" aria-label="The instruments">'
-            f'\n  <span class="rideau-titre">Crusetra &#183; {n} instruments, one method</span>'
+            f'\n  <span class="rideau-titre"><span>{n} instruments</span>'
+            f'<span class="rideau-points" aria-hidden="true">{points}</span><span>One method</span></span>'
             f'{pans}\n</nav>')
 
 
@@ -1484,6 +1532,203 @@ def sequence_scrub(prefixe):
 _CANEVAS_V, _CSS_SCRUB_V, _SCRUB_V = sequence_scrub(ETATS_PREFIXE["routing"])
 
 
+# 25/10 (Arslane, look A kept in the retouch session): the three audit steps as a living sample page
+# 25/10 (Arslane, look B kept in the retouch session): the data-and-limits note as three cards with a drawn icon each.
+_RNOTE_CSS = "<style>#report p.r-note{max-width:none;font-size:inherit;line-height:inherit;color:inherit}#report .rn2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}#report .rn2>span{display:flex;flex-direction:column;gap:10px;padding:20px;border-radius:14px;border:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--pan-a,#33191f) 64%,transparent),color-mix(in srgb,var(--pan-b,#241217) 80%,transparent))}\n#report .rn2 svg{width:30px;height:30px;color:var(--pan-vif,#d64a5c)}#report .rn2 b{font:600 18px/1.2 \"Literata\",Georgia,serif;color:var(--sur-vert)}#report .rn2 i{font:400 13.5px/1.55 \"Literata\",Georgia,serif;font-style:normal;color:var(--sur-vert-pale)}\n@media (max-width:900px){#report .rn2{grid-template-columns:1fr}}</style>"
+_RNOTE_ICONES = ["<path d=\"M9 9h18l-2 20H11z M7 9h22 M14 9V6h8v3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/>", "<path d=\"M28 18a10 10 0 1 1-3-7 M28 7v5h-5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/>", "<circle cx=\"18\" cy=\"14\" r=\"5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M8 29c1-6 5-9 10-9s9 3 10 9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/>"]
+def _rnote_cartes(conservation):
+    # the offer's retention text holds two sentences (the file, then the re-screen list); one card each, the limits third
+    phrases = [x.strip() for x in re.split(r"(?<=\.)\s+", conservation.strip()) if x.strip()]
+    if len(phrases) != 2:
+        sys.exit(f"offre screening : « conservation » devait porter deux phrases, elle en porte {len(phrases)} : revoir _rnote_cartes")
+    cartes = [("Your file", phrases[0]), ("Re-screen", phrases[1]),
+              ("Candidates", "A candidate is a name for your compliance officer to check: the report does not decide, does not screen ownership, and is not legal advice.")]
+    return _RNOTE_CSS + '<span class="rn2">' + "".join(
+        f"<span><svg viewBox='0 0 36 36' aria-hidden='true'>{ic}</svg><b>{t}</b><i>{d}</i></span>" for (t, d), ic in zip(cartes, _RNOTE_ICONES)) + "</span>"
+
+# 25/10 (Arslane, look C kept in the retouch session): the measurement line between two hairlines with a lit point.
+_SCEAUL_CSS = ".entites .sceau-l.sl3{display:flex;align-items:center;gap:18px;letter-spacing:0;text-transform:none}.entites .sl3>i{flex:1;height:1px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--sur-vert) 14%,transparent))}.entites .sl3>i:last-child{background:linear-gradient(90deg,color-mix(in srgb,var(--sur-vert) 14%,transparent),transparent)}.entites .sl3>span{display:flex;align-items:center;gap:12px;font:500 11px/1.4 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--sur-vert-pale);text-align:center}.entites .sl3 b{flex:none;width:8px;height:8px;border-radius:50%;background:var(--pan-vif,#d64a5c);box-shadow:0 0 14px var(--pan-vif,#d64a5c);animation:sl3 2.4s ease-in-out infinite}@keyframes sl3{50%{opacity:.4}}@media (prefers-reduced-motion:reduce){.entites .sl3 b{animation:none}}"
+# 25/10 (Arslane, look kept in the retouch session): section#companies as look A, the title on top, then the three
+# populations as three panels side by side (figure, sentence, dots, key); the dots keep their pointer script and hover.
+_ENTITES_PANNEAUX_CSS = ".entites .ca-k{display:block;margin:0 0 10px;font:500 11px/1.4 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--pan-vif,#d64a5c)}.entites .ca-t{margin:0;font:600 34px/1.12 \"Literata\",Georgia,serif;letter-spacing:-.01em;color:var(--sur-vert);text-wrap:balance;max-width:none}.entites .ca-t span{display:block}.entites .ca-t span+span{color:var(--sur-vert-pale)}.entites .ca-n{font:500 52px/.95 \"Literata\",Georgia,serif;letter-spacing:-.02em;color:var(--sur-vert);font-variant-numeric:lining-nums;white-space:nowrap}.entites .ca-n small{font-size:.4em;letter-spacing:0;color:var(--pan-vif,#d64a5c)}.entites .ca-d{margin:0;max-width:none;font:400 13.5px/1.55 \"Literata\",Georgia,serif;color:var(--sur-vert-pale)}.entites .ca-g{display:grid;gap:1px}.entites .ca-g i{display:block;aspect-ratio:1;border-radius:1px;background:color-mix(in srgb,var(--sur-vert) 13%,transparent)}.entites .ca-g i.f{background:var(--vert-clair);box-shadow:0 0 6px var(--vert-clair)}.entites .ca-g i.p,.entites .ca-g i.v{background:var(--vert-vif)}.entites .ca-c{margin:0;max-width:none;display:flex;flex-direction:column;gap:5px;font:500 10.5px/1.45 var(--mono);letter-spacing:.06em;color:var(--sur-vert-pale)}.entites .ca-c>span{display:flex;align-items:baseline;gap:8px}.entites .ca-c i{flex:none;width:7px;height:7px;border-radius:1px;background:color-mix(in srgb,var(--sur-vert) 22%,transparent)}.entites .ca-c b.nw{font-weight:inherit;white-space:nowrap}.entites .ca-c i.f{background:var(--vert-clair)}.entites .ca-c i.v{background:var(--vert-vif)}.entites .ca-top{display:block;margin-bottom:26px}.entites .ca-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.entites .ca-p{display:flex;flex-direction:column;gap:14px;padding:20px 20px 18px;border-radius:14px;border:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--pan-a,#33191f) 64%,transparent),color-mix(in srgb,var(--pan-b,#241217) 80%,transparent))}.entites .ca-h{display:flex;flex-direction:column;gap:10px}.entites .ca-g{grid-template-columns:repeat(69,1fr);margin-top:auto}@media (max-width:900px){.entites .ca-row{grid-template-columns:1fr}}.entites .grille i:hover{transform:scale(1.9);background:#fff}"
+# 25/10 (Arslane, look kept in the retouch session): the note under the panels as look B, a band of large figures in two
+# groups (the real-name measure, the easier set) and the two closing sentences of the note under it.
+_ENTITES_NOTE_CSS = ".entites .note{max-width:none;font-size:inherit;line-height:inherit;color:inherit}.entites .note .nc2{display:block}.entites .note .nc2 .band{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border-top:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent);border-bottom:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent)}.entites .note .nc2 .g{display:flex;flex-direction:column;gap:14px;padding:20px 28px 22px 0}.entites .note .nc2 .g+.g{padding-left:28px;border-left:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent)}.entites .note .nc2 .h{min-height:3em;font:400 13px/1.5 \"Literata\",Georgia,serif;font-style:italic;color:var(--sur-vert-pale)}.entites .note .nc2 .fs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:auto}.entites .note .nc2 .f{display:flex;flex-direction:column;gap:8px}.entites .note .nc2 .n{font:500 52px/1 \"Literata\",Georgia,serif;letter-spacing:-.02em;color:var(--sur-vert);font-variant-numeric:lining-nums}.entites .note .nc2 .n i{font-style:normal;font-size:20px;letter-spacing:0;color:var(--pan-vif,#d64a5c)}.entites .note .nc2 .m{font:500 10.5px/1.6 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--sur-vert-pale)}.entites .note .nc2 .c{display:block;margin-top:14px;font:400 13.5px/1.6 \"Literata\",Georgia,serif;color:var(--sur-vert-pale)}@media (max-width:900px){.entites .note .nc2 .band{grid-template-columns:1fr}.entites .note .nc2 .g+.g{padding-left:0;border-left:0;border-top:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent)}}"
+# (labels appear, a scan passes, the seal lands), on a 9 s loop; still under prefers-reduced-motion.
+_AUDIT_VIVANT = "<p class=\"marque-h\">The extraction cost audit</p><h2 class=\"h2\" style=\"font-size:clamp(24px,2vw,30px);line-height:1.2;max-width:28ch\">Find the cheapest extractor for each field, measured on your own pages.</h2><style>\n.lk1{margin-top:30px;display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:26px;align-items:center}\n.lk1 .pg{position:relative;padding:18px 20px 20px;border-radius:4px;color:var(--encre);\n  background:linear-gradient(170deg,var(--papier-haut),var(--papier-bas));box-shadow:0 28px 60px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.5) inset;transform:rotate(-1deg)}\n.lk1 .hd{display:flex;justify-content:space-between;font:500 10px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--demi);padding-bottom:10px;border-bottom:1px solid var(--filet-clair)}\n.lk1 .rw{position:relative;display:grid;grid-template-columns:132px 1fr 52px;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(27,29,24,.1)}\n.lk1 .rw span{font:500 12px/1 \"Literata\",Georgia,serif;white-space:nowrap}\n.lk1 .rw i{height:7px;border-radius:4px;background:rgba(27,29,24,.18)}\n.lk1 .rw em{justify-self:end;font:600 9px/1 var(--mono);letter-spacing:.12em;font-style:normal;padding:4px 6px;border-radius:3px;background:#1d6b47;color:#e8f6ee;opacity:0;transform:translateX(8px);animation:lk1t 9s infinite}\n.lk1 .sc{position:absolute;left:0;right:0;height:26px;top:34px;background:linear-gradient(180deg,transparent,rgba(87,177,132,.35),transparent);opacity:0;animation:lk1s 9s infinite}\n.lk1 .st{position:absolute;right:-14px;bottom:-18px;width:96px;height:96px;opacity:0;animation:lk1x 9s infinite}\n.lk1 ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:18px}\n.lk1 li{position:relative;padding-left:14px;color:var(--sur-vert);opacity:.4;animation:lk1l 9s infinite}\n.lk1 li:before{content:\"\";position:absolute;left:0;top:2px;bottom:2px;width:2px;background:var(--vert-vif)}\n.lk1 li b{display:block;font:600 17px/1.2 \"Literata\",Georgia,serif}.lk1 li small{display:block;margin-top:5px;font:400 11.5px/1.45 var(--mono);opacity:.8}\n.lk1 li:nth-child(2){animation-delay:3s}.lk1 li:nth-child(3){animation-delay:6s}\n@keyframes lk1l{0%,2%{opacity:.4}5%,30%{opacity:1}34%,100%{opacity:.4}}\n@keyframes lk1t{0%,3%{opacity:0;transform:translateX(8px)}10%,90%{opacity:1;transform:none}96%,100%{opacity:0}}\n@keyframes lk1s{0%,33%{opacity:0;top:34px}36%{opacity:1;top:34px}60%{opacity:1;top:calc(100% - 40px)}64%,100%{opacity:0;top:calc(100% - 40px)}}\n@keyframes lk1x{0%,66%{opacity:0;transform:scale(1.6) rotate(-30deg)}71%{opacity:1;transform:scale(.94) rotate(-8deg)}74%,94%{opacity:1;transform:scale(1) rotate(-8deg)}100%{opacity:0;transform:scale(1) rotate(-8deg)}}\n@media (max-width:900px){.lk1{grid-template-columns:1fr}}\n@media (max-width:700px){.lk1 .st{right:6px;width:84px;height:84px;animation-name:lk1xm}}\n@keyframes lk1xm{0%,66%{opacity:0;transform:scale(1.12) rotate(-30deg)}71%{opacity:1;transform:scale(.94) rotate(-8deg)}74%,94%{opacity:1;transform:scale(1) rotate(-8deg)}100%{opacity:0;transform:scale(1) rotate(-8deg)}}\n@media (prefers-reduced-motion:reduce){.lk1 *{animation:none!important}}</style><div class=\"lk1\"><div class=\"pg\" aria-hidden=\"true\"><div class=\"hd\"><span>Your sample · page 1</span><span>5 fields</span></div><div class=\"rw\"><span>Name</span><i style=\"width:62%\"></i><em style=\"animation-delay:0.0s\">LABEL</em></div><div class=\"rw\"><span>Date of birth</span><i style=\"width:40%\"></i><em style=\"animation-delay:0.25s\">LABEL</em></div><div class=\"rw\"><span>Document number</span><i style=\"width:74%\"></i><em style=\"animation-delay:0.5s\">LABEL</em></div><div class=\"rw\"><span>Country</span><i style=\"width:34%\"></i><em style=\"animation-delay:0.75s\">LABEL</em></div><div class=\"rw\"><span>Address</span><i style=\"width:88%\"></i><em style=\"animation-delay:1.0s\">LABEL</em></div><div class=\"sc\"></div><svg class=\"st\" viewBox=\"0 0 100 100\" aria-hidden=\"true\"><defs><radialGradient id=\"lk1g\" cx=\"40%\" cy=\"35%\"><stop offset=\"0\" stop-color=\"#2f9a68\"/><stop offset=\"1\" stop-color=\"#145036\"/></radialGradient><path id=\"lk1c\" d=\"M50,50 m-33,0 a33,33 0 1,1 66,0 a33,33 0 1,1 -66,0\"/></defs><circle cx=\"50\" cy=\"50\" r=\"46\" fill=\"url(#lk1g)\"/><circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"none\" stroke=\"#c9f2dc\" stroke-width=\".7\" opacity=\".7\"/><text font-family=\"Roboto Mono,ui-monospace\" font-size=\"7.4\" letter-spacing=\"1.6\" fill=\"#e3f7ec\"><textPath href=\"#lk1c\">SEALED · SIGNED · CRUSETRA · SEALED ·</textPath></text><text x=\"50\" y=\"53\" text-anchor=\"middle\" font-family=\"Roboto Mono,ui-monospace\" font-size=\"7.5\" fill=\"#fff\">__SCEAU8__</text></svg></div><ol><li><b>You label</b><small>a sample of your own documents, field by field.</small></li><li><b>You run</b><small>the audit on your machine: your extractor, the ones you compare, our local models.</small></li><li><b>You receive</b><small>a sealed record and a signed report: the cheapest source per field, the saving at your volume. Check the signature with <code>node src/verifier-rapport.mjs</code>.</small></li></ol></div>"
+_RECUS_CSS = "<style>#report .r-recus{position:relative;overflow:hidden;border:0;border-top:1px solid rgba(236,233,223,.12);border-bottom:1px solid rgba(236,233,223,.12);border-radius:0;padding:44px 40px;\nbackground:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\"),#0a0c0b}\n#report .r-recus:before{content:\"\";position:absolute;inset:-40px 0;pointer-events:none;background:repeating-linear-gradient(180deg,rgba(236,233,223,.025) 0 1px,transparent 1px 4px);animation:rk3s 14s linear infinite}\n@keyframes rk3s{to{transform:translateY(40px)}}\n#report .rk3{position:relative}#report .rk3 .top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:end}\n#report .rk3 .mh{font:500 11px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:#8f938c}\n#report .rk3 h3{margin:12px 0 0;font:600 40px/1.05 \"Literata\",Georgia,serif;color:#ece9df;letter-spacing:-.02em}\n#report .rk3 .in{margin:0;font:400 15px/1.6 \"Literata\",Georgia,serif;color:#8f938c}\n#report .rk3 code{display:block;margin-top:26px;padding:14px 0;border-top:1px solid rgba(236,233,223,.12);border-bottom:1px solid rgba(236,233,223,.12);font:400 12px/1.8 var(--mono);color:#ece9df;white-space:pre;overflow-x:auto}\n#report .rk3 code b{color:#8f938c;font-weight:400}\n#report .rk3 .s{display:grid;grid-template-columns:repeat(5,1fr);margin-top:30px}#report .rk3 .s div{padding:4px 18px 0;border-left:1px solid rgba(236,233,223,.12)}#report .rk3 .s div:first-child{border-left:0;padding-left:0}\n#report .rk3 .s b{display:block;font:500 46px/1 \"Literata\",Georgia,serif;color:#ece9df;letter-spacing:-.03em;font-variant-numeric:tabular-nums}#report .rk3 .s b small{font-size:20px;color:#8f938c}\n#report .rk3 .s .o b{color:#8f938c}#report .rk3 .s span{display:block;margin-top:10px;font:400 12px/1.4 var(--mono);color:#ece9df}#report .rk3 .s span i{display:block;font-style:normal;color:#8f938c}\n#report .rk3 .nt{letter-spacing:0;text-transform:none;margin-top:22px;font:400 11px/1.6 var(--mono);color:#8f938c}\n@media (max-width:800px){#report .rk3 .s{grid-template-columns:1fr 1fr}#report .rk3 .top{grid-template-columns:minmax(0,1fr);gap:18px}}@media (prefers-reduced-motion:reduce){#report .r-recus, *{animation:none!important}}</style>"
+# 25/10 (Arslane, look C kept): the sample-report caption as the same green seal set on the page's corner.
+_LEGENDE_SCEAU = "<style>.cp3{position:relative;display:grid;grid-template-columns:clamp(84px,34%,132px) minmax(0,1fr);gap:18px;align-items:center;margin-top:-66px;text-transform:none;letter-spacing:0}\n.cp3 svg{width:100%;height:auto;aspect-ratio:1;transform:rotate(-8deg);filter:drop-shadow(0 14px 24px rgba(0,0,0,.55));animation:cp3s 7s ease-in-out infinite}\n@keyframes cp3s{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(-2deg) scale(1.03)}}\n.cp3 .t{padding-top:66px;min-width:0;overflow-wrap:anywhere}.cp3 b{display:block;font:600 22px/1.1 \"Literata\",Georgia,serif;color:var(--sur-vert)}\n.cp3 small{display:block;margin-top:6px;font:400 11px/1.5 var(--mono);color:var(--sur-vert);opacity:.72}\n.cp3 a{display:inline-block;margin-top:12px;font:600 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--vert-vif);text-decoration:none;border-bottom:1px solid var(--vert-vif);padding-bottom:4px}\n@media (prefers-reduced-motion:reduce){.cp3,.cp3 *{animation:none!important}}</style>\n<div class=\"cp3\"><svg viewBox=\"0 0 100 100\" aria-hidden=\"true\"><defs><radialGradient id=\"cp3g\" cx=\"40%\" cy=\"35%\"><stop offset=\"0\" stop-color=\"#2f9a68\"/><stop offset=\"1\" stop-color=\"#145036\"/></radialGradient>\n<path id=\"cp3c\" d=\"M50,50 m-35,0 a35,35 0 1,1 70,0 a35,35 0 1,1 -70,0\"/></defs><circle cx=\"50\" cy=\"50\" r=\"47\" fill=\"url(#cp3g)\"/>\n<circle cx=\"50\" cy=\"50\" r=\"42\" fill=\"none\" stroke=\"#c9f2dc\" stroke-width=\".7\" opacity=\".7\"/><circle cx=\"50\" cy=\"50\" r=\"27\" fill=\"none\" stroke=\"#c9f2dc\" stroke-width=\".5\" opacity=\".6\"/>\n<text font-family=\"Roboto Mono,ui-monospace\" font-size=\"6.6\" letter-spacing=\"1.3\" fill=\"#e3f7ec\"><textPath href=\"#cp3c\">SEALED __D__ &#183; SIGNED &#183; CRUSETRA &#183;</textPath></text>\n<text x=\"50\" y=\"49\" text-anchor=\"middle\" font-family=\"Literata,Georgia,serif\" font-size=\"9\" font-weight=\"600\" fill=\"#fff\">Sealed</text>\n<text x=\"50\" y=\"59\" text-anchor=\"middle\" font-family=\"Roboto Mono,ui-monospace\" font-size=\"5.6\" fill=\"#d8f5e6\">__H8__</text></svg>\n<div class=\"t\"><b>__N__ real receipts</b><small>record __H__<br>signed page beside the PDF</small><a href=\"__PDF__\" download>Download the sample &#8595;</a></div></div>"
+# 25/10 (Arslane, look B kept in the retouch session)
+# The free test as a travelling file (CSV, graded, measured JSON, email, PDF) on a 12.5 s loop beside five clickable
+# steps (CSS radios); the chosen step shows its labelled rows and its numbered commands. The four links under it become
+# tiles (scoped by .r-essai+.liens, which only the Routing report has). Under prefers-reduced-motion the chosen step's
+# frame stands still.
+_ESSAI_CSS = r"""<style>#report .r-essai .gd-h{margin:10px 0 0}
+#report .gd{margin-top:30px;padding:34px;border-radius:18px;border:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--nuit-a) 64%,transparent),color-mix(in srgb,var(--nuit-b) 80%,transparent))}#report .gd input{position:absolute;opacity:0;pointer-events:none}
+#report .gd .top{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:34px;align-items:center}
+#report .gd .stage{position:relative;height:300px;border-radius:12px;background:radial-gradient(120% 90% at 50% 40%,color-mix(in srgb,var(--nuit-a) 90%,#fff 4%),var(--nuit-c));overflow:hidden}
+#report .gd .stage:after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--vert-clair);transform-origin:left;animation:gdp 2.5s linear infinite;opacity:.7}
+@keyframes gdp{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+#report .gd .fr{position:absolute;inset:0;display:grid;place-items:center;opacity:0;animation:gbf 12.5s infinite}
+@keyframes gbf{0%{opacity:0;transform:translateY(14px) scale(.97)}3%,17%{opacity:1;transform:none}20%,100%{opacity:0;transform:translateY(-10px) scale(.98)}}
+#report .gd .sh,#report .gd .pdf{width:min(340px,80%);padding:16px 18px 18px;border-radius:4px;color:var(--encre);background:linear-gradient(170deg,var(--papier-haut),var(--papier-bas));box-shadow:0 24px 50px rgba(0,0,0,.45);transform:rotate(-1.2deg)}
+#report .gd .pdf{width:200px;transform:rotate(2deg)}
+#report .gd .stage p{margin:0}#report .gd .fn{font:600 11px/1 var(--mono);letter-spacing:.06em;color:var(--demi);padding-bottom:10px;border-bottom:1px solid var(--filet-clair);margin-bottom:8px;overflow-wrap:anywhere;line-height:1.3}
+#report .gd .hdr{font:500 10px/1.4 var(--mono);color:#1d6b47;margin-bottom:6px;word-break:break-all}
+#report .gd .ln{display:flex;align-items:center;gap:8px;height:20px;border-bottom:1px solid rgba(27,29,24,.08)}#report .gd .ln i{display:block;height:6px;border-radius:3px;background:rgba(27,29,24,.18)}
+#report .gd .ln u{display:block;width:9px;height:9px;border-radius:50%;background:#2f9a68;opacity:.85;margin-left:auto}#report .gd .ln u+u{margin-left:0;opacity:.55}#report .gd .ln u+u+u{opacity:.3}
+#report .gd .cap{margin-top:10px;font:400 10.5px/1.4 var(--mono);color:var(--demi)}
+#report .gd .fi,#report .gd .env{width:min(320px,80%);padding:20px;border-radius:10px;border:1px solid color-mix(in srgb,var(--vert-vif) 45%,transparent);background:color-mix(in srgb,var(--nuit-c) 85%,transparent);box-shadow:0 0 30px color-mix(in srgb,var(--vert-vif) 18%,transparent)}
+#report .gd .fi .fn,#report .gd .env .fn{color:var(--sur-vert);border-color:color-mix(in srgb,var(--sur-vert) 12%,transparent)}#report .gd .fi .cap,#report .gd .env .cap{color:var(--sur-vert-pale)}
+#report .gd .bar{margin-top:14px;height:3px;border-radius:2px;background:color-mix(in srgb,var(--sur-vert) 12%,transparent);overflow:hidden}#report .gd .bar i{display:block;height:100%;background:var(--vert-clair)}
+#report .gd .env{position:relative;padding-top:48px}#report .gd .env:before{content:"";position:absolute;left:20px;right:20px;top:14px;height:26px;border:1px solid color-mix(in srgb,var(--sur-vert) 35%,transparent);border-top:0;clip-path:polygon(0 0,50% 100%,100% 0)}
+#report .gd .sts{display:flex;flex-direction:column}
+#report .gd .st{position:relative;cursor:pointer;display:grid;grid-template-columns:40px 1fr;align-items:baseline;padding:11px 14px 11px 12px;border-radius:10px;opacity:.45;animation:gbl 12.5s infinite;transition:background .25s}
+@keyframes gbl{0%{opacity:.45}2%,18%{opacity:1}21%,100%{opacity:.45}}
+#report .gd .st:hover{background:color-mix(in srgb,var(--sur-vert) 5%,transparent);opacity:1}
+#report .gd .st b{font:500 26px/1 "Literata",Georgia,serif;color:var(--vert-clair)}#report .gd .st em{display:block;font:600 19px/1.15 "Literata",Georgia,serif;font-style:normal;color:var(--sur-vert)}
+#report .gd .st small{display:block;margin-top:3px;font:400 13px/1.4 "Literata",Georgia,serif;color:var(--sur-vert-pale)}
+#report .gd #gd0:checked~.top .sts .st:nth-of-type(1),#report .gd #gd1:checked~.top .sts .st:nth-of-type(2),#report .gd #gd2:checked~.top .sts .st:nth-of-type(3),#report .gd #gd3:checked~.top .sts .st:nth-of-type(4),#report .gd #gd4:checked~.top .sts .st:nth-of-type(5){opacity:1;animation:none;background:color-mix(in srgb,var(--vert-vif) 12%,transparent);box-shadow:inset 2px 0 0 var(--vert-clair)}
+#report .gd #gd0:focus-visible~.top .sts .st:nth-of-type(1),#report .gd #gd1:focus-visible~.top .sts .st:nth-of-type(2),#report .gd #gd2:focus-visible~.top .sts .st:nth-of-type(3),#report .gd #gd3:focus-visible~.top .sts .st:nth-of-type(4),#report .gd #gd4:focus-visible~.top .sts .st:nth-of-type(5){outline:2px solid var(--vert-clair);outline-offset:2px}
+#report .gd .ps{margin-top:26px;padding-top:24px;border-top:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent)}#report .gd .p{display:none}
+#report .gd #gd0:checked~.ps .p0,#report .gd #gd1:checked~.ps .p1,#report .gd #gd2:checked~.ps .p2,#report .gd #gd3:checked~.ps .p3,#report .gd #gd4:checked~.ps .p4{display:grid;animation:gdi .4s var(--montee)}@keyframes gdi{from{opacity:0;transform:translateY(5px)}}
+#report .gd .p.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+#report .gd .pr{margin:0;max-width:none}#report .gd .rw{display:grid;grid-template-columns:118px 1fr;gap:16px;padding:9px 0;border-top:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent)}#report .gd .rw:first-child{border-top:0;padding-top:0}
+#report .gd dt{font:500 10.5px/1.6 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--vert-clair)}#report .gd dd{margin:0;font:400 14.5px/1.55 "Literata",Georgia,serif;color:var(--sur-vert-pale)}
+#report .gd dd code{font:400 11.5px/1.6 var(--mono);color:var(--sur-vert);background:color-mix(in srgb,var(--nuit-c) 80%,transparent);border:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent);border-radius:5px;padding:1px 6px;overflow-wrap:anywhere}
+#report .gd .mk{display:inline-grid;place-items:center;width:17px;height:17px;margin:0 2px;border-radius:50%;background:var(--vert-vif);color:var(--nuit-c);font:600 10px/1 var(--mono);vertical-align:2px}
+#report .gd .tm{margin:0;padding:16px 18px;border-radius:10px;background:color-mix(in srgb,var(--nuit-c) 90%,transparent);border:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent);font:400 12px/1.85 var(--mono);color:var(--sur-vert);white-space:pre-wrap;word-break:break-all}
+#report .gd .tm b{color:var(--sur-vert-pale);font-weight:400}#report .gd .tm .n{display:inline-grid;place-items:center;width:17px;height:17px;margin-right:8px;border-radius:50%;background:var(--vert-vif);color:var(--nuit-c);font:600 10px/1 var(--mono)}
+#report .r-essai+.liens{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+#report .r-essai+.liens .lien-e{position:relative;display:flex;flex-direction:column;justify-content:flex-start;gap:8px;min-height:118px;padding:18px 58px 18px 20px;border:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent);border-radius:14px;
+background:linear-gradient(180deg,color-mix(in srgb,var(--nuit-a) 64%,transparent),color-mix(in srgb,var(--nuit-b) 80%,transparent));letter-spacing:0;text-transform:none;color:var(--sur-vert);text-decoration:none;
+transition:border-color .3s,transform .3s var(--montee),box-shadow .3s}
+#report .r-essai+.liens .lien-e .lv{display:block;font:500 10.5px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--vert-clair)}
+#report .r-essai+.liens .lien-e .lt{display:block;font:600 18px/1.25 "Literata",Georgia,serif;color:var(--sur-vert)}
+#report .r-essai+.liens .lien-e:hover .lv,#report .r-essai+.liens .lien-e:hover .lt{transform:none}
+#report .r-essai+.liens .lien-e .la{position:absolute;right:16px;bottom:16px;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;border:1px solid color-mix(in srgb,var(--sur-vert) 30%,transparent);font:400 14px/1 var(--mono);transition:all .3s}
+#report .r-essai+.liens .lien-e:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--vert-vif) 55%,transparent);box-shadow:0 16px 34px rgba(0,0,0,.3)}
+#report .r-essai+.liens .lien-e:hover .la{transform:none;background:var(--vert-clair);border-color:var(--vert-clair);color:var(--nuit-c)}
+#report .r-essai+.liens .lien-e:focus-visible{outline:2px solid var(--vert-clair);outline-offset:3px}
+@media (max-width:900px){#report .gd{padding:24px}#report .gd .top,#report .gd .p.two{grid-template-columns:1fr}#report .gd .top{gap:18px}#report .gd .stage{height:240px}#report .r-essai+.liens{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){#report .gd{padding:18px 14px}#report .gd .st{padding:9px 10px;grid-template-columns:32px 1fr}#report .gd .st b{font-size:22px}#report .gd .st em{font-size:17px}
+#report .gd .rw{grid-template-columns:1fr;gap:4px}#report .gd .tm{padding:12px 12px;font-size:11px}#report .r-essai+.liens{grid-template-columns:1fr}#report .r-essai+.liens .lien-e{min-height:0;padding:16px 58px 16px 18px}}
+@media (prefers-reduced-motion:reduce){#report .r-essai *,#report .r-essai+.liens .lien-e,#report .r-essai+.liens .lien-e *{animation:none!important;transition:none!important}#report .gd .stage:after{display:none}
+#report .gd .st{opacity:.7}#report .gd #gd0:checked~.top .stage .fr:nth-child(1),#report .gd #gd1:checked~.top .stage .fr:nth-child(2),#report .gd #gd2:checked~.top .stage .fr:nth-child(3),#report .gd #gd3:checked~.top .stage .fr:nth-child(4),#report .gd #gd4:checked~.top .stage .fr:nth-child(5){opacity:1}#report .r-essai+.liens .lien-e:hover{transform:none}}</style>"""
+
+# 25/10 (Arslane, look C kept in the retouch session): under the instrument card, the pricing link as a tile like the
+# report's link tiles (small verb, title, arrow) and the measurement note as numbered, labelled footnotes in two
+# columns. Real markup in place of the old link and paragraph; the tile keeps the class affiche-tarif (garde-voix reads
+# its verb) and the href it had. Every figure in a footnote comes from the caller's variables.
+_TARIF_CSS = """<style>.tn3{display:grid;grid-template-columns:240px minmax(0,1fr);gap:34px;align-items:start;margin:18px 4px 0}
+.tn3 a.affiche-tarif{position:relative;display:flex;flex-direction:column;gap:8px;min-height:118px;margin:0;padding:18px 58px 18px 20px;border-radius:14px;border:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent);
+background:linear-gradient(180deg,color-mix(in srgb,var(--nuit-a) 64%,transparent),color-mix(in srgb,var(--nuit-b) 80%,transparent));color:var(--sur-vert);font-family:inherit;font-size:inherit;letter-spacing:0;text-transform:none;text-decoration:none;transition:transform .3s var(--montee),border-color .3s}
+.tn3 a small{font:500 10.5px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--vert-clair)}.tn3 a b{font:600 22px/1.2 "Literata",Georgia,serif}
+.tn3 a i{position:absolute;right:16px;bottom:16px;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;border:1px solid color-mix(in srgb,var(--sur-vert) 30%,transparent);font-style:normal;transition:all .3s}
+.tn3 a.affiche-tarif:hover{color:var(--sur-vert);transform:translateY(-3px);border-color:color-mix(in srgb,var(--vert-vif) 55%,transparent)}.tn3 a:hover i{background:var(--vert-clair);color:var(--nuit-c)}
+.tn3 a.affiche-tarif:focus-visible{outline:2px solid var(--vert-clair);outline-offset:3px}
+.tn3 ol{margin:0;padding:0;list-style:none;columns:2;column-gap:34px;counter-reset:n}
+.tn3 li{break-inside:avoid;counter-increment:n;display:grid;grid-template-columns:22px 1fr;margin:0 0 14px;font:400 13px/1.55 "Literata",Georgia,serif;color:var(--sur-vert-pale)}
+.tn3 li:before{content:counter(n);font:500 11px/1.8 var(--mono);color:var(--vert-clair)}.tn3 li b{color:var(--sur-vert);font-weight:600}
+@media (max-width:900px){.tn3{grid-template-columns:1fr}.tn3 ol{columns:1}}
+@media (prefers-reduced-motion:reduce){.tn3 a.affiche-tarif,.tn3 a i{transition:none}.tn3 a.affiche-tarif:hover{transform:none}}</style>"""
+
+
+def _tarif_et_notes(affiche, href, notes):
+    """The instrument card (affiche_html, built without its link and note) with the pricing tile and the numbered
+    footnotes set inside its column, after the card. `notes` is a list of (label, text)."""
+    fin = affiche.rstrip()
+    if not fin.endswith("</div>") or 'class="affiche-tarif"' in fin or 'class="t-note"' in fin:
+        sys.exit("affiche_html a changé de forme : la tuile des tarifs ne sait plus où se poser")
+    bloc = (f'{_TARIF_CSS}<div class="tn3"><a class="affiche-tarif" href="{href}"><small>See</small> <b>Pricing</b><i aria-hidden="true">&#8594;</i></a>'
+            '<ol>' + "".join(f"<li><span><b>{t}.</b> {d}</span></li>" for t, d in notes) + "</ol></div>")
+    return fin[:-len("</div>")] + bloc + "\n  </div>"
+
+
+def couture_defile(texte, empreinte, fois=8):
+    """The seam (25/10, look C kept): `texte` then the content hash, repeated `fois` times (an even number, so the
+    -50% loop of the ticker lands on its own start); the hash comes from the caller's sealed record."""
+    if fois % 2:
+        sys.exit("la couture défile sur la moitié de sa ligne : il lui faut un nombre pair de répétitions")
+    morceau = f"{texte} &#183; content hash <em>{empreinte}</em> &#183; "
+    return f'<div class="couture defile" aria-hidden="true"><div class="colonne"><div class="cz3"><div>{morceau * fois}</div></div></div></div>'
+
+
+# 25/10: the Routing retouches carried to the Screening page, in its own accent. The green that the kept looks wrote as
+# hex inside their SVG becomes the Screening tool's colours, read from PALETTE_RUBIS (outil.py), never typed here.
+_ACCENT_RUBIS = dict(re.findall(r"--accent-(titre|vif|clair):(#[0-9a-f]{6})", PALETTE_RUBIS))
+
+
+def _en_rubis(s):
+    for vert, nom in (("#2f9a68", "vif"), ("#145036", "titre"), ("#c9f2dc", "clair"), ("#e3f7ec", "clair"), ("#d8f5e6", "clair")):
+        if vert not in s:
+            sys.exit(f"le vert {vert} n'est plus dans le look : la passe rubis ne sait plus quoi remplacer")
+        s = s.replace(vert, _ACCENT_RUBIS[nom])
+    return s
+
+
+# The symmetric link tiles of the Routing report (look B kept on 25/10), for any row of links: .liens.tuiles, one column
+# per link (--n). Each link holds a small verb (.lv), a title (.lt) and the arrow (.la).
+_TUILES_CSS = """<style>.liens.tuiles{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:12px;margin-top:34px}
+.liens.tuiles .lien-e{position:relative;display:flex;flex-direction:column;justify-content:flex-start;gap:8px;min-height:118px;padding:18px 58px 18px 20px;border:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent);border-radius:14px;
+background:linear-gradient(180deg,color-mix(in srgb,var(--nuit-a) 64%,transparent),color-mix(in srgb,var(--nuit-b) 80%,transparent));letter-spacing:0;text-transform:none;color:var(--sur-vert);text-decoration:none;
+transition:border-color .3s,transform .3s var(--montee),box-shadow .3s}
+.liens.tuiles .lien-e .lv{display:block;font:500 10.5px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--vert-clair)}
+.liens.tuiles .lien-e .lt{display:block;font:600 18px/1.25 "Literata",Georgia,serif;color:var(--sur-vert)}
+.liens.tuiles .lien-e:hover .lv,.liens.tuiles .lien-e:hover .lt{transform:none}
+.liens.tuiles .lien-e .la{position:absolute;right:16px;bottom:16px;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;border:1px solid color-mix(in srgb,var(--sur-vert) 30%,transparent);font:400 14px/1 var(--mono);transition:all .3s}
+.liens.tuiles .lien-e:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--vert-vif) 55%,transparent);box-shadow:0 16px 34px rgba(0,0,0,.3)}
+.liens.tuiles .lien-e:hover .la{transform:none;background:var(--vert-clair);border-color:var(--vert-clair);color:var(--nuit-c)}
+.liens.tuiles .lien-e:focus-visible{outline:2px solid var(--vert-clair);outline-offset:3px}
+@media (max-width:760px){.liens.tuiles{grid-template-columns:1fr}.liens.tuiles .lien-e{min-height:0;padding:16px 58px 16px 18px}}
+@media (prefers-reduced-motion:reduce){.liens.tuiles .lien-e,.liens.tuiles .lien-e *{transition:none!important}.liens.tuiles .lien-e:hover{transform:none}}</style>"""
+
+
+def liens_tuiles(liens):
+    """liens: (href, verb, title, extra attributes). The row of links as symmetric tiles."""
+    return (f'{_TUILES_CSS}<p class="liens tuiles" style="--n:{len(liens)}">'
+            + "".join(f'<a class="lien-e" href="{h}"{x}><span class="lv">{v}</span><span class="lt">{t}</span><span class="la" aria-hidden="true">&#8594;</span></a>'
+                      for h, v, t, x in liens) + "</p>")
+
+
+# 25/10 (Arslane, look A kept on Routing, carried to Screening): the report's three steps beside a living sample page.
+# The page is the committed sample list (invented counterparties): five of its rows, read from the sealed record, take
+# the verdict the record gives them as the scan passes (step 2), then the seal lands (step 3). Colours from the page's
+# own variables (rubis here). The steps are long on this page, so they run under the page rather than in a side column.
+_LISTE_VIVANTE_CSS = """<style>
+.sk1{margin-top:30px;display:grid;grid-template-columns:minmax(0,1fr);gap:34px}
+.sk1 .pg{position:relative;padding:18px 20px 64px;border-radius:4px;color:var(--encre);max-width:520px;
+  background:linear-gradient(170deg,var(--papier-haut),var(--papier-bas));box-shadow:0 28px 60px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.5) inset;transform:rotate(-1deg)}
+.sk1 .hd{display:flex;justify-content:space-between;gap:12px;font:500 10px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--demi);padding-bottom:10px;border-bottom:1px solid var(--filet-clair)}
+.sk1 .rw{position:relative;display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(27,29,24,.1);animation:sk1r 9s infinite}
+.sk1 .rw code{font:500 10px/1 var(--mono);color:var(--demi);letter-spacing:.06em}
+.sk1 .rw span{font:500 12.5px/1.2 "Literata",Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sk1 .rw em{justify-self:end;font:600 9px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;font-style:normal;padding:4px 6px;border-radius:3px;white-space:nowrap;opacity:0;transform:translateX(8px);animation:sk1t 9s infinite}
+.sk1 .rw em.s{background:var(--vert-titre);color:#fff}
+.sk1 .rw em.p{box-shadow:inset 0 0 0 1px var(--vert-vif);color:var(--vert-titre)}
+.sk1 .rw em.n{background:rgba(27,29,24,.1);color:var(--demi)}
+.sk1 .sc{position:absolute;left:0;right:0;height:26px;top:34px;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--vert-vif) 35%,transparent),transparent);opacity:0;animation:sk1s 9s infinite}
+.sk1 .ft{position:absolute;left:20px;bottom:24px;margin:0;font:500 10px/1 var(--mono);letter-spacing:.12em;color:var(--demi)}
+.sk1 .st{position:absolute;right:-14px;bottom:-30px;width:96px;height:96px;opacity:0;animation:sk1x 9s infinite}
+.sk1 .st .g0{stop-color:var(--vert-vif)}.sk1 .st .g1{stop-color:var(--vert-titre)}
+.sk1 .st .an{fill:none;stroke:var(--vert-clair);stroke-width:.7;opacity:.7}.sk1 .st .tx{fill:var(--vert-clair)}.sk1 .st .ce{fill:#fff}
+.sk1 ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:18px}
+.sk1 li{position:relative;padding-left:14px;color:var(--sur-vert);opacity:.5;animation:sk1l 9s infinite}
+.sk1 li:before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:2px;background:var(--vert-vif)}
+.sk1 li b{display:block;font:600 17px/1.2 "Literata",Georgia,serif}.sk1 li small{display:block;margin-top:5px;font:400 14px/1.55 "Literata",Georgia,serif;opacity:.85}
+.sk1 li code{font:400 12px/1.5 var(--mono);overflow-wrap:break-word}
+.sk1 li:nth-child(2){animation-delay:3s}.sk1 li:nth-child(3){animation-delay:6s}
+@keyframes sk1l{0%,2%{opacity:.5}5%,30%{opacity:1}34%,100%{opacity:.5}}
+@keyframes sk1r{0%{opacity:.35;transform:translateX(-6px)}6%,96%{opacity:1;transform:none}100%{opacity:.35}}
+@keyframes sk1t{0%,36%{opacity:0;transform:translateX(8px)}44%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes sk1s{0%,33%{opacity:0;top:34px}36%{opacity:1;top:34px}60%{opacity:1;top:calc(100% - 40px)}64%,100%{opacity:0;top:calc(100% - 40px)}}
+@keyframes sk1x{0%,66%{opacity:0;transform:scale(1.6) rotate(-30deg)}71%{opacity:1;transform:scale(.94) rotate(-8deg)}74%,94%{opacity:1;transform:scale(1) rotate(-8deg)}100%{opacity:0;transform:scale(1) rotate(-8deg)}}
+@keyframes sk1xm{0%,66%{opacity:0;transform:scale(1.12) rotate(-30deg)}71%{opacity:1;transform:scale(.94) rotate(-8deg)}74%,94%{opacity:1;transform:scale(1) rotate(-8deg)}100%{opacity:0;transform:scale(1) rotate(-8deg)}}
+@media (max-width:700px){.sk1 .st{right:6px;width:84px;height:84px;animation-name:sk1xm}.sk1 .rw{grid-template-columns:40px minmax(0,1fr) auto}}
+@media (prefers-reduced-motion:reduce){.sk1 *{animation:none!important}.sk1 .rw em{opacity:1;transform:none}.sk1 .st{opacity:1;transform:rotate(-8deg)}.sk1 li{opacity:1}}</style>"""
+
+
 def _section_rapport_routing():
     """L'audit du coût d'extraction en service (Routing, produit à prix fixe), page Routing, 30/09 : l'offre lue dans
     offre-routing.json (grille choisie par Arslane le 29/09), la feuille lue dans le rapport exemple rendu par
@@ -1521,13 +1766,17 @@ def _section_rapport_routing():
     insep_total = [x for x in rec["audit"]["inseparable"] if x["field"] == "total" and {x["source"], x["against"]} == {courant, meilleur}]
     cmd_grade = (f"npm run grade -- --cases=examples/cord-receipts/cord-labels-grouped.csv --name={courant} "
                  f"--values=examples/cord-receipts/cord-google-values.json --price-per-thousand-documents=100 --out=/tmp/{courant}.json")
-    recus = f"""<div class="r-recus">
-    <p class="marque-h">Start with receipts</p>
-    <p>The public run grades two vendors and our local tiers on {ex["cas"]} real receipts. Grade one vendor's outputs against the labels yourself, with nothing downloaded:</p>
-    <code class="r-cmd"><b>$ </b>git clone {DEPOT_URL}
+    # 25/10 (Arslane, look C kept): a dark textured band, the run on top, the five rates on one line. Values from rec.
+    _taux = [(meilleur, "vendor"), (courant, "vendor"), ("gen-4b", "ours, local, needs Ollama"), ("large", "ours, large encoder"), ("small", "ours, small encoder")]
+    _bande = "".join(f'<div class="{"o" if w.startswith("ours") else ""}"><b>{pc(n)[:-1]}<small>%</small></b><span>{n}<i>{w}</i></span></div>' for n, w in _taux)
+    recus = f"""<div class="r-recus">{_RECUS_CSS}
+    <div class="rk3"><div class="top"><div><p class="mh">Start with receipts</p><h3>{ex["cas"]} real receipts,<br>graded in the open.</h3></div>
+    <p class="in">The public run grades two vendors and our local tiers on {ex["cas"]} real receipts. Grade one vendor's outputs against the labels yourself, with nothing downloaded:</p></div>
+    <code><b>$ </b>git clone {DEPOT_URL}
 <b>$ </b>cd {DEPOT_URL.rsplit('/', 1)[1]} &amp;&amp; npm ci --ignore-scripts
 <b>$ </b>{cmd_grade}</code>
-    <p>On those receipts, {meilleur} reads {pc(meilleur)} of totals right and {courant} {pc(courant)}. Our two encoder tiers read {pc("small")} and {pc("large")}; the local tier that competes, gen-4b, reads {pc("gen-4b")}, and it needs Ollama. The local tiers read a text that our macOS OCR produced from the images, so their rates include that OCR's errors.</p>
+    <div class="s">{_bande}</div>
+    <p class="nt">Share of totals read right. The local tiers read a text that our macOS OCR produced from the images, so their rates include that OCR's errors.</p></div>
   </div>"""
     # 05/10 (parcours client) : les cinq pas disent ce que la commande fait vraiment : l'en-tête avec les types de champ (sans
     # type la comparaison est le texte exact, et l'outil refuse une colonne qui ressemble à des montants ou des dates sans
@@ -1539,31 +1788,76 @@ def _section_rapport_routing():
     if len(_octets) < 2:
         sys.exit("src/tessdata.ts du dépôt cascade ne porte plus les tailles des deux fichiers de langue : le pas 1 ne peut pas les citer")
     tess_mb = f"{sum(_octets) / 1e6:.1f}"
-    essai = f"""<div class="r-essai">
-    <p class="marque-h">How the free test goes</p>
-    <ol class="r-pas">
-      <li><span><b>Label {es["pages"]} pages</b> of one document type in a CSV: an id, the text, then one column per field, each named with its type, as in <code>id,text,total:amount,date:date,vendor:free-text</code>. Without a type the comparison is exact text, so "$1,234.50" and "1234.50" count as different; the tool refuses such a column unless you pass <code>--exact</code>. Write a dash where a document has no such line, and leave the cell empty when you do not know the value. For the text, take what your vendor already returns, <code>npm run text-from-exports -- --cases=your.csv --vendor=&lt;textract|documentai|azure&gt; --exports=&lt;folder&gt;</code>, or read your images offline: once, <code>npm run tessdata -- --prime</code> ({tess_mb} MB of language files), then <code>npm run text-from-images -- --cases=your.csv --images=&lt;folder&gt; --ocr=tesseract --lang=eng</code>. Either one writes <code>your-with-text.csv</code>: use that file in steps 2 and 3. Node 24 or newer. Up to {es["extracteurs"]} extractors.</span></li>
-      <li><span><b>Grade each extractor</b> you use or want to compare. We call no vendor: you run each one on your pages, then grade its outputs here. From a JSON of values, <code>{{ "&lt;id&gt;": {{ "&lt;field&gt;": "&lt;value&gt;" }} }}</code>: <code>npm run grade -- --cases=your-with-text.csv --name=&lt;vendor&gt; --values=&lt;its outputs&gt; --price-per-thousand-pages=&lt;your price&gt; --out=&lt;vendor&gt;.json</code>. From raw Textract, Document AI or Azure exports: <code>--vendor=&lt;textract|documentai|azure&gt; --exports=&lt;folder&gt; --mapping=mapping.json</code> in place of <code>--values</code>. The file it writes holds verdicts, no value.</span></li>
-      <li><span><b>Measure, with the margin you accept</b>: <code>npm run measure:yours -- --cases=your-with-text.csv --sorties=&lt;vendor&gt;.json,&lt;vendor&gt;.json --current=&lt;the one you run today&gt; --margin=2 --pages-per-year=&lt;your volume&gt;</code>, one <code>--sorties</code> per file or a comma list. Add <code>--no-encoders</code> to compare vendors only, with no download; without it, our local models download once.</span></li>
-      <li><span><b>Email the record</b>, the file ending in <code>-measured.json</code> beside your CSV, to {off["contact"]}. It holds counts, a right, wrong or blank verdict per case and field, your file's name and its hash, and the prices you declared: no document, no value. It is the one file you may attach; a price under a vendor contract can be replaced with a list price before you send it.</span></li>
-      <li><span><b>You get a one-page PDF back</b> by email within {es["delai_heures"]} hours, from that record. The record carries a content hash; this report is not signed, and the free test stays an internal evaluation under the thirty-day grant. The Snapshot and the Audit come back signed, and include the right to act on the recommendation in your own operations. On our {ex["cas"]}-receipt sample, two vendors {ecart_pts} points apart on totals could not be told apart{(" (" + str(insep_total[0]["discordant"]) + " disagreements, p = " + f"{insep_total[0]['p']:.2f}" + ")") if insep_total else ""}: {es["pages"]} pages separate vendors far apart, and the paid tiers size the sample for close ones.</span></li>
-    </ol>
-  </div>"""
+    # 25/10 (Arslane, look B kept in the retouch session): the same five steps, each fact of the old list kept in the
+    # labelled rows of its step, its commands numbered beside them. Every figure from es, off, ex, rec or tessdata.ts.
+    _C = lambda x: f"<code>{x}</code>"
+    _M = lambda n: f'<sup class="mk">{n}</sup>'
+    _hdr = "id,text,total:amount,date:date,vendor:free-text"
+    _vend = "--vendor=&lt;textract|documentai|azure&gt;"
+    _cmds = [
+        [f"npm run text-from-exports -- --cases=your.csv {_vend} --exports=&lt;folder&gt;",
+         "npm run tessdata -- --prime",
+         "npm run text-from-images -- --cases=your.csv --images=&lt;folder&gt; --ocr=tesseract --lang=eng"],
+        ["npm run grade -- --cases=your-with-text.csv --name=&lt;vendor&gt; --values=&lt;its outputs&gt; --price-per-thousand-pages=&lt;your price&gt; --out=&lt;vendor&gt;.json"],
+        ["npm run measure:yours -- --cases=your-with-text.csv --sorties=&lt;vendor&gt;.json,&lt;vendor&gt;.json --current=&lt;the one you run today&gt; --margin=2 --pages-per-year=&lt;your volume&gt;"],
+        [], []]
+    _insep = (f' ({insep_total[0]["discordant"]} disagreements, p = {insep_total[0]["p"]:.2f})') if insep_total else ""
+    _court = [("Label", f'{es["pages"]} pages of one document type, one typed column per field.'),
+              ("Grade", "each extractor on your own pages. We call no vendor."),
+              ("Measure", "every field, with the margin you accept."),
+              ("Email", "one record: counts and verdicts, no document, no value."),
+              ("Receive", f'a one-page PDF by email within {es["delai_heures"]} hours.')]
+    _rangs = [
+        [("Format", f"A CSV: an id, the text, then one column per field, named with its type: {_C(_hdr)}"),
+         ("No type", f'Exact text: "$1,234.50" and "1234.50" differ. Such a column is refused unless you pass {_C("--exact")}.'),
+         ("Blanks", "A dash where a document has no such line. Empty when you do not know the value."),
+         ("Text", f"What your vendor already returns {_M(1)}, or your images read offline: once {_M(2)} ({tess_mb} MB of language files), then {_M(3)}."),
+         ("Output", f'Either one writes {_C("your-with-text.csv")}, used in steps 2 and 3.'),
+         ("Needs", f'Node 24 or newer. Up to {es["extracteurs"]} extractors.')],
+        [("No vendor call", "You run each extractor you use or want to compare on your pages, then grade its outputs here."),
+         ("From values", f'A JSON {_C("{ &quot;&lt;id&gt;&quot;: { &quot;&lt;field&gt;&quot;: &quot;&lt;value&gt;&quot; } }")} {_M(1)}'),
+         ("From exports", f'Raw Textract, Document AI or Azure: {_C(_vend + " --exports=&lt;folder&gt; --mapping=mapping.json")} in place of {_C("--values")}.'),
+         ("Output", "Verdicts only, no value.")],
+        [("Margin", f"The one you accept, {_M(1)}."),
+         ("Files", f'One {_C("--sorties")} per file, or a comma list.'),
+         ("Vendors only", f'Add {_C("--no-encoders")}: nothing downloaded. Without it, our local models download once.')],
+        [("Send", f'The file ending in {_C("-measured.json")} beside your CSV, to {off["contact"]}.'),
+         ("It holds", "Counts, a right, wrong or blank verdict per case and field, your file's name and its hash, the prices you declared."),
+         ("Never", "No document, no value. It is the one file you may attach."),
+         ("Contract price", "A price under a vendor contract can be replaced with a list price before you send it.")],
+        [("Back", f'A one-page PDF by email within {es["delai_heures"]} hours, from that record. The record carries a content hash.'),
+         ("Free test", "This report is not signed: the free test stays an internal evaluation under the thirty-day grant."),
+         ("Paid tiers", "The Snapshot and the Audit come back signed, and include the right to act on the recommendation in your own operations."),
+         ("Sample size", f'On our {ex["cas"]}-receipt sample, two vendors {ecart_pts} points apart on totals could not be told apart{_insep}. {es["pages"]} pages separate vendors far apart; the paid tiers size the sample for close ones.')]]
+    _cadres = [
+        '<div class="sh"><p class="fn">your.csv</p><p class="hdr">' + _hdr + '</p>' + "".join(f'<p class="ln"><i style="width:{w}%"></i></p>' for w in (78, 64, 86, 58, 72)) + '</div>',
+        '<div class="sh"><p class="fn">your-with-text.csv &#183; graded</p>' + "".join(f'<p class="ln g"><i style="width:{w}%"></i><u></u><u></u><u></u></p>' for w in (60, 48, 66, 44, 56)) + '<p class="cap">verdicts, no value</p></div>',
+        '<div class="fi"><p class="fn">your-with-text-measured.json</p><p class="cap">counts &#183; a verdict per case and field &#183; your file\'s hash</p><p class="bar"><i></i></p></div>',
+        f'<div class="env"><p class="fn">to {off["contact"]}</p><p class="cap">one file attached, no document</p></div>',
+        f'<div class="pdf"><p class="fn">one-page PDF</p><p class="cap">by email within {es["delai_heures"]} hours</p>' + "".join(f'<p class="ln"><i style="width:{w}%"></i></p>' for w in (80, 62, 70)) + '</div>']
+    _pas = lambda k: (f'<div class="p p{k}{" two" if _cmds[k] else ""}"><dl class="pr">'
+                      + "".join(f'<div class="rw"><dt>{t}</dt><dd>{d}</dd></div>' for t, d in _rangs[k]) + "</dl>"
+                      + (('<pre class="tm">' + "\n".join(f'<span class="n">{n + 1}</span><b>$ </b>{c}' for n, c in enumerate(_cmds[k])) + "</pre>") if _cmds[k] else "")
+                      + "</div>")
+    for k, r in enumerate(_rangs):
+        if "".join(d for _, d in r).count('class="mk"') != len(_cmds[k]):
+            sys.exit(f"pas {k + 1} de l'essai : les renvois numérotés ne correspondent plus à ses commandes")
+    essai = (f'<div class="r-essai">{_ESSAI_CSS}<p class="marque-h">How the free test goes</p><h3 class="gd-h">Five steps, all on your machine.</h3>'
+             '<div class="gd">' + "".join(f'<input type="radio" name="gd" id="gd{k}"{" checked" if k == 0 else ""}>' for k in range(5))
+             + '<div class="top"><div class="stage" aria-hidden="true">'
+             + "".join(f'<div class="fr" style="animation-delay:{k * 2.5}s">{f}</div>' for k, f in enumerate(_cadres))
+             + '</div><div class="sts">'
+             + "".join(f'<label for="gd{k}" class="st" style="animation-delay:{k * 2.5}s"><b>{k + 1}</b><span><em>{t}</em><small>{d}</small></span></label>' for k, (t, d) in enumerate(_court))
+             + '</div></div><div class="ps">' + "".join(_pas(k) for k in range(5)) + "</div></div></div>")
     html = f"""<section class="rapport" id="report"><div class="colonne">
   <div class="r-grille">
   <div class="r-texte">
-    <p class="marque-h">The extraction cost audit</p>
-    <h2 class="h2">Find the cheapest extractor for each field of your documents, measured on your own pages.</h2>
-    <ol class="r-pas">
-      <li><span><b>You label</b> a sample of your own documents: for each field, the value it should read, or a dash when the document has no such line.</span></li>
-      <li><span><b>You run the audit</b> on your machine. Your current extractor, the ones you want to compare, and our local models read the same pages. The local models read them as text: the text your current vendor already returns, or an OCR you run.</span></li>
-      <li><span><b>You receive</b> a sealed record and a signed report: for each field, the cheapest source that stays within the margin you declare of the best, and the saving at your volume. Sealed means the record carries a content hash, so an edit made after sealing shows. Signed means the report page carries a signature your audit team checks against our public key with <code>node src/verifier-rapport.mjs</code>, like the sample below.</span></li>
-    </ol>
+    {_AUDIT_VIVANT.replace("__SCEAU8__", ex["sceau"][:8])}
   </div>
   <figure class="r-feuille">
     <a href="{pdf}" download><img src="{img}" width="1224" height="1584" loading="lazy" decoding="async"
       alt="First page of the sample report: {ex["cas"]} real receipts, {ex["sources"]} sources on {len(ex["champs"])} fields, all routed to {", ".join(pick)}, saving {usd(ex["economie"])} a year at {ex["volume"]:,} documents."></a>
-    <figcaption>sample report &#183; {ex["cas"]} real receipts &#183; sealed {ex["mesure"]} &#183; record {ex["sceau"]} &#183; signed page beside the PDF</figcaption>
+    <figcaption style="text-transform:none;letter-spacing:0;opacity:1">{_LEGENDE_SCEAU.replace("__H__", ex["sceau"]).replace("__H8__", ex["sceau"][:8]).replace("__D__", ex["mesure"]).replace("__N__", str(ex["cas"])).replace("__PDF__", pdf)}</figcaption>
   </figure>
   </div>
   {recus}
@@ -1597,7 +1891,7 @@ def _section_rapport_routing():
     <span class="ouvrir-s">One document type and up to {es["extracteurs"]} extractors. Write to {off["contact"]}.</span></span>
     <span class="fl" aria-hidden="true">&#8594;</span></a></div>
   {essai}
-  <p class="liens"><a class="lien-e" href="{pdf}" download>Download the sample report <span aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{signe}">Verify the signed report <span aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{exemple}">See the labels, the OCR text and the vendor outputs <span aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{releve}">Open the sealed record <span aria-hidden="true">&#8594;</span></a></p>
+  <p class="liens"><a class="lien-e" href="{pdf}" download><span class="lv">Download</span><span class="lt">The sample report</span><span class="la" aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{signe}"><span class="lv">Verify</span><span class="lt">The signed report</span><span class="la" aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{exemple}"><span class="lv">See</span><span class="lt">Labels, OCR text, vendor outputs</span><span class="la" aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{releve}"><span class="lv">Open</span><span class="lt">The sealed record</span><span class="la" aria-hidden="true">&#8594;</span></a></p>
 </div></section>
 <script>
 (() => {{
@@ -1623,12 +1917,1118 @@ def _section_rapport_routing():
 _SECTION_RAPPORT_ROUTING = _section_rapport_routing()
 
 # the Routing film section, empty while its film is hidden (FILMS_VISIBLES, outil.py)
+# THE FIVE FIELDS UNDER THE MOUSE (Arslane, 25/10, retouch pin 1 on Routing: "no life on the screen").
+# One card per field of the published routing, every figure read from instrument-donnees.json at build time:
+# the engine and its measured accuracy (acc), and its price per 1,000 documents at the assumed prices.
+_DONNEES_CHAMPS = json.loads((BASE / "instrument-donnees.json").read_text())
+# THE FLOW, the living Routing hero (Arslane picked and approved it on 25/10, mockup docs/maquette-flux.html).
+# A full-bleed canvas: a still stack of identity records, one lane per field in gate order, one gate per engine.
+# Every figure (routing, accuracy, price, total, mean accuracy) is read here from instrument-donnees.json at
+# build time, the way maquette-flux.py does it; none is typed. All CSS is scoped under .flux-hero.
+_FX_ROUTE = _DONNEES_CHAMPS["publie"]["routage"]
+_FX_CHAMPS = _DONNEES_CHAMPS["fields"]
+_FX_DATA = {
+    "fields": _FX_CHAMPS,
+    "route": _FX_ROUTE,
+    "acc": {f: _DONNEES_CHAMPS["acc"][_FX_ROUTE[f]][f] for f in _FX_CHAMPS},
+    "price": {f: _DONNEES_CHAMPS["price"][_FX_ROUTE[f]][f] for f in _FX_CHAMPS},
+    "total": sum(_DONNEES_CHAMPS["price"][_FX_ROUTE[f]][f] for f in _FX_CHAMPS),
+    "justesse": _DONNEES_CHAMPS["publie"]["justesse"],
+}
+_FX_NOMS = {"name": "name", "birth": "date of birth", "document": "document number", "country": "country",
+            "address": "address"}
+_FX_MOTS = {1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five"}
+_fx_libres = [_FX_NOMS[f] for f in _FX_CHAMPS if _FX_DATA["price"][f] == 0]
+_fx_payants = [_FX_NOMS[f] for f in _FX_CHAMPS if _FX_DATA["price"][f] > 0]
+_fx_tout_grand = sum(_DONNEES_CHAMPS["price"]["large"][f] for f in _FX_CHAMPS)
+# the lede, variant C (three short airy paragraphs), built from the same figures as the canvas
+_FX_LEDE = (f'{_FX_MOTS[len(_fx_libres)]} of the {_FX_MOTS[len(_FX_CHAMPS)].lower()} fields need no model at all. '
+            f'A text pattern reads them, free.'
+            f'<span class="fx-p">The {" and the ".join(_fx_payants)} go to a model, each to the smallest one that holds up.</span>'
+            f'<span class="fx-p fx-prix"><b>${_FX_DATA["total"]:.2f}</b> per 1,000 documents, not ${_fx_tout_grand:.2f}.</span>')
+
+CSS_FLUX = r"""
+  .flux-hero{--fx-fond:#07100c;--fx-sur:#ece9df;--fx-pale:#9fa79f;--fx-vert:#57b184;--fx-ambre:#e3b062;
+    --fx-texte:"Literata",Georgia,serif;--fx-mono:"Roboto Mono",ui-monospace,Menlo,monospace;
+    position:relative;height:100vh;min-height:680px;overflow:hidden;isolation:isolate;color:var(--fx-sur);
+    font-family:var(--fx-texte);background:radial-gradient(75% 75% at 62% 48%,#10231a,#0a1712 55%,#050b08)}
+  .flux-hero canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .flux-hero .fx-grain{position:absolute;inset:0;pointer-events:none;opacity:.09;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .flux-hero .fx-vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 55% 45%,transparent 45%,rgba(0,0,0,.55) 100%)}
+  .flux-hero .fx-texte{position:absolute;left:clamp(24px,5vw,80px);top:clamp(90px,13vh,140px);max-width:min(560px,44vw);pointer-events:none}
+  .flux-hero .fx-kicker{font:500 12px/1 var(--fx-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--fx-vert);display:flex;align-items:center;gap:10px}
+  .flux-hero .fx-kicker i{width:7px;height:7px;border-radius:50%;background:var(--fx-vert);box-shadow:0 0 12px var(--fx-vert);animation:fx-pouls 1.6s ease-in-out infinite}
+  @keyframes fx-pouls{50%{opacity:.35}}
+  .flux-hero h1{margin:18px 0 0;font-size:clamp(38px,3.9vw,60px);line-height:1.04;font-weight:600;letter-spacing:-.02em;color:var(--fx-sur)}
+  .flux-hero h1 em{font-style:normal;color:var(--fx-vert)}
+  .flux-hero .fx-lede{margin:18px 0 0;font-size:17px;line-height:1.55;color:var(--fx-pale);max-width:44ch}
+  .flux-hero .fx-lede .fx-p{display:block;margin-top:14px}
+  .flux-hero .fx-lede .fx-prix{color:var(--fx-sur)}
+  .flux-hero .fx-lede b{color:var(--fx-vert);font-weight:500}
+  .flux-hero .fx-bande{display:none}
+  .flux-hero .fx-compteurs{position:absolute;left:clamp(24px,5vw,80px);bottom:clamp(28px,6vh,56px);display:flex;gap:48px;pointer-events:none}
+  .flux-hero .fx-compteurs div{display:flex;flex-direction:column;gap:6px}
+  .flux-hero .fx-compteurs strong{font:600 38px/1 var(--fx-texte);font-variant-numeric:tabular-nums;color:var(--fx-sur)}
+  .flux-hero .fx-compteurs strong.fx-v{color:var(--fx-vert)}
+  .flux-hero .fx-compteurs span{font:400 11px/1 var(--fx-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--fx-pale)}
+  .flux-hero .fx-etiquettes{position:absolute;inset:0;pointer-events:none}
+  .flux-hero .fx-lf,.flux-hero .fx-lg{position:absolute;transition:opacity .25s ease}
+  .flux-hero .fx-lf{transform:translate(-100%,-50%);text-align:right;display:flex;flex-direction:column;gap:3px;
+    padding:6px 10px;border-radius:8px;background:rgba(7,16,12,.62);backdrop-filter:blur(6px)}
+  .flux-hero .fx-lf b{font:500 15px/1.1 var(--fx-texte);color:var(--fx-sur)}
+  .flux-hero .fx-lf span{font:400 11px/1 var(--fx-mono);letter-spacing:.04em;color:var(--fx-sur);opacity:.7;font-variant-numeric:tabular-nums}
+  .flux-hero .fx-lf.fx-libre span{color:var(--fx-vert);opacity:1}.flux-hero .fx-lf.fx-cher span{color:var(--fx-ambre);opacity:1}
+  .flux-hero .fx-lg{transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;max-width:260px}
+  .flux-hero .fx-lg i{font:500 11px/1 var(--fx-mono);font-style:normal;letter-spacing:.18em;text-transform:uppercase;color:var(--fx-sur);opacity:.75}
+  .flux-hero .fx-lg.fx-libre i{color:var(--fx-vert);opacity:1}.flux-hero .fx-lg.fx-cher i{color:var(--fx-ambre);opacity:1}
+  .flux-hero .fx-lg b{font:600 28px/1.05 var(--fx-texte);letter-spacing:-.01em;color:var(--fx-sur)}
+  .flux-hero .fx-lg span{font:400 12px/1.4 var(--fx-mono);color:var(--fx-pale)}
+  .flux-hero .fx-lg em{font:400 12px/1.4 var(--fx-mono);font-style:normal;color:var(--fx-sur);max-height:0;overflow:hidden;opacity:0;transition:max-height .3s ease,opacity .25s ease}
+  .flux-hero .fx-lg.fx-on em{max-height:60px;opacity:1}
+  .flux-hero .fx-off{opacity:.28}
+  /* below 1080px the site bar sits in the page, above the hero, not over it */
+  @media (max-width:1080px){.flux-hero{height:calc(100vh - 70px)}}
+  /* phone and narrow screens: the text, then a band where the flow runs, then the counters */
+  @media (max-width:899px){
+    .flux-hero{height:auto;min-height:0;display:flex;flex-direction:column;padding:40px 0 32px}
+    .flux-hero .fx-texte{position:relative;left:auto;top:auto;max-width:none;padding:0 24px}
+    .flux-hero h1{font-size:34px}
+    .flux-hero .fx-lede{font-size:16px}
+    .flux-hero .fx-bande{display:block;height:440px}
+    .flux-hero .fx-compteurs{position:relative;left:auto;bottom:auto;padding:0 24px;gap:20px}
+    .flux-hero .fx-compteurs div{flex:1 1 0;min-width:0}
+    .flux-hero .fx-compteurs strong{font-size:26px}
+    .flux-hero .fx-compteurs span{font-size:10px;line-height:1.35;letter-spacing:.12em}
+    .flux-hero .fx-lf{padding:4px 7px;gap:2px}
+    .flux-hero .fx-lf b{font-size:12.5px}
+    .flux-hero .fx-lf span{font-size:10px}
+    .flux-hero .fx-lg{gap:4px}
+    .flux-hero .fx-lg i{font-size:9.5px;letter-spacing:.14em}
+    .flux-hero .fx-lg b{font-size:18px}
+    .flux-hero .fx-lg span,.flux-hero .fx-lg em{font-size:10.5px;line-height:1.35}
+  }
+  @media (prefers-reduced-motion:reduce){.flux-hero .fx-kicker i{animation:none}}
+"""
+
+JS_FLUX = r"""
+(function(){
+const D = __DATA__;
+const hero = document.querySelector(".flux-hero"); if (!hero) return;
+const NOM = {name:"Name",birth:"Date of birth",document:"Document number",country:"Country",address:"Address"};
+const MOT = {rules:"Text pattern",large:"Large model","gen-4b":"4B model",small:"Small model","gen-0.6b":"0.6B model","gen-8b":"8B model"};
+const calme = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const engines = [...new Set(D.fields.map(f=>D.route[f]))].sort((a,b)=>{
+  const pa = D.fields.filter(f=>D.route[f]===a).reduce((s,f)=>s+D.price[f],0), pb = D.fields.filter(f=>D.route[f]===b).reduce((s,f)=>s+D.price[f],0); return pa-pb; });
+const ORDRE = engines.flatMap(e=>D.fields.filter(f=>D.route[f]===e));   // fields in gate order: parallel lanes
+const eFree = e => D.fields.filter(f=>D.route[f]===e).every(f=>D.price[f]===0);
+const RGB = {free:[87,177,132], mid:[236,233,223], dear:[227,176,98]};
+const tint = e => eFree(e) ? RGB.free : (engines.indexOf(e)===engines.length-1 ? RGB.dear : RGB.mid);
+const cout = p => p===0 ? "free" : "$"+p.toFixed(2);
+
+const cv = hero.querySelector("canvas"), ctx = cv.getContext("2d"), bande = hero.querySelector(".fx-bande");
+let W=0,H=0,R=1, mx=-9999, my=-9999, inside=false, visible=true;
+const sprites = {};
+function sprite(rgb, r){ const k = rgb.join()+r; if (sprites[k]) return sprites[k];
+  const c = document.createElement("canvas"), s = r*6*R; c.width=c.height=s; const g = c.getContext("2d");
+  const gr = g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+  gr.addColorStop(0,`rgba(${rgb},1)`); gr.addColorStop(.18,`rgba(${rgb},.85)`); gr.addColorStop(.45,`rgba(${rgb},.18)`); gr.addColorStop(1,`rgba(${rgb},0)`);
+  g.fillStyle=gr; g.fillRect(0,0,s,s); return sprites[k]=c; }
+function fit(){ R = Math.min(2, devicePixelRatio||1); W = cv.clientWidth; H = cv.clientHeight; cv.width=W*R; cv.height=H*R; ctx.setTransform(R,0,0,R,0,0); for (const k in sprites) delete sprites[k]; geo(); }
+let G = {};
+function geo(){
+  const narrow = W < 900;
+  let srcX, srcY, splitX, gateX, fy, gy;
+  if (narrow){   // the flow runs in its own band under the text; the stream enters from the left edge
+    const top = bande.offsetTop, h = bande.offsetHeight;
+    srcX = -24; srcY = top + h/2; splitX = Math.round(W*.385); gateX = Math.round(W*.64);
+    fy = D.fields.map(f=> srcY + (ORDRE.indexOf(f)-2)*Math.min(76, h*.17));
+    gy = engines.map((e,i)=> srcY + (i-(engines.length-1)/2)*Math.min(150, h*.3));
+  } else {
+    srcX = W*.53; srcY = H*.52; splitX = W*.66; gateX = Math.min(W*.8, W-300);
+    fy = D.fields.map(f=> srcY + (ORDRE.indexOf(f)-2)*Math.min(84, H*.11));
+    gy = engines.map((e,i)=> srcY + (i-(engines.length-1)/2)*Math.min(170, H*.22));
+  }
+  G = {narrow, srcX, srcY, splitX, gateX, fy, gy};
+  D.fields.forEach((f,i)=>{ const el = LF[i]; el.style.left = (splitX-(narrow?12:16))+"px"; el.style.top = fy[i]+"px"; });
+  engines.forEach((e,i)=>{ const el = LG[i], x = gateX+(narrow?18:30); el.style.left = x+"px"; el.style.top = gy[i]+"px";
+    el.style.maxWidth = narrow ? (W-x-12)+"px" : ""; });
+}
+const couche = hero.querySelector(".fx-etiquettes");
+const LF = D.fields.map(f=>{ const el=document.createElement("div"); el.className="fx-lf"+(D.price[f]===0?" fx-libre":(engines.indexOf(D.route[f])===engines.length-1?" fx-cher":""));
+  el.innerHTML=`<b>${NOM[f]}</b><span>${D.acc[f]}% · ${cout(D.price[f])}</span>`; couche.appendChild(el); return el; });
+const LG = engines.map(e=>{ const fs=D.fields.filter(f=>D.route[f]===e), el=document.createElement("div");
+  el.className="fx-lg"+(eFree(e)?" fx-libre":(engines.indexOf(e)===engines.length-1?" fx-cher":""));
+  el.innerHTML=`<i>${eFree(e)?"Free · ":""}${fs.length} field${fs.length>1?"s":""}</i><b>${MOT[e]}</b><span>${fs.map(f=>NOM[f].toLowerCase()).join(" · ")}</span>`
+    + `<em>${cout(fs.reduce((s,f)=>s+D.price[f],0))} per 1,000 documents · ${fs.map(f=>D.acc[f]+"%").join(" / ")} accurate</em>`;
+  couche.appendChild(el); return el; });
+new ResizeObserver(fit).observe(cv);
+addEventListener("pointermove", e=>{ const b=cv.getBoundingClientRect(); mx=e.clientX-b.left; my=e.clientY-b.top; inside = my>=0 && my<=b.height; }, {passive:true});
+new IntersectionObserver(([e])=>visible=e.isIntersecting).observe(cv);
+
+// path of a field: source -> its split node -> its gate (two cubic segments)
+function pos(p, u){
+  const {srcX,srcY,splitX,gateX,fy,gy} = G, k = engines.indexOf(D.route[p.f]), i = p.i;
+  const a = .38;
+  if (u < a){ const t=u/a, s=1-t;
+    const x0=srcX, y0=srcY+p.j*.3, x3=splitX, y3=fy[i]+p.j*.25;
+    return [s*s*s*x0+3*s*s*t*(x0+(x3-x0)*.55)+3*s*t*t*(x3-(x3-x0)*.35)+t*t*t*x3, s*s*s*y0+3*s*s*t*y0+3*s*t*t*y3+t*t*t*y3]; }
+  const t=(u-a)/(1-a), s=1-t, x0=splitX, y0=fy[i]+p.j*.25, x3=gateX-8, y3=gy[k]+p.j*.18;
+  return [s*s*s*x0+3*s*s*t*(x0+(x3-x0)*.5)+3*s*t*t*(x3-(x3-x0)*.45)+t*t*t*x3, s*s*s*y0+3*s*s*t*y0+3*s*t*t*y3+t*t*t*y3];
+}
+let parts=[], docs=0, spawn=0, spent=0, glow=engines.map(()=>0), hover=-1, t=0;
+const nDocs=hero.querySelector(".fx-n-docs"), nCout=hero.querySelector(".fx-n-cout");
+// reduced motion: a still frame, particles laid along each lane and left there; the counters keep the
+// figures the page was built with (1,000 documents and their cost)
+if (calme) D.fields.forEach((f,i)=>{ for (let k=0;k<14;k++) parts.push({f,i,u:(k+.5)/14,s:0,j:(Math.random()-.5)*16,ox:0,oy:0,vx:0,vy:0,r:1.6+Math.random()*1.4}); });
+
+function lanes(){ // soft ribbons under the particles
+  D.fields.forEach((f,i)=>{ const rgb = tint(D.route[f]), on = hover<0 || hover===i;
+    ctx.strokeStyle=`rgba(${rgb},${on?.10:.03})`; ctx.lineWidth=on&&hover===i?10:6; ctx.lineCap="round";
+    ctx.beginPath(); for (let u=0; u<=1.0001; u+=.02){ const [x,y]=pos({f,i,j:0},u); u?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke(); });
+}
+function source(){ // a small stack of identity records the stream comes out of; it stays still
+  if (G.narrow) return;
+  const {srcX,srcY} = G, w=86, h=112;
+  for (let k=3;k>=0;k--){ const o=k*6;
+    ctx.save(); ctx.translate(srcX-w-18+o*.6, srcY-h/2-o);
+    ctx.shadowColor="rgba(0,0,0,.6)"; ctx.shadowBlur=24; ctx.shadowOffsetY=10;
+    ctx.fillStyle = k===0 ? "#17291f" : `rgba(23,41,31,${.9-k*.18})`; ctx.beginPath(); ctx.roundRect(0,0,w,h,9); ctx.fill(); ctx.shadowColor="transparent";
+    ctx.strokeStyle="rgba(165,247,203,.16)"; ctx.lineWidth=1; ctx.stroke();
+    if (k===0){ ctx.fillStyle="rgba(236,233,223,.16)"; ctx.beginPath(); ctx.roundRect(10,12,24,30,4); ctx.fill();
+      for (let r=0;r<5;r++){ ctx.fillStyle=`rgba(236,233,223,${.12+.05*r})`; ctx.beginPath(); ctx.roundRect(10, 52+r*11, 30+((r*29)%40), 4, 2); ctx.fill(); } }
+    ctx.restore(); }
+}
+function gates(){
+  const {gateX, gy} = G; hover = -1; let hoverGate=-1;
+  engines.forEach((e,i)=>{ const rgb=tint(e), fs=D.fields.filter(f=>D.route[f]===e), g=glow[i];
+    const y=gy[i], hgt=58+fs.length*16;
+    if (inside && mx>gateX-40 && Math.abs(my-y)<hgt/2+10) hoverGate=i;
+    const hal = ctx.createRadialGradient(gateX,y,0,gateX,y,90+g*30); hal.addColorStop(0,`rgba(${rgb},${.16+g*.22})`); hal.addColorStop(1,`rgba(${rgb},0)`);
+    ctx.fillStyle=hal; ctx.fillRect(gateX-140,y-140,280,280);
+    const gr = ctx.createLinearGradient(gateX-6,0,gateX+6,0); gr.addColorStop(0,`rgba(${rgb},.55)`); gr.addColorStop(.5,`rgba(${rgb},1)`); gr.addColorStop(1,`rgba(${rgb},.55)`);
+    ctx.fillStyle=gr; ctx.beginPath(); ctx.roundRect(gateX-5,y-hgt/2,10,hgt,5); ctx.fill();
+  });
+  LG.forEach((el,i)=>{ el.classList.toggle("fx-on", hoverGate===i); el.classList.toggle("fx-off", hoverGate>=0 && hoverGate!==i); });
+  if (hoverGate>=0) hover = D.fields.findIndex(f=>D.route[f]===engines[hoverGate]);
+  if (hoverGate<0 && inside) D.fields.forEach((f,i)=>{ if (Math.abs(mx-G.splitX)<90 && Math.abs(my-G.fy[i])<20) hover=i; });
+  return hoverGate;
+}
+function splits(hg){
+  D.fields.forEach((f,i)=>{ const rgb=tint(D.route[f]), x=G.splitX, y=G.fy[i];
+    const on = hg>=0 ? D.route[f]===engines[hg] : (hover<0||hover===i);
+    ctx.globalAlpha = on?1:.35;
+    ctx.fillStyle=`rgba(${rgb},1)`; ctx.beginPath(); ctx.arc(x,y,4,0,7); ctx.fill();
+    ctx.strokeStyle=`rgba(${rgb},.35)`; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(x,y,9,0,7); ctx.stroke();
+    ctx.globalAlpha=1; LF[i].classList.toggle("fx-off", !on); });
+}
+function frame(now){
+  requestAnimationFrame(frame); if (!visible || document.hidden) return;
+  const dt = Math.min(.05, (now-(frame.l||now))/1000); frame.l = now; t += dt;
+  // background: deep field + faint ruled grid that drifts with the pointer
+  ctx.globalCompositeOperation="source-over";
+  const bg = ctx.createRadialGradient(W*.62,H*.48,0,W*.62,H*.48,Math.max(W,H)*.75);
+  bg.addColorStop(0,"#10231a"); bg.addColorStop(.55,"#0a1712"); bg.addColorStop(1,"#050b08");
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  const px = inside && !calme ? (mx/W-.5)*14 : 0, py = inside && !calme ? (my/H-.5)*10 : 0;
+  ctx.strokeStyle="rgba(165,247,203,.035)"; ctx.lineWidth=1; ctx.beginPath();
+  for (let x=(px%48)-48; x<W; x+=48){ ctx.moveTo(x,0); ctx.lineTo(x,H); }
+  for (let y=(py%48)-48; y<H; y+=48){ ctx.moveTo(0,y); ctx.lineTo(W,y); } ctx.stroke();
+  lanes(); source();
+  if (!calme){ spawn += dt*7;
+    while (spawn>1){ spawn-=1; docs++; spent += D.total/1000;
+      D.fields.forEach((f,i)=>parts.push({f,i,u:0,s:.16+Math.random()*.07,j:(Math.random()-.5)*16,ox:0,oy:0,vx:0,vy:0,r:1.6+Math.random()*1.4})); } }
+  ctx.globalCompositeOperation="lighter";
+  const keep=[];
+  for (const p of parts){ p.u += dt*p.s; if (p.u>=1){ glow[engines.indexOf(D.route[p.f])] += .05; continue; } keep.push(p);
+    let [x,y] = pos(p,p.u);
+    if (inside && !calme){ const dx=x+p.ox-mx, dy=y+p.oy-my, d2=dx*dx+dy*dy; if (d2<140*140){ const d=Math.sqrt(d2)+1, k=(1-d/140)*2.2; p.vx+=dx/d*k; p.vy+=dy/d*k; } }
+    p.vx*=.88; p.vy*=.88; p.ox=(p.ox+p.vx)*.96; p.oy=(p.oy+p.vy)*.96;
+    const dim = hover>=0 && hover!==p.i && D.route[D.fields[hover]]!==D.route[p.f] ? .25 : 1;
+    const sp = sprite(tint(D.route[p.f]), p.r), s=p.r*6;
+    ctx.globalAlpha = dim*Math.min(1, p.u*8, (1-p.u)*10);
+    ctx.drawImage(sp, x+p.ox-s/2, y+p.oy-s/2, s, s); }
+  parts = keep; ctx.globalAlpha=1; ctx.globalCompositeOperation="source-over";
+  glow = glow.map(g=>Math.min(1,g)*.94);
+  const hg = gates(); splits(hg);
+  if (!calme){ nDocs.textContent = docs.toLocaleString("en-US"); nCout.textContent = "$"+spent.toFixed(2); }
+}
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(()=>{ fit(); requestAnimationFrame(frame); });
+})();
+""".replace("__DATA__", json.dumps(_FX_DATA))
+
+# without script the canvas stays empty and the section keeps its dark ground: the text reads, and the
+# counters show the figures for 1,000 documents rather than a stream that never starts
+_HERO_FLUX = f'''<section class="flux-hero" aria-label="Routing, live">
+  <canvas aria-hidden="true"></canvas>
+  <div class="fx-grain"></div><div class="fx-vignette"></div><div class="fx-etiquettes" aria-hidden="true"></div>
+  <div class="fx-texte">
+    <div class="fx-kicker"><i></i>Routing &#183; measured live</div>
+    <h1>See which engine each field of your documents <em>actually needs.</em></h1>
+    <p class="fx-lede">{_FX_LEDE}</p>
+  </div>
+  <div class="fx-bande" aria-hidden="true"></div>
+  <div class="fx-compteurs" aria-live="off">
+    <div><strong class="fx-n-docs">1,000</strong><span>documents routed</span></div>
+    <div><strong class="fx-v fx-n-cout">${_FX_DATA["total"]:.2f}</strong><span>spent, assumed prices</span></div>
+    <div><strong>{_FX_DATA["justesse"]:g}%</strong><span>mean accuracy per field</span></div>
+  </div>
+</section>
+<script>{JS_FLUX}</script>'''
+
+# ── THE FOUR LIVING HEROES of the catalogue pages (Arslane picked them on 25/10 from the five-concept mockups in
+# sessions/chef/maquettes-site-2510): Screening "the sphere" (maquettes-screening-2.py, n=2), Scoring "the seven
+# lamps" (maquettes-scoring.py, n=4), Dossier "the board" (maquettes-dossier.py, n=2), Monitoring "the skyline"
+# (maquettes-monitoring.py, n=5, with his fix: the tower signs no longer collide). Each is built like _HERO_FLUX:
+# one section scoped under its own class, its tokens defined on that class only, every figure read here from the
+# same instrument-*-donnees.json file the mockup generator reads, with the same derivations; none is typed.
+# Each hero: a still frame under prefers-reduced-motion, the animation loop stopped while the canvas is off screen
+# or the tab hidden, and below 900px a column layout (text, a band where the scene runs, the counters).
+import math
+_HV_MOTS = {1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven", 8: "Eight", 9: "Nine"}
+
+# the shared ground of the four heroes: the layout the Routing hero uses, under a per-hero class and prefix
+def _hv_css(c, p, toks, fond, kicker, accent, n_cpt):
+    s = c + " ." + p
+    grille_cpt = ("grid-template-columns:repeat(2,minmax(0,1fr));display:grid;gap:18px 20px" if n_cpt == 4
+                  else "gap:20px")
+    return ("""
+  @C@{@TOKS@;--@P@-texte:"Literata",Georgia,serif;--@P@-mono:"Roboto Mono",ui-monospace,Menlo,monospace;
+    position:relative;height:100vh;min-height:680px;overflow:hidden;isolation:isolate;color:var(--@P@-sur);
+    font-family:var(--@P@-texte);background:@FOND@}
+  @C@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  @S@-grain{position:absolute;inset:0;pointer-events:none;opacity:.09;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  @S@-vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 60% 45%,transparent 48%,rgba(0,0,0,.55) 100%)}
+  @S@-texte{position:absolute;left:clamp(24px,5vw,80px);top:clamp(90px,13vh,140px);max-width:min(560px,44vw);pointer-events:none;z-index:2}
+  @S@-kicker{font:500 12px/1 var(--@P@-mono);letter-spacing:.2em;text-transform:uppercase;color:@KICK@;display:flex;align-items:center;gap:10px}
+  @S@-kicker i{width:7px;height:7px;border-radius:50%;background:@ACC@;box-shadow:0 0 12px @ACC@;animation:@P@-pouls 1.6s ease-in-out infinite}
+  @keyframes @P@-pouls{50%{opacity:.35}}
+  @C@ h1{margin:18px 0 0;font-size:clamp(38px,3.9vw,60px);line-height:1.04;font-weight:600;letter-spacing:-.02em;color:var(--@P@-sur)}
+  @S@-lede{margin:18px 0 0;font-size:17px;line-height:1.55;color:var(--@P@-pale);max-width:44ch}
+  @S@-lede>span{display:block;margin-top:14px}
+  @S@-etiquettes{position:absolute;inset:0;pointer-events:none;z-index:2}
+  @S@-bande{display:none}
+  @S@-cpt{position:absolute;left:clamp(24px,5vw,80px);bottom:clamp(28px,6vh,56px);display:flex;gap:44px;pointer-events:none;z-index:2}
+  @S@-cpt div{display:flex;flex-direction:column;gap:6px}
+  @S@-cpt strong{font:600 38px/1 var(--@P@-texte);font-variant-numeric:tabular-nums;color:var(--@P@-sur)}
+  @S@-cpt strong small{font-size:16px;color:var(--@P@-pale);font-weight:400}
+  @S@-cpt span{font:400 11px/1 var(--@P@-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--@P@-pale)}
+  @media (max-width:1080px){@C@{height:calc(100vh - 70px)}}
+  @media (max-width:899px){
+    @C@{height:auto;min-height:0;display:flex;flex-direction:column;padding:40px 0 32px}
+    @S@-texte{position:relative;left:auto;top:auto;max-width:none;padding:0 24px}
+    @C@ h1{font-size:34px}
+    @S@-lede{font-size:16px}
+    @S@-bande{display:block}
+    @S@-cpt{position:relative;left:auto;bottom:auto;padding:0 24px;@GRILLE@}
+    @S@-cpt div{flex:1 1 0;min-width:0}
+    @S@-cpt strong{font-size:26px}
+    @S@-cpt strong small{font-size:13px}
+    @S@-cpt span{font-size:10px;line-height:1.35;letter-spacing:.12em}
+  }
+  @media (prefers-reduced-motion:reduce){@S@-kicker i{animation:none}}
+""".replace("@S@", s).replace("@C@", c).replace("@TOKS@", toks).replace("@FOND@", fond).replace("@KICK@", kicker)
+       .replace("@ACC@", accent).replace("@GRILLE@", grille_cpt).replace("@P@", p))
+
+
+def _hv_boucle(p):
+    """The loop every hero shares: it runs only while its canvas is on screen and the tab visible, and stops
+    (no frame requested at all) otherwise; `pas(dt_seconds, now)` draws one frame."""
+    return r"""
+  let P_vu=false, P_roule=false, P_der=0, P_pret=false;   // P_pret: set once the first fit() has laid the scene out
+  function P_boucle(now){ if (!P_vu || document.hidden){ P_roule=false; return; }
+    requestAnimationFrame(P_boucle); const dt=P_der?Math.min(.05,(now-P_der)/1000):.016; P_der=now; pas(dt, now); }
+  function P_lancer(){ if (calme || !P_pret || P_roule || !P_vu || document.hidden) return; P_roule=true; P_der=0; requestAnimationFrame(P_boucle); }
+  new IntersectionObserver(([e])=>{ P_vu=e.isIntersecting; P_lancer(); }, {threshold:.1}).observe(cv);
+  document.addEventListener("visibilitychange", P_lancer);
+""".replace("P_", p + "_")
+
+
+# ── 1 · SCREENING, THE SPHERE (maquettes-screening-2.py, concept 2). 120 pairs become 1,440 points on a slowly
+# turning globe, latitude = score (the pole = identical). The bar is a glowing latitude plane cutting the globe:
+# above it is flagged (green real matches, rose false alerts), below it let through (amber missed, grey cleared).
+# DERIVED, as in the generator: a pair's score is the highest threshold at which it is still counted (from the
+# cumulative counts of the sealed grid); a pair never flagged sits at 0.44. Only the recommended method is shipped.
+_SP_SRC = json.loads((BASE / "instrument-screening-donnees.json").read_text())
+_SP_A, _SP_REC = _SP_SRC["authored"], _SP_SRC["recommandee"]
+def _sp_scores(cle, n):
+    g = _SP_A["grille"][_SP_REC["palier"]]; ts = sorted(g, key=float); out = []
+    for i in range(n):
+        s = [float(t) for t in ts if g[t][cle]["succes"] > i]
+        out.append(max(s) if s else 0.44)
+    return out
+_SP_DATA = {"nM": _SP_A["nMatch"], "nD": _SP_A["nDifferent"],
+            "m": _sp_scores("rappel", _SP_A["nMatch"]), "f": _sp_scores("fauxPositifs", _SP_A["nDifferent"]),
+            "grid": {t: [c["rappel"]["succes"], c["fauxPositifs"]["succes"]] for t, c in _SP_A["grille"][_SP_REC["palier"]].items()}}
+_SP_DEPART = _SP_DATA["grid"]["0.75"]   # the bar starts at 0.75 (the middle of its breath), the still frame keeps it
+CSS_SPHERE = _hv_css(".sphere-hero", "sp", "--sp-sur:#f1e6e4;--sp-pale:#b59a9c;--sp-rubis:#d64a5c;--sp-rose:#ff8a98;--sp-vert:#7fd6a6;--sp-ambre:#e3b062",
+                     "radial-gradient(75% 75% at 70% 51%,#33191f,#241217 50%,#120709)", "var(--sp-rose)", "var(--sp-rubis)", 4) + r"""
+  .sphere-hero .sp-texte{max-width:min(520px,40vw)}
+  .sphere-hero h1{font-size:clamp(36px,3.6vw,56px);line-height:1.05}
+  .sphere-hero h1 em{font-style:normal;color:var(--sp-rose)}
+  .sphere-hero .sp-lede>span{margin-top:12px}
+  .sphere-hero .sp-lede b{color:var(--sp-sur);font-weight:500}
+  .sphere-hero .sp-cpt{gap:40px}
+  .sphere-hero .sp-cpt strong{font-size:36px}
+  .sphere-hero .sp-cpt .sp-v{color:var(--sp-vert)}.sphere-hero .sp-cpt .sp-r{color:var(--sp-rose)}.sphere-hero .sp-cpt .sp-o{color:var(--sp-ambre)}
+  .sphere-hero .sp-lab{position:absolute;font:500 11px/1 var(--sp-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--sp-sur);white-space:nowrap;padding:5px 8px;border-radius:6px;background:rgba(24,11,15,.6)}
+  .sphere-hero .sp-lab em{font-style:normal;color:var(--sp-rose)}
+  @media (max-width:899px){
+    .sphere-hero .sp-texte{max-width:none}
+    .sphere-hero h1{font-size:34px}
+    .sphere-hero .sp-bande{height:380px}
+    .sphere-hero .sp-cpt{gap:18px 20px}
+    .sphere-hero .sp-cpt strong{font-size:26px}
+  }
+"""
+JS_SPHERE = (r"""
+(function(){
+const D = __DATA__;
+const hero = document.querySelector(".sphere-hero"); if (!hero) return;
+const cv = hero.querySelector("canvas"), x = cv.getContext("2d"), bande = hero.querySelector(".sp-bande"), couche = hero.querySelector(".sp-etiquettes");
+const calme = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const tk = t=>Math.round(Math.min(1,Math.max(.5,t))*100)/100;
+const cls = (p,t)=>p.v>=tk(t)-1e-9?(p.m?"caught":"fals"):(p.m?"missed":"clear");
+const norm = v=>(Math.min(1,Math.max(.44,v))-.44)/.56;              // 0.44 (never flagged) -> 0, 1.00 -> 1
+const breath = ts=>.75+Math.sin(ts/5200)*.15;                        // the bar breathes between 0.60 and 0.90
+const spread = u=>Math.pow(Math.max(0,u),2.5), unspread = u=>Math.pow(Math.max(0,u),.4);
+const RGB = {caught:[127,214,166],fals:[255,138,152],missed:[227,176,98],clear:[150,120,124],neutre:[241,230,228]};
+const ON = c=>c==="caught"||c==="fals";
+let rnd = (s=>()=>(s=(s*16807)%2147483647)/2147483647)(7);
+const gauss = ()=>Math.sqrt(-2*Math.log(1-rnd()))*Math.cos(6.283*rnd());
+let W=0, H=0, R=1;
+const SP = {};
+function spr(rgb,r){ r=Math.max(.125,Math.round(r*8)/8); const k=rgb+"|"+r; if (SP[k]) return SP[k];   // radius rounded to 1/8 px: the cache stays bounded
+  const c=document.createElement("canvas"), z=Math.ceil(r*6*2); c.width=c.height=z; const g=c.getContext("2d"), gr=g.createRadialGradient(z/2,z/2,0,z/2,z/2,z/2);
+  gr.addColorStop(0,`rgba(${rgb},1)`); gr.addColorStop(.18,`rgba(${rgb},.85)`); gr.addColorStop(.45,`rgba(${rgb},.18)`); gr.addColorStop(1,`rgba(${rgb},0)`);
+  g.fillStyle=gr; g.fillRect(0,0,z,z); return SP[k]=c; }
+const dot = (sp,px,py,r)=>x.drawImage(sp,px-r*3,py-r*3,r*6,r*6);
+function bg(cx,cy){ const g=x.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*.72); g.addColorStop(0,"#33191f"); g.addColorStop(.5,"#241217"); g.addColorStop(1,"#120709");
+  x.globalCompositeOperation="source-over"; x.fillStyle=g; x.fillRect(0,0,W,H); }
+const M = {x:null, y:null};
+hero.addEventListener("pointermove", e=>{ const b=hero.getBoundingClientRect(); M.x=e.clientX-b.left; M.y=e.clientY-b.top; }, {passive:true});
+hero.addEventListener("pointerleave", ()=>{ M.x=M.y=null; });
+const L = document.createElement("div"); L.className="sp-lab"; couche.appendChild(L);
+const N = [0,1,2,3].map(i=>hero.querySelector(".sp-n"+i));
+const P = [...D.m.map(v=>({v,m:1})), ...D.f.map(v=>({v,m:0}))], pts=[], tilt=.46;
+P.forEach(p=>{ const ly=spread(norm(p.v))*1.7-.85, lon0=rnd()*6.283;
+  for (let k=0;k<12;k++){ const y=Math.max(-.9,Math.min(.9,ly+gauss()*.018)), lon=lon0+gauss()*.22; pts.push({p,y,lon,rr:Math.sqrt(1-y*y),r:1.1+rnd()*1.2}); } });
+const latY = t=>spread(norm(t))*1.7-.85; let t=.75, spin=0;
+// wide: the globe right of the text; narrow: centred in its own band under the text
+function geo(){ if (W<900){ const top=bande.offsetTop, h=bande.offsetHeight; return [W/2, top+h/2, Math.min(W*.4,h*.44)]; }
+  return [W*.705, H*.51, Math.min(W*.25,H*.39)]; }
+function frame(ts,dt){ const [cx,cy,Rs]=geo(), ct=Math.cos(tilt), st=Math.sin(tilt); spin+=dt*.00024; bg(cx,cy);
+  const inS = M.x!=null && Math.hypot(M.x-cx,M.y-cy)<Rs*1.2;
+  const tg = inS ? .44+unspread((cy+.85*Rs*ct-M.y)/(1.7*Rs*ct))*.56 : breath(ts); t += (Math.min(.98,Math.max(.5,tg))-t)*.06;
+  const yb=latY(t), rb=Math.sqrt(1-yb*yb), ey=cy-yb*ct*Rs;
+  // core glow and faint wire
+  x.globalCompositeOperation="lighter"; const core=x.createRadialGradient(cx,cy,0,cx,cy,Rs*1.05); core.addColorStop(0,"rgba(214,74,92,.16)"); core.addColorStop(.7,"rgba(214,74,92,.05)"); core.addColorStop(1,"rgba(214,74,92,0)");
+  x.fillStyle=core; x.fillRect(cx-Rs*1.1,cy-Rs*1.1,Rs*2.2,Rs*2.2);
+  x.globalCompositeOperation="source-over"; x.strokeStyle="rgba(255,138,152,.07)"; x.lineWidth=1;
+  for (const y of [-.6,-.3,0,.3,.6]){ const r=Math.sqrt(1-y*y); x.beginPath(); x.ellipse(cx,cy-y*ct*Rs,r*Rs,r*Rs*st,0,0,7); x.stroke(); }
+  x.beginPath(); x.arc(cx,cy,Rs,0,7); x.stroke();
+  // the plane, back half
+  x.strokeStyle="rgba(255,138,152,.35)"; x.lineWidth=1.2; x.beginPath(); x.ellipse(cx,ey,rb*Rs,rb*Rs*st,0,Math.PI,2*Math.PI); x.stroke();
+  const pl=x.createRadialGradient(cx,ey,0,cx,ey,rb*Rs); pl.addColorStop(0,"rgba(214,74,92,.22)"); pl.addColorStop(1,"rgba(214,74,92,.04)"); x.fillStyle=pl; x.beginPath(); x.ellipse(cx,ey,rb*Rs,rb*Rs*st,0,0,7); x.fill();
+  // points, back to front
+  for (const q of pts){ const a=q.lon+spin, X=q.rr*Math.cos(a), Z=q.rr*Math.sin(a); q.Z=q.y*st+Z*ct; q.sx=cx+X*Rs; q.sy=cy-(q.y*ct-Z*st)*Rs; }
+  pts.sort((a,b)=>a.Z-b.Z); x.globalCompositeOperation="lighter";
+  for (const q of pts){ const c=cls(q.p,t), on=ON(c), dep=(q.Z+1)/2, near=Math.abs(q.y-yb)<.03; const rgb=near&&on?RGB.neutre:RGB[c];
+    x.globalAlpha=(.25+.75*dep)*(on?1:(c==="missed"?.7:.3)); const r=q.r*(on?1.25:.9)*(.7+.5*dep); dot(spr(rgb,r),q.sx,q.sy,r); }
+  x.globalAlpha=1;
+  // the plane, front half
+  x.globalCompositeOperation="source-over"; x.strokeStyle="#ffd5da"; x.lineWidth=1.6; x.beginPath(); x.ellipse(cx,ey,rb*Rs,rb*Rs*st,0,0,Math.PI); x.stroke();
+  x.globalCompositeOperation="lighter"; x.strokeStyle="rgba(214,74,92,.5)"; x.lineWidth=7; x.beginPath(); x.ellipse(cx,ey,rb*Rs,rb*Rs*st,0,0,Math.PI); x.stroke();
+  x.globalCompositeOperation="source-over";
+  L.style.left=Math.min(W-96,cx+rb*Rs+12)+"px"; L.style.top=(ey-11)+"px"; L.innerHTML=`<em>bar ${tk(t).toFixed(2)}</em>`;
+  const g=D.grid[tk(t).toFixed(2)]; N[0].textContent=tk(t).toFixed(2); N[1].innerHTML=g[0]+" <small>/ "+D.nM+"</small>";
+  N[2].innerHTML=g[1]+" <small>/ "+D.nD+"</small>"; N[3].textContent=D.nM-g[0]; }
+function fit(){ R=Math.min(1.5,devicePixelRatio||1); W=cv.clientWidth; H=cv.clientHeight; cv.width=W*R; cv.height=H*R; x.setTransform(R,0,0,R,0,0);
+  if (calme) frame(0,16); }   // reduced motion: one still frame, the bar at 0.75, redrawn on resize
+const pas = (dt,now)=>frame(now, dt*1000);
+""" + _hv_boucle("sp") + r"""
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(()=>{ fit(); new ResizeObserver(fit).observe(cv); sp_pret=true; sp_lancer(); });
+})();
+""").replace("__DATA__", json.dumps(_SP_DATA, separators=(",", ":")))
+_HERO_SPHERE = f'''<section class="sphere-hero" aria-label="Screening, live">
+  <canvas aria-hidden="true"></canvas>
+  <div class="sp-grain"></div><div class="sp-vignette"></div><div class="sp-etiquettes" aria-hidden="true"></div>
+  <div class="sp-texte">
+    <div class="sp-kicker"><i></i>Screening &#183; measured live</div>
+    <h1>See what your screening catches, and what it <em>flags incorrectly.</em></h1>
+    <p class="sp-lede">A threshold is the score above which two names count as a match.<span>The bar moves on its own; take it: <b>point at the globe, higher or lower, the plane follows.</b></span></p>
+  </div>
+  <div class="sp-bande" aria-hidden="true"></div>
+  <div class="sp-cpt" aria-live="off">
+    <div><strong class="sp-n0">0.75</strong><span>the bar</span></div>
+    <div><strong class="sp-v sp-n1">{_SP_DEPART[0]} <small>/ {_SP_DATA["nM"]}</small></strong><span>real matches caught</span></div>
+    <div><strong class="sp-r sp-n2">{_SP_DEPART[1]} <small>/ {_SP_DATA["nD"]}</small></strong><span>false alerts</span></div>
+    <div><strong class="sp-o sp-n3">{_SP_DATA["nM"] - _SP_DEPART[0]}</strong><span>matches missed</span></div>
+  </div>
+</section>
+<script>{JS_SPHERE}</script>'''
+
+
+# ── 2 · SCORING, THE SEVEN LAMPS (maquettes-scoring.py, concept 4). Seven lamps in a row, one per factor; the
+# threshold is a cursor on a long ruler, rising from 0.50 to 1.00. Each lamp burns with the number of risky customers
+# it still catches: the 42 are its filaments, the caught ones orbit tight in the light, the missed ones drift out
+# into the dark; amber at the rim, the quiet customers it pushes up. The page gets counts, not rates, as in the mockup.
+_LP_SRC = json.loads((BASE / "instrument-scoring-donnees.json").read_text())
+_LP_CLES = ["%.2f" % s for s in _LP_SRC["seuils"]]
+_LP_G = _LP_SRC["authored"]["grille"]
+_LP_F = [p["id"] for p in sorted(_LP_SRC["paliers"], key=lambda p: p["rang"])]
+_LP_DATA = {"seuils": _LP_SRC["seuils"], "montres": _LP_SRC["seuilsMontres"], "paliers": _LP_F,
+            "n": {"esc": _LP_SRC["authored"]["nEscalated"], "main": _LP_SRC["authored"]["nMaintained"]},
+            "caught": {f: [_LP_G[f][k]["rappel"]["succes"] for k in _LP_CLES] for f in _LP_F},
+            "faux": {f: [_LP_G[f][k]["fauxPositifs"]["succes"] for k in _LP_CLES] for f in _LP_F}}
+# shipped as tool data in an application/json block (exception 2 of garde-orthographe): it carries the sealed
+# factor name "behaviour", which the American-spelling guard would refuse as a script string
+for _f in _LP_F:   # the lamps assume the counts never grow with the threshold (the generator asserts the same)
+    _c, _x = _LP_DATA["caught"][_f], _LP_DATA["faux"][_f]
+    if not (all(_c[i] >= _c[i + 1] for i in range(len(_c) - 1)) and all(_x[i] >= _x[i + 1] for i in range(len(_x) - 1))):
+        sys.exit(f"instrument-scoring-donnees.json : the counts of {_f} grow with the threshold; the lamps would lie")
+_LP_REC = _LP_SRC["recommandee"]
+_LP_ALLUMES = sum(1 for f in _LP_F if _LP_DATA["caught"][f][0] > 0)        # the counters without script: at 0.50
+_LP_MEILLEUR = max(_LP_DATA["caught"][f][0] for f in _LP_F)
+CSS_LAMPES = _hv_css(".lampes-hero", "lp", "--lp-sur:#ede6f7;--lp-pale:#b9a9d4;--lp-vif:#9b6fe0;--lp-clair:#e2d3ff;--lp-ambre:#e3b062",
+                     "radial-gradient(78% 78% at 72% 50%,#1f1538,#140d28 50%,#080513)", "var(--lp-vif)", "var(--lp-vif)", 3) + r"""
+  .lampes-hero h1 em{font-style:normal;color:var(--lp-vif)}
+  .lampes-hero .lp-lede .lp-clair{color:var(--lp-sur)}
+  .lampes-hero .lp-lede b{color:var(--lp-vif);font-weight:600}
+  .lampes-hero .lp-cpt{gap:48px}
+  .lampes-hero .lp-cpt strong.lp-v{color:var(--lp-vif)}
+  .lampes-hero .lp-eti{position:absolute;display:flex;flex-direction:column;gap:4px;white-space:nowrap;transition:opacity .25s ease;transform:translateX(-50%);align-items:center;text-align:center}
+  .lampes-hero .lp-eti b{font:500 14px/1.1 var(--lp-texte);color:var(--lp-sur)}
+  .lampes-hero .lp-eti span{font:400 11px/1 var(--lp-mono);letter-spacing:.06em;color:var(--lp-pale);font-variant-numeric:tabular-nums}
+  .lampes-hero .lp-eti span.lp-on{color:var(--lp-clair)}
+  .lampes-hero .lp-eti em{font:400 11px/1 var(--lp-mono);font-style:normal;color:var(--lp-ambre);letter-spacing:.06em}
+  .lampes-hero .lp-eti.lp-off{opacity:.3}
+  .lampes-hero .lp-lecture{position:absolute;display:flex;flex-direction:column;align-items:center;gap:6px;transform:translate(-50%,-50%)}
+  .lampes-hero .lp-lecture b{font:500 clamp(26px,2.4vw,40px)/1 var(--lp-mono);letter-spacing:-.02em;color:var(--lp-sur);font-variant-numeric:tabular-nums}
+  .lampes-hero .lp-lecture span{font:400 10.5px/1 var(--lp-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--lp-pale)}
+  .lampes-hero .lp-tick{position:absolute;font:400 10.5px/1 var(--lp-mono);color:var(--lp-pale);transform:translate(-50%,-50%);font-variant-numeric:tabular-nums}
+  @media (max-width:899px){
+    .lampes-hero .lp-bande{height:380px}
+    .lampes-hero .lp-cpt{gap:20px}
+    .lampes-hero .lp-eti b{font-size:12px}
+    .lampes-hero .lp-eti span,.lampes-hero .lp-eti em{font-size:10px}
+    .lampes-hero .lp-tick{font-size:9.5px}
+  }
+  @media (prefers-reduced-motion:reduce){.lampes-hero .lp-eti{transition:none}}
+"""
+JS_LAMPES = (r"""
+(function(){
+const hero = document.querySelector(".lampes-hero"); if (!hero) return;
+const D = JSON.parse(hero.querySelector(".lp-donnees").textContent);
+const calme = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const T = D.seuils, NT = T.length, F = D.paliers, NF = F.length;
+const NOM = {geography:"Geography",activity:"Activity",product:"Product",exposure:"Exposure",structure:"Structure",behaviour:"Behavior",tenure:"Tenure"};
+const C = {vif:[155,111,224], clair:[226,211,255], pale:[185,169,212], ambre:[227,176,98], blanc:[255,255,255]};
+const fmt = t => t.toFixed(2);
+// nearest measured threshold for a continuous value: the page never shows a figure between two cells
+const idx = t => Math.max(0, Math.min(NT-1, Math.round((t-T[0])/(T[NT-1]-T[0])*(NT-1))));
+const lerp = (a,b,k) => a+(b-a)*k, clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const cv = hero.querySelector("canvas"), ctx = cv.getContext("2d"), lab = hero.querySelector(".lp-etiquettes"), bande = hero.querySelector(".lp-bande");
+const K = {t:hero.querySelector(".lp-k-t"), l:hero.querySelector(".lp-k-l"), c:hero.querySelector(".lp-k-c")};
+let W=0, H=0, R=1, t=0, pret_=false;
+const ptr = {x:-9999, y:-9999, in:false}, sprites = {};
+const S = {
+  sprite(rgb, r, dur){ r = Math.max(.125, Math.round(r*8)/8);   // rounded to 1/8 px so the cache stays bounded
+    const k = rgb.join()+r+(dur?"d":""); if (sprites[k]) return sprites[k];
+    const c = document.createElement("canvas"), s = Math.ceil(r*6*R); c.width = c.height = s; const g = c.getContext("2d");
+    const gr = g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+    if (dur){ gr.addColorStop(0,`rgba(${rgb},1)`); gr.addColorStop(.3,`rgba(${rgb},.95)`); gr.addColorStop(.42,`rgba(${rgb},.25)`); gr.addColorStop(1,`rgba(${rgb},0)`); }
+    else { gr.addColorStop(0,`rgba(${rgb},1)`); gr.addColorStop(.18,`rgba(${rgb},.85)`); gr.addColorStop(.45,`rgba(${rgb},.18)`); gr.addColorStop(1,`rgba(${rgb},0)`); }
+    g.fillStyle = gr; g.fillRect(0,0,s,s); return sprites[k] = c; },
+  point(rgb, x, y, r, a, dur){ const sp = S.sprite(rgb, r, dur), s = r*6; ctx.globalAlpha = a; ctx.drawImage(sp, x-s/2, y-s/2, s, s); },
+  fond(cx, cy, drift){ ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
+    const bg = ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*.78);
+    bg.addColorStop(0,"#1f1538"); bg.addColorStop(.5,"#140d28"); bg.addColorStop(1,"#080513");
+    ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+    const px = ((drift*5) % 48 + (ptr.in ? (ptr.x/W-.5)*14 : 0)), py = (ptr.in ? (ptr.y/H-.5)*10 : 0);
+    ctx.strokeStyle = "rgba(226,211,255,.035)"; ctx.lineWidth = 1; ctx.beginPath();
+    for (let x=(px%48)-48; x<W; x+=48){ ctx.moveTo(x,0); ctx.lineTo(x,H); }
+    for (let y=(py%48)-48; y<H; y+=48){ ctx.moveTo(0,y); ctx.lineTo(W,y); } ctx.stroke(); },
+  el(cls, html){ const el = document.createElement("div"); el.className = cls; el.innerHTML = html; lab.appendChild(el); return el; },
+  place(el, x, y){ el.style.left = x+"px"; el.style.top = y+"px"; },
+};
+// the seven lamps (concept 4 of the mockup, unchanged but for the narrow band and the staggered names)
+let G = {}, thr = .5, eti = [], curseur, ticks = [], lamps = [];
+const sDe = x => clamp(T[0] + (x-G.x0)/(G.x1-G.x0)*(T[NT-1]-T[0]), T[0], T[NT-1]);
+const xDe = s => G.x0 + (s-T[0])/(T[NT-1]-T[0])*(G.x1-G.x0);
+const FIXE = 5.0;
+function geo(){ const etroit = W < 900; let x0, x1, cy, ry;
+  if (etroit){ const top = bande.offsetTop, h = bande.offsetHeight; x0 = 20; x1 = W-20; cy = top+82; ry = top+h-58; }
+  else { x0 = Math.max(W*.49, W-760); x1 = W*.95; cy = H*.42; ry = H*.72; }
+  const pas = (x1-x0)/NF; G = {x0, x1, pas, cy, ry, rmax: Math.min(64, pas*.5)};
+  G.cx = F.map((f,k)=> x0 + (k+.5)*pas);
+  if (!eti.length){ eti = F.map(f=> S.el("lp-eti", `<b>${NOM[f]}</b><span></span><em></em>`)); curseur = S.el("lp-lecture", "<b></b><span>threshold</span>"); ticks = D.montres.map(m=> S.el("lp-tick", fmt(m)));
+    lamps = F.map(()=>({L:0, fil: Array.from({length:D.n.esc}, (_,k)=>({a:Math.random()*7, r:1, v:.7+Math.random()*.9, s:Math.random()<.5?1:-1, e:Math.random()})),
+      amb: Array.from({length:D.n.main}, ()=>({a:Math.random()*7, v:.5+Math.random()*.6})) })); }
+  // the names under the lamps: one row while they fit (the mockup, wide screens), two alternating rows when the lamps close up
+  const etage = pas < 90;
+  eti.forEach((el,k)=> S.place(el, G.cx[k], G.cy + G.rmax + (etage ? 40 : 70) + (etage && k%2 ? 44 : 0)));
+  ticks.forEach((el,j)=> S.place(el, xDe(D.montres[j]), G.ry + 24));
+}
+function frame(dt, t){
+  const dedans = ptr.in && ptr.x > G.x0-20 && ptr.x < G.x1+20 && ptr.y > G.ry-60 && ptr.y < G.ry+60;
+  let cible; if (dedans) cible = sDe(ptr.x); else { const u = (t % 16)/16; cible = u < .8 ? T[0] + (T[NT-1]-T[0])*(u/.8) : T[NT-1] - (T[NT-1]-T[0])*((u-.8)/.2); }
+  thr = lerp(thr, cible, Math.min(1, dt*(dedans?6:2.5))); const i = idx(thr), xC = xDe(thr);
+  S.fond(W*.72, H*.5, t);
+  ctx.globalCompositeOperation = "lighter";
+  let lit = 0, bestC = -1;
+  F.forEach((f,k)=>{ const c = D.caught[f][i], x = D.faux[f][i], lamp = lamps[k], cx = G.cx[k], cy = G.cy + Math.sin(t*.4+k)*4;
+    lamp.L = lerp(lamp.L, c/D.n.esc, Math.min(1, dt*3)); const L = lamp.L; if (c > 0) lit++; if (c > bestC) bestC = c;
+    const rc = 14 + G.rmax*.86*L, kh = Math.min(1, G.pas/90);   // kh: the halos shrink with the pitch, so close lamps stay seven
+    // halo, core, and the pool of light on the floor beneath
+    S.point(C.vif, cx, cy, rc*2.3*kh, .25+.55*L);
+    S.point(C.vif, cx, cy, rc*1.3*kh, .3+.5*L);
+    S.point(C.clair, cx, cy, rc*.8, .4+.55*L, true);
+    S.point(C.blanc, cx, cy, Math.max(3, rc*.26), .55+.4*L);
+    ctx.save(); ctx.translate(cx, G.ry-6); ctx.scale(1, .18); S.point(C.vif, 0, 0, rc*2.2, .12+.35*L); ctx.restore();
+    // the filaments: index below the catch orbits in the light, the rest drifts out
+    lamp.fil.forEach((p,j)=>{ const dedansL = j < c; const rt = dedansL ? 6 + (rc-4)*p.e : G.rmax*1.25 + 26*p.e + 10*Math.sin(t*.7+p.a);
+      p.r = lerp(p.r, rt, Math.min(1, dt*2.2)); p.a += dt*p.v*p.s*(dedansL ? 1.6 : .25);
+      const px = cx + Math.cos(p.a)*p.r, py = cy + Math.sin(p.a)*p.r*.78;
+      dedansL ? S.point(C.clair, px, py, 2, .95) : S.point(C.pale, px, py, 1.8, .4); });
+    // the quiet customers it pushes up: amber at the rim
+    for (let j=0;j<x;j++){ const p = lamp.amb[j]; p.a += dt*p.v; const r = rc + 14 + 6*Math.sin(t+p.a);
+      S.point(C.ambre, cx + Math.cos(p.a)*r, cy + Math.sin(p.a)*r*.8, 2.4, .95); }
+    eti[k].children[1].textContent = `${c} / ${D.n.esc}`; eti[k].children[1].className = c ? "lp-on" : ""; eti[k].children[2].textContent = x ? `${x} false` : "";
+    eti[k].classList.toggle("lp-off", c===0); });
+  // the ruler
+  ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
+  ctx.strokeStyle = "rgba(226,211,255,.14)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(G.x0, G.ry); ctx.lineTo(G.x1, G.ry); ctx.stroke();
+  ctx.strokeStyle = "rgba(226,211,255,.3)"; D.montres.forEach(m=>{ const x = xDe(m); ctx.beginPath(); ctx.moveTo(x, G.ry-5); ctx.lineTo(x, G.ry+5); ctx.stroke(); });
+  ctx.globalCompositeOperation = "lighter";
+  const lit_ = ctx.createLinearGradient(G.x0, 0, xC, 0); lit_.addColorStop(0,"rgba(155,111,224,.05)"); lit_.addColorStop(1,"rgba(155,111,224,.6)");
+  ctx.fillStyle = lit_; ctx.fillRect(G.x0, G.ry-1.5, xC-G.x0, 3);
+  S.point(C.clair, xC, G.ry, 7, .95); S.point(C.vif, xC, G.ry, 22, .5);
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
+  S.place(curseur, xC, G.ry - 44); curseur.firstChild.textContent = fmt(T[i]);
+  K.t.textContent = fmt(T[i]); K.l.textContent = `${lit} / ${NF}`; K.c.textContent = bestC;
+}
+function fixe(){ for (let i=0;i<240;i++) frame(1/60, FIXE + i/60); }   // reduced motion: the scene settles for a few seconds off screen, then one frame stays
+function fit(){ R = Math.min(1.5, devicePixelRatio||1); W = cv.clientWidth; H = cv.clientHeight; cv.width = W*R; cv.height = H*R;
+  ctx.setTransform(R,0,0,R,0,0); for (const k in sprites) delete sprites[k]; geo(); if (calme && pret_) fixe(); }
+hero.addEventListener("pointermove", e=>{ const b = cv.getBoundingClientRect(); ptr.x = e.clientX-b.left; ptr.y = e.clientY-b.top; ptr.in = true; }, {passive:true});
+hero.addEventListener("pointerleave", ()=>{ ptr.in = false; ptr.x = ptr.y = -9999; });
+const pas = dt=>{ t += dt; frame(dt, t); };
+""" + _hv_boucle("lp") + r"""
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(()=>{ pret_ = true; fit(); new ResizeObserver(fit).observe(cv); if (calme) fixe(); else { lp_pret=true; lp_lancer(); } });
+})();
+""")
+_HERO_LAMPES = f'''<section class="lampes-hero" aria-label="Scoring, live">
+  <canvas aria-hidden="true"></canvas>
+  <div class="lp-grain"></div><div class="lp-vignette"></div><div class="lp-etiquettes" aria-hidden="true"></div>
+  <div class="lp-texte">
+    <div class="lp-kicker"><i></i>Scoring &#183; measured live</div>
+    <h1>See which risk factors separate a risky customer <em>from a quiet one.</em></h1>
+    <p class="lp-lede">A factor's threshold is the score above which it pushes a customer up a rating.<span>{_HV_MOTS[len(_LP_F)]} factors, run at every threshold from {_LP_DATA["seuils"][0]:.2f} to {_LP_DATA["seuils"][-1]:.2f}, over the {_LP_DATA["n"]["esc"] + _LP_DATA["n"]["main"]} reviews your analysts already decided.</span><span class="lp-clair"><b>{_LP_REC["plusForteBorne"]:.2f}</b> is the strongest recall lower bound a single factor reaches. The floor is {_LP_REC["plancher"]:.2f}.</span></p>
+  </div>
+  <div class="lp-bande" aria-hidden="true"></div>
+  <div class="lp-cpt" aria-live="off">
+    <div><strong class="lp-v lp-k-t">{_LP_DATA["seuils"][0]:.2f}</strong><span>threshold</span></div>
+    <div><strong class="lp-k-l">{_LP_ALLUMES} / {len(_LP_F)}</strong><span>factors still lit</span></div>
+    <div><strong class="lp-k-c">{_LP_MEILLEUR}</strong><span>risky caught, brightest</span></div>
+  </div>
+  <script type="application/json" class="lp-donnees">{json.dumps(_LP_DATA, separators=(",", ":"))}</script>
+</section>
+<script>{JS_LAMPES}</script>'''
+
+
+# ── 3 · DOSSIER, THE BOARD (maquettes-dossier.py, concept 2). Each seal recomputed in public: five rows of sixteen
+# split-flap tiles (the four reports, then the dossier's own fingerprint). A read head crosses a row; the tiles ahead
+# flutter through hex, the ones behind settle on the seal's character and glow; when the row is done its five
+# controls light one after the other. Read from the sealed public dossier, with the generator's derivations: the
+# checks held = the verdicts with tenu=true; the oldest report's age = the largest joursDepuis.
+_TB_SRC = json.loads((BASE / "instrument-dossier-donnees.json").read_text())
+_TB_RAPPORTS = [{"q": k, "fichier": q["fichier"], "sceau": q["sceau"],
+                 "verdicts": [{"c": v["controle"], "ok": v["tenu"]} for v in q["verdicts"]]}
+                for k, q in _TB_SRC["questions"].items()]
+_TB_TENUS = sum(1 for r in _TB_RAPPORTS for v in r["verdicts"] if v["ok"])
+_TB_DATA = {"reports": _TB_RAPPORTS, "controls": _TB_SRC["controles"]["presents"], "auJour": _TB_SRC["reglages"]["auJour"],
+            "held": _TB_TENUS, "empreinte": _TB_SRC["provenance"]["empreinte"]}
+_TB_TOTAL = len(_TB_RAPPORTS) * len(_TB_DATA["controls"])
+_TB_DOYEN = max(q["joursDepuis"] for q in _TB_SRC["questions"].values())
+for _r in _TB_RAPPORTS + [{"q": "dossier", "sceau": _TB_DATA["empreinte"]}]:
+    if len(_r["sceau"]) < 16:
+        sys.exit(f"instrument-dossier-donnees.json : the seal of {_r['q']} has fewer than the board's sixteen tiles")
+CSS_TABLEAU = _hv_css(".tableau-hero", "tb", "--tb-sur:#efede6;--tb-pale:#b8b6ad;--tb-gra:#8a8a96;--tb-arg:#e8e6df;--tb-vert:#57b184;--tb-vclair:#a5f7cb",
+                      "radial-gradient(120% 95% at 68% 45%,#121216,#0c0c10 55%,#070709)", "var(--tb-gra)", "var(--tb-arg)", 3) + r"""
+  .tableau-hero h1{font-size:clamp(36px,3.7vw,56px);line-height:1.05}
+  .tableau-hero h1 em{font-style:normal;color:var(--tb-gra)}
+  .tableau-hero .tb-lede{max-width:46ch}
+  .tableau-hero .tb-lede>span{margin-top:12px}
+  .tableau-hero .tb-lede b{color:var(--tb-sur);font-weight:500}
+  .tableau-hero .tb-lede .tb-fig{color:var(--tb-sur)}.tableau-hero .tb-lede .tb-fig b:first-child{color:var(--tb-vert)}
+  .tableau-hero .tb-cpt strong small{font-size:18px;font-weight:500}
+  .tableau-hero .tb-cpt .tb-v{color:var(--tb-vert)}
+  .tableau-hero .tb-row{position:absolute;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;column-gap:16px;row-gap:6px;white-space:nowrap;transform:translateY(-100%)}
+  .tableau-hero .tb-row b{font:500 12px/1 var(--tb-mono);color:var(--tb-sur);letter-spacing:.02em}
+  .tableau-hero .tb-row b small{color:var(--tb-pale);margin-left:10px;letter-spacing:.1em;text-transform:uppercase;font-size:10.5px}
+  .tableau-hero .tb-row em{display:flex;gap:7px;font-style:normal}
+  .tableau-hero .tb-row em s{text-decoration:none;font:500 10px/1 var(--tb-mono);letter-spacing:.14em;text-transform:uppercase;color:rgba(138,138,150,.45);transition:color .25s,text-shadow .5s}
+  .tableau-hero .tb-row em s.tb-on{color:var(--tb-vclair);text-shadow:0 0 12px rgba(165,247,203,.7)}
+  @media (max-width:899px){
+    .tableau-hero h1{font-size:34px}
+    .tableau-hero .tb-lede{max-width:none}
+    .tableau-hero .tb-bande{height:460px}
+    .tableau-hero .tb-cpt strong small{font-size:13px}
+    .tableau-hero .tb-row b{font-size:10px}
+    .tableau-hero .tb-row b small{font-size:9px;margin-left:8px}
+    .tableau-hero .tb-row em{gap:5px}
+    .tableau-hero .tb-row em s{font-size:9px;letter-spacing:.1em}
+  }
+  @media (prefers-reduced-motion:reduce){.tableau-hero .tb-row em s{transition:none}}
+"""
+JS_TABLEAU = (r"""
+(function(){
+const D = __DATA__;
+const hero = document.querySelector(".tableau-hero"); if (!hero) return;
+const calme = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const MONO = '"Roboto Mono",ui-monospace,Menlo,monospace';
+const ARG = [232,230,223], VCL = [165,247,203];
+const NOM = {routing:"Routing",screening:"Screening",monitoring:"Monitoring",scoring:"Scoring"};
+const SP = {};
+function spr(rgb,r){ r=Math.max(.125,Math.round(r*8)/8); const k=rgb+"|"+r; if (SP[k]) return SP[k];   // radius rounded to 1/8 px: the cache stays bounded
+  const c=document.createElement("canvas"), z=Math.ceil(r*6*2); c.width=c.height=z; const g=c.getContext("2d"), gr=g.createRadialGradient(z/2,z/2,0,z/2,z/2,z/2);
+  gr.addColorStop(0,`rgba(${rgb},1)`); gr.addColorStop(.18,`rgba(${rgb},.85)`); gr.addColorStop(.45,`rgba(${rgb},.18)`); gr.addColorStop(1,`rgba(${rgb},0)`);
+  g.fillStyle=gr; g.fillRect(0,0,z,z); return SP[k]=c; }
+function glow(x,rgb,cx,cy,r,a){ const s=spr(rgb,r), z=r*6; x.globalAlpha=a; x.drawImage(s,cx-z/2,cy-z/2,z,z); x.globalAlpha=1; }
+let rnd = (s=>()=>(s=(s*16807)%2147483647)/2147483647)(11);
+const HEX = "0123456789abcdef";
+const cv = hero.querySelector("canvas"), x = cv.getContext("2d"), lab = hero.querySelector(".tb-etiquettes"), bande = hero.querySelector(".tb-bande");
+const S = {W:0, H:0, t:0, mx:null, my:null, held:0, cnt:hero.querySelector(".tb-n-held")};
+S.tick = n=>{ S.held+=n; S.cnt.textContent=S.held.toLocaleString("en-US"); };
+function fond(cx,cy){ const {W,H}=S; x.globalCompositeOperation="source-over"; const bg=x.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*.75);
+  bg.addColorStop(0,"#17171c"); bg.addColorStop(.55,"#0d0d11"); bg.addColorStop(1,"#060608"); x.fillStyle=bg; x.fillRect(0,0,W,H);
+  const px=S.mx!=null?(S.mx/W-.5)*14:0, py=S.my!=null?(S.my/H-.5)*10:0; x.strokeStyle="rgba(232,230,223,.035)"; x.lineWidth=1; x.beginPath();
+  for (let a=(px%48)-48;a<W;a+=48){ x.moveTo(a,0); x.lineTo(a,H); } for (let a=(py%48)-48;a<H;a+=48){ x.moveTo(0,a); x.lineTo(W,a); } x.stroke(); }
+const ROWS = [...D.reports.map(r=>({seal:r.sceau, titre:r.fichier, sous:NOM[r.q], ctl:r.verdicts})),
+  {seal:D.empreinte, titre:"dossier fingerprint", sous:"the Dossier, "+D.auJour, ctl:D.controls.map(c=>({c, ok:D.reports.every(r=>r.verdicts.find(v=>v.c===c&&v.ok))}))}];
+const N = 16, T = ROWS.map(r=>Array.from({length:N},()=>({ch:HEX[Math.floor(rnd()*16)], set:0, flip:0, glow:0})));
+const RW = ROWS.map(r=>{ const e=document.createElement("div"); e.className="tb-row"; e.innerHTML=`<b>${r.titre}<small>${r.sous}</small></b><em>${r.ctl.map(v=>`<s>${v.c}</s>`).join("")}</em>`; lab.appendChild(e); return e; });
+let row=0, head=-1.5, pause=0, scr=0;
+// reduced motion: the board as it stands once every row has been read, each seal set and every control that holds lit
+if (calme){ T.forEach((R,r)=>R.forEach((c,k)=>{ c.set=1; c.ch=ROWS[r].seal[k]; })); row=ROWS.length-1; head=N+3; scr=Infinity; }
+function draw(dt){ const {W,H}=S, nar=W<900; fond(W*.72,H*.5);
+  const s=nar?Math.min(W*.86/N*.84,36):Math.min(H*.078,(W*.46)/N*.84), pitch=s*1.19, bw=N*pitch-(pitch-s), x0=nar?(W-bw)/2:W-28-bw;
+  // the row pitch follows its label: one line (wide screens) gives the mockup's s+42; a label wrapped on two lines gets its room
+  const cle=W+"x"+H; if (cle!==S.cle){ S.cle=cle; RW.forEach(e=>{ e.style.width=bw+"px"; }); S.haut=Math.max(12,...RW.map(e=>e.offsetHeight)); }
+  const rowH=s+30+S.haut;
+  const mid = nar ? bande.offsetTop+bande.offsetHeight/2 : H*.5, y0=mid-(ROWS.length*rowH)/2+10;
+  // the pass: head crosses the current row; then a short pause; then the next row; after the last, the board scrambles again
+  if (pause>0){ pause-=dt; } else if (scr>0){ scr-=dt; if (scr<=0){ row=0; head=-1.5; } } else { head+=dt*7.5;
+    if (head>N+2.5){ row++; pause=.35; head=-1.5; if (row>=ROWS.length){ row=ROWS.length-1; head=N+3; scr=1.6; T.forEach(R=>R.forEach(c=>{ c.set=0; })); } } }
+  const hov=S.mx!=null?Math.floor((S.my-y0)/rowH):-1;
+  ROWS.forEach((R,r)=>{ const ry=y0+r*rowH+30, cells=T[r], active=r===row&&scr<=0, ahead=active?head:(r<row?N+9:-9);
+    RW[r].style.left=x0+"px"; RW[r].style.top=(ry-12)+"px"; RW[r].style.width=bw+"px";
+    for (let k=0;k<N;k++){ const c=cells[k], tx=x0+k*pitch, dist=k-ahead;
+      if (dist<0&&!c.set){ c.set=1; c.ch=R.seal[k]; c.glow=1; c.flip=1; S.tick(0); }
+      if (!c.set){ const near=dist<4; if (near||rnd()<dt*1.2){ c.flip=1; if (rnd()<(near?.6:1)) c.ch=HEX[Math.floor(rnd()*16)]; } }
+      c.flip=Math.max(0,c.flip-dt*(c.set?5:9)); c.glow=Math.max(0,c.glow-dt*.55);
+      x.globalCompositeOperation="source-over"; const pl=x.createLinearGradient(0,ry,0,ry+s);
+      pl.addColorStop(0,c.set?"#2a2a31":"#1c1c21"); pl.addColorStop(.5,c.set?"#1f1f25":"#15151a"); pl.addColorStop(.5,c.set?"#1a1a1f":"#111115"); pl.addColorStop(1,c.set?"#232329":"#17171c");
+      x.fillStyle=pl; x.beginPath(); x.roundRect(tx,ry,s,s,4); x.fill(); x.fillStyle="rgba(0,0,0,.55)"; x.fillRect(tx,ry+s/2-.5,s,1);
+      // the glyph, split at the middle like a flap; a flipping tile shows its upper half squashed
+      x.save(); x.beginPath(); x.rect(tx,ry,s,s); x.clip(); x.font=`500 ${s*.62}px ${MONO}`; x.textAlign="center"; x.textBaseline="middle";
+      const sq=c.flip>0?Math.abs(Math.cos(c.flip*Math.PI*2.5)):1; x.translate(tx+s/2,ry+s/2); x.scale(1,Math.max(.08,sq));
+      x.fillStyle=c.set?`rgba(232,230,223,${.78+c.glow*.22})`:`rgba(138,138,150,${.35+(dist<4&&dist>=0?.35:0)})`; x.fillText(c.ch,0,1); x.restore();
+      if (c.set&&c.glow>0){ x.globalCompositeOperation="lighter"; glow(x,ARG,tx+s/2,ry+s/2,s*.7,c.glow*.55); }
+      if (hov===r&&S.mx>x0&&S.mx<x0+bw){ x.globalCompositeOperation="lighter"; x.fillStyle="rgba(232,230,223,.05)"; x.beginPath(); x.roundRect(tx,ry,s,s,4); x.fill(); } }
+    // the head: a bright vertical bar with a halo, only on the active row
+    if (active&&head>-1&&head<N+1){ const hx=x0+head*pitch; x.globalCompositeOperation="lighter"; const hg=x.createLinearGradient(hx-s*2.5,0,hx+s*.3,0);
+      hg.addColorStop(0,"rgba(232,230,223,0)"); hg.addColorStop(1,"rgba(232,230,223,.22)"); x.fillStyle=hg; x.fillRect(hx-s*2.5,ry-6,s*2.8,s+12);
+      x.fillStyle="rgba(232,230,223,.95)"; x.fillRect(hx-1,ry-8,2,s+16); glow(x,ARG,hx,ry+s/2,s*.9,.7); }
+    // controls light one by one as the head crosses fifths of the row; stay lit once the row is done
+    const done=r<row||(r===row&&head>N+1)||scr>0;
+    R.ctl.forEach((v,k)=>{ const on=v.ok&&(done||(active&&head>(k+1)/R.ctl.length*N)); const el=RW[r].children[1].children[k];
+      if (on&&!el.classList.contains("tb-on")&&scr<=0) S.tick(1); el.classList.toggle("tb-on",on); });
+    if (done){ x.globalCompositeOperation="lighter"; x.fillStyle="rgba(165,247,203,.55)"; x.fillRect(x0-14,ry+2,3,s-4); glow(x,VCL,x0-13,ry+s/2,s*.4,.35); } });
+  // the board's own frame
+  x.globalCompositeOperation="source-over"; x.strokeStyle="rgba(232,230,223,.08)"; x.lineWidth=1; x.strokeRect(x0-24,y0-14,bw+48,ROWS.length*rowH+8); }
+function fit(){ const r=Math.min(1.5,devicePixelRatio||1); S.W=cv.clientWidth; S.H=cv.clientHeight; cv.width=S.W*r; cv.height=S.H*r; x.setTransform(r,0,0,r,0,0);
+  for (const k in SP) delete SP[k]; if (calme){ draw(0); S.held=D.held; S.cnt.textContent=String(D.held); } }
+hero.addEventListener("pointermove", e=>{ const r=hero.getBoundingClientRect(); S.mx=e.clientX-r.left; S.my=e.clientY-r.top; }, {passive:true});
+hero.addEventListener("pointerleave", ()=>{ S.mx=S.my=null; });
+const pas = dt=>{ S.t+=dt; draw(dt); };
+if (!calme) S.cnt.textContent = "0";   // the live count starts from nothing; without script, or still, it shows today's figure
+""" + _hv_boucle("tb") + r"""
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(()=>{ fit(); new ResizeObserver(fit).observe(cv); tb_pret=true; tb_lancer(); });
+})();
+""").replace("__DATA__", json.dumps(_TB_DATA, separators=(",", ":")))
+_HERO_TABLEAU = f'''<section class="tableau-hero" aria-label="Dossier, live">
+  <canvas aria-hidden="true"></canvas>
+  <div class="tb-grain"></div><div class="tb-vignette"></div><div class="tb-etiquettes" aria-hidden="true"></div>
+  <div class="tb-texte">
+    <div class="tb-kicker"><i></i>Dossier &#183; verified live</div>
+    <h1>Check each report: present, sealed, signed, <em>fresh, consistent.</em></h1>
+    <p class="tb-lede">A reviewer asks whether the whole chain still holds.<span>The Dossier reads the four reports and checks that each one is present, frozen, fresh, signed with a key you can check, and consistent with the others.</span><span class="tb-fig"><b>{_TB_TENUS} of {_TB_TOTAL}</b> checks hold today, across <b>{_TB_SRC["couverture"]["n"]} of {_TB_SRC["couverture"]["sur"]}</b> reports.</span></p>
+  </div>
+  <div class="tb-bande" aria-hidden="true"></div>
+  <div class="tb-cpt" aria-live="off">
+    <div><strong class="tb-v tb-n-held">{_TB_TENUS}</strong><span>checks held, live</span></div>
+    <div><strong>{_TB_SRC["couverture"]["n"]}<small>/{_TB_SRC["couverture"]["sur"]}</small></strong><span>reports present</span></div>
+    <div><strong>{_TB_DOYEN}<small> d</small></strong><span>oldest report, of {_TB_SRC["reglages"]["rythmeJours"]}</span></div>
+  </div>
+</section>
+<script>{JS_TABLEAU}</script>'''
+
+
+# ── 4 · MONITORING, THE SKYLINE (maquettes-monitoring.py, concept 5). Seven towers, one per scenario, the closed
+# alerts as windows: the windows a scenario would light over the closed book at the threshold, blue for the
+# suspicious cases it catches, amber for the benign ones it alerts; the generated set glows as the far city, and
+# the wet ground reflects it all. THE DERIVATION, as in the generator: case k of a population is alerted at
+# threshold t exactly when the record's count at t exceeds k (counts non-increasing in t, checked here), so each
+# threshold shows precisely the record's count; which window is case k is a layout choice.
+# ARSLANE'S FIX (25/10, "the words on the buildings collide"): the towers keep the mockup's look, but their overlap
+# now shrinks with the window pitch (the mockup's fixed 60 px stacked towers on top of each other below ~1400 px),
+# and each tower's sign is measured and lifted until it meets no other label: no two labels intersect, 390 to 1920 px.
+# The mockup's top-right concept line (one per concept, beside its tag) is a mockup annotation and stays out.
+_HZ_SRC = json.loads((BASE / "instrument-monitoring-donnees.json").read_text())
+_HZ_SEUILS = _HZ_SRC["seuils"]
+_HZ_SCEN = [{"id": p["id"], "desc": p["description"]} for p in sorted(_HZ_SRC["paliers"], key=lambda p: p["rang"])]
+def _hz_grille(pop):
+    g, out = _HZ_SRC[pop]["grille"], {}
+    for s in _HZ_SCEN:
+        c = g[s["id"]]
+        r = [c["%.2f" % t]["rappel"]["succes"] for t in _HZ_SEUILS]
+        f = [c["%.2f" % t]["fauxPositifs"]["succes"] for t in _HZ_SEUILS]
+        if not (all(r[i] >= r[i + 1] for i in range(len(r) - 1)) and all(f[i] >= f[i + 1] for i in range(len(f) - 1))):
+            sys.exit(f"instrument-monitoring-donnees.json : the counts of {pop}/{s['id']} grow with the threshold; the windows would lie")
+        out[s["id"]] = {"r": r, "f": f}
+    return out
+_HZ_DATA = {"scen": _HZ_SCEN, "nS": _HZ_SRC["authored"]["nSuspicious"], "nB": _HZ_SRC["authored"]["nBenign"],
+            "nSs": _HZ_SRC["synthetic"]["nSuspicious"], "nBs": _HZ_SRC["synthetic"]["nBenign"],
+            "A": _hz_grille("authored"), "S": _hz_grille("synthetic")}
+if not (len(_HZ_SEUILS) == 51 and _HZ_SEUILS[0] == 0.5 and _HZ_SEUILS[-1] == 1):
+    sys.exit("instrument-monitoring-donnees.json : the skyline reads 51 thresholds from 0.50 to 1.00 (idx = round((t-.5)*100))")
+_HZ_REC = _HZ_SRC["recommandee"]
+_HZ_CAS = _HZ_DATA["nS"] + _HZ_DATA["nB"]
+# the counters without script: the still frame's state (t = 6.3 s of the schedule, the tower catching most)
+_hz_u = (6.3 - 4) / 10
+_HZ_IDX = max(0, min(50, round((.5 + .5 * (.5 - .5 * math.cos(2 * math.pi * _hz_u)) - .5) * 100)))
+_hz_best = max(_HZ_SCEN, key=lambda s: (_HZ_DATA["A"][s["id"]]["r"][_HZ_IDX], -_HZ_SCEN.index(s)))["id"]
+_HZ_DEPART = (_HZ_SEUILS[_HZ_IDX], _HZ_DATA["A"][_hz_best]["r"][_HZ_IDX], _HZ_DATA["A"][_hz_best]["f"][_HZ_IDX], _hz_best)
+CSS_HORIZON = _hv_css(".horizon-hero", "hz", "--hz-sur:#e6ecf7;--hz-pale:#a8b7d4;--hz-bleu:#4f8ae0;--hz-glace:#c3d8ff;--hz-ambre:#e3b062",
+                      "radial-gradient(110% 90% at 70% 45%,#16213a,#101a30 55%,#0a111f)", "var(--hz-bleu)", "var(--hz-bleu)", 4) + r"""
+  .horizon-hero .hz-vignette{background:radial-gradient(120% 90% at 60% 45%,transparent 50%,rgba(0,0,0,.5) 100%)}
+  .horizon-hero h1 em{font-style:normal;color:var(--hz-glace)}
+  .horizon-hero .hz-lede b{color:var(--hz-sur);font-weight:500}.horizon-hero .hz-lede .hz-val{color:var(--hz-sur)}.horizon-hero .hz-lede .hz-val b{color:var(--hz-bleu)}
+  .horizon-hero .hz-cpt strong.hz-v{color:var(--hz-bleu)}.horizon-hero .hz-cpt strong.hz-a{color:var(--hz-ambre)}.horizon-hero .hz-cpt strong.hz-m{font-size:28px;line-height:38px}
+  .horizon-hero .hz-lg{position:absolute;display:flex;flex-direction:column;gap:5px;max-width:250px;transition:opacity .3s ease;transform:translateX(-50%);align-items:center;text-align:center}
+  .horizon-hero .hz-lg i{font:500 11px/1 var(--hz-mono);font-style:normal;letter-spacing:.18em;text-transform:uppercase;color:var(--hz-pale);font-variant-numeric:tabular-nums}
+  .horizon-hero .hz-lg i b{color:var(--hz-bleu);font-weight:500}.horizon-hero .hz-lg i em{color:var(--hz-ambre);font-style:normal}
+  .horizon-hero .hz-lg b.hz-nom{font:600 17px/1.05 var(--hz-texte);letter-spacing:-.01em;color:var(--hz-sur)}
+  .horizon-hero .hz-lg span{font:400 12px/1.4 var(--hz-mono);color:var(--hz-pale);max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .3s ease}
+  .horizon-hero .hz-lg.hz-on span{max-height:90px;opacity:1}
+  .horizon-hero .hz-base{position:absolute;transform:translateX(-50%);font:500 10px/1 var(--hz-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--hz-pale);white-space:nowrap;transition:opacity .2s ease}
+  @media (max-width:899px){
+    .horizon-hero .hz-bande{height:360px}
+    .horizon-hero .hz-cpt strong.hz-m{font-size:20px;line-height:26px;overflow-wrap:anywhere}
+    .horizon-hero .hz-base{font-size:9px;letter-spacing:.1em}
+    .horizon-hero .hz-lg{max-width:220px}
+    .horizon-hero .hz-lg span{font-size:11px}
+  }
+  @media (prefers-reduced-motion:reduce){.horizon-hero .hz-lg,.horizon-hero .hz-lg span,.horizon-hero .hz-base{transition:none}}
+"""
+JS_HORIZON = (r"""
+(function(){
+const D = __DATA__;
+const hero = document.querySelector(".horizon-hero"); if (!hero) return;
+const calme = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const BLUE=[79,138,224], AMBER=[227,176,98], SLATE=[150,170,210];
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+function prng(seed){ let a=seed>>>0; return ()=>{ a=(a+0x6D2B79F5)|0; let t=Math.imul(a^(a>>>15),1|a); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
+function shuffle(arr,rnd){ for (let i=arr.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+const range=n=>Array.from({length:n},(_,i)=>i);
+const idx=thr=>clamp(Math.round((thr-.5)*100),0,50);   // threshold -> index in the 51 thresholds (0.50 .. 1.00 by 0.01)
+const alerted=(arr,thr,k)=>arr[idx(thr)]>k;            // THE DERIVATION: case k is alerted at t iff the record's count at t exceeds k
+// the schedule: 10 s per scenario, the threshold breathes 0.50 -> 1.00 -> 0.50 and the scenario changes at the peak
+const PER=10, T0=-4;
+function horaire(t){ const u=(t+T0)/PER; const thr=.5+.5*(.5-.5*Math.cos(2*Math.PI*u)); const sc=((Math.floor(u+.5)%D.scen.length)+D.scen.length)%D.scen.length; return {thr,sc}; }
+const fmt=n=>n.toLocaleString("en-US");
+const cv=hero.querySelector("canvas"), ctx=cv.getContext("2d"), bande=hero.querySelector(".hz-bande");
+const S={cv,ctx,W:0,H:0,R:1,mx:-1e4,my:-1e4,inside:false,seen:false,t:0,thr:horaire(0).thr,sc:0,hover:false,sprites:{},lab:hero.querySelector(".hz-etiquettes"),
+  cpt:Object.fromEntries([...hero.querySelectorAll("[data-c]")].map(e=>[e.dataset.c,e]))};
+S.sprite=(rgb,r)=>{ r=Math.max(.125,Math.round(r*8)/8);   // rounded to 1/8 px so the cache stays bounded
+  const k=rgb.join()+"/"+r; if (S.sprites[k]) return S.sprites[k];
+  const c=document.createElement("canvas"), s=Math.ceil(r*6*S.R); c.width=c.height=s; const g=c.getContext("2d");
+  const gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+  gr.addColorStop(0,`rgba(${rgb},1)`); gr.addColorStop(.16,`rgba(${rgb},.85)`); gr.addColorStop(.42,`rgba(${rgb},.18)`); gr.addColorStop(1,`rgba(${rgb},0)`);
+  g.fillStyle=gr; g.fillRect(0,0,s,s); return S.sprites[k]=c; };
+S.glow=(rgb,x,y,r,a=1)=>{ const sp=S.sprite(rgb,r), s=r*6; const o=ctx.globalAlpha; ctx.globalAlpha=o*a; ctx.drawImage(sp,x-s/2,y-s/2,s,s); ctx.globalAlpha=o; };
+S.mk=(cls,html)=>{ const el=document.createElement("div"); el.className=cls; el.innerHTML=html; S.lab.appendChild(el); return el; };
+S.put=(el,x,y)=>{ el.style.left=Math.round(x)+"px"; el.style.top=Math.round(y)+"px"; };
+S.fond=()=>{ const {W,H}=S; ctx.globalCompositeOperation="source-over"; ctx.globalAlpha=1;
+  const bg=ctx.createRadialGradient(W*.7,H*.45,0,W*.7,H*.45,Math.max(W,H)*.78); bg.addColorStop(0,"#16213a"); bg.addColorStop(.55,"#101a30"); bg.addColorStop(1,"#070c18");
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  // the faint ruled grid drifts on its own (and a little with the pointer)
+  const px=(S.t*4+(S.inside?(S.mx/W-.5)*14:0))%48, py=(S.t*2.4+(S.inside?(S.my/H-.5)*10:0))%48;
+  ctx.strokeStyle="rgba(195,216,255,.035)"; ctx.lineWidth=1; ctx.beginPath();
+  for (let x=px-48;x<W;x+=48){ ctx.moveTo(x,0); ctx.lineTo(x,H); } for (let y=py-48;y<H;y+=48){ ctx.moveTo(0,y); ctx.lineTo(W,y); } ctx.stroke(); };
+const inter=(a,b,m)=>a.l<b.r+m && b.l<a.r+m && a.t<b.b+m && b.t<a.b+m;
+// the skyline (concept 5 of the mockup)
+const sky={
+  init(S){ const rnd=prng(71), n=D.nS+D.nB;
+    // each tower holds the closed cases as windows; its shape is a layout choice (cols x floors = 84)
+    const shapes=[[7,12],[6,14],[12,7],[4,21],[7,12],[6,14],[12,7]];
+    S.towers=D.scen.map((s,i)=>({s,i,cols:shapes[i][0],floors:shapes[i][1],perm:shuffle(range(n),rnd),back:i%2===1,fl:range(n).map(()=>rnd()*7),
+      el:S.mk("hz-lg","<i></i><b class=hz-nom>"+s.id+"</b><span>"+s.desc+"</span>"),sign:S.mk("hz-base",s.id),hi:0}));
+    S.far=range(D.nSs+D.nBs).map(k=>({k,sus:k<D.nSs,kk:k<D.nSs?k:k-D.nSs,ux:rnd(),uy:rnd()})); S.off=document.createElement("canvas"); },
+  geo(S){ const {W,H}=S, etroit=W<900;
+    let x0, x1, yg, haut, bas;
+    if (etroit){ const top=bande.offsetTop, h=bande.offsetHeight; x0=16; x1=W-16; yg=top+h*.8; haut=top; bas=top+h; }
+    else { x0=W*.475; x1=W*.99; yg=H*.82; haut=yg-H*.62; bas=H; }
+    // the window pitch, at most the mockup's 18 px; the towers overlap by 60 px at that pitch and proportionally below it
+    // (the mockup kept 60 px at every pitch, which piled the towers on one another below ~1400 px)
+    const sc=t=>t.back?.84:1, sCols=S.towers.reduce((a,t)=>a+t.cols*sc(t),0), sSc=S.towers.reduce((a,t)=>a+sc(t),0), nO=S.towers.length-1;
+    const pitch=Math.min(18,(x1-x0-16*sSc)/(sCols-nO*60/18)), over=60*pitch/18;
+    S.g={x0,x1,yg,pitch,win:[pitch*.6,pitch*.62],ph:pitch*1.12,haut,bas}; let x=x0;
+    for (const t of S.towers){ const k=sc(t), w=(t.cols*pitch+16)*k; t.x=x; t.w=w; t.h=(t.floors*S.g.ph+26)*k; t.sc=k; x+=w-over; }
+    S.g.xEnd=x+over; S.off.width=Math.ceil(W*S.R); S.off.height=Math.ceil(H*S.R);
+    // THE FIX: each sign sits 16 px above its roof, then rises by its own height plus a gap until it meets no sign
+    // already placed (front towers first, then the ones behind); measured boxes, not guesses
+    const placed=[];
+    for (const t of [...S.towers.filter(t=>!t.back), ...S.towers.filter(t=>t.back)]){
+      const w=t.sign.offsetWidth, h=t.sign.offsetHeight, cx=t.x+t.w/2; let y=yg-t.h-16-(etroit?4:0);
+      const box=()=>({l:cx-w/2,r:cx+w/2,t:y,b:y+h});
+      while (placed.some(b=>inter(b,box(),8))) y-=h+5;   // at least 8 px between any two signs
+      t.sy=y; placed.push(box()); S.put(t.sign,cx,y); }
+  },
+  zone(S){ const {x0,xEnd,yg,haut}=S.g; return [x0,xEnd,haut,yg+40]; },
+  draw(S){ const {ctx,W,H,thr}=S; S.fond(); const {yg,pitch,win,ph,x0,x1,bas}=S.g;
+    // sky glow over the horizon and the far lights (the generated set, lit by the same record)
+    ctx.globalCompositeOperation="lighter"; const sky=ctx.createLinearGradient(0,yg-220,0,yg); sky.addColorStop(0,"rgba(79,138,224,0)"); sky.addColorStop(1,"rgba(79,138,224,.14)"); ctx.fillStyle=sky; ctx.fillRect(x0-80,yg-220,x1-x0+160,220);
+    const best=S.towers.reduce((b,t)=>{ const n=D.A[t.s.id].r[idx(thr)]; return n>b.n?{n,t}:b; },{n:-1,t:null}).t;
+    const far=D.S[best.s.id]; for (const p of S.far){ const lit=alerted(p.sus?far.r:far.f,thr,p.kk); const x=x0-40+p.ux*(x1-x0+80), y=yg-6-p.uy*34; if (lit) S.glow(p.sus?BLUE:AMBER,x,y,1.6,.55); else { ctx.globalAlpha=.25; ctx.fillStyle=`rgba(${SLATE})`; ctx.fillRect(x,y,1.2,1.2); ctx.globalAlpha=1; } }
+    // towers to an offscreen layer (so the water can reflect them)
+    const o=S.off.getContext("2d"); o.setTransform(S.R,0,0,S.R,0,0); o.clearRect(0,0,W,H);
+    let hov=-1; if (S.inside) S.towers.forEach(t=>{ if (S.mx>=t.x&&S.mx<=t.x+t.w&&S.my>=yg-t.h&&S.my<=yg) hov=t.i; });
+    const draw=(t)=>{ const r=D.A[t.s.id].r, f=D.A[t.s.id].f; let nC=0,nF=0; const top=yg-t.h, dim=t.back?.72:1, hdim=hov>=0?(hov===t.i?1:.5):1;
+      o.globalCompositeOperation="source-over"; o.globalAlpha=1; o.shadowColor="rgba(0,0,0,.6)"; o.shadowBlur=24; o.shadowOffsetX=t.back?-6:6;
+      const wall=o.createLinearGradient(t.x,0,t.x+t.w,0); wall.addColorStop(0,t.back?"#0c1526":"#101c34"); wall.addColorStop(.5,t.back?"#111d35":"#182a4c"); wall.addColorStop(1,t.back?"#0a1222":"#0e192e");
+      o.fillStyle=wall; o.beginPath(); o.roundRect(t.x,top,t.w,t.h+20,3); o.fill(); o.shadowColor="transparent";
+      o.fillStyle="rgba(195,216,255,.25)"; o.fillRect(t.x+6*t.sc,top,t.w-12*t.sc,1.5);
+      for (let j=0;j<t.perm.length;j++){ const c=t.perm[j], sus=c<D.nS, k=sus?c:c-D.nS, lit=alerted(sus?r:f,thr,k); if (lit){ if (sus) nC++; else nF++; }
+        const col=j%t.cols, row=Math.floor(j/t.cols); const x=t.x+8*t.sc+col*pitch*t.sc+(pitch*t.sc-win[0]*t.sc)/2, y=top+14*t.sc+row*ph*t.sc, w=win[0]*t.sc, h=win[1]*t.sc;
+        o.globalCompositeOperation="source-over"; o.globalAlpha=dim*hdim;
+        o.fillStyle= lit ? (sus?"rgba(205,224,255,.98)":"rgba(255,222,165,.98)") : "rgba(195,216,255,.07)"; o.fillRect(x,y,w,h);
+        if (lit){ o.globalCompositeOperation="lighter"; const fl=.75+.25*Math.sin(S.t*3+t.fl[j]); const sp=S.sprite(sus?BLUE:AMBER,w*1.1), sz=w*1.1*6; o.globalAlpha=dim*hdim*fl*.9; o.drawImage(sp,x+w/2-sz/2,y+h/2-sz/2,sz,sz); } }
+      o.globalAlpha=1; t.n=[nC,nF]; t.el.firstChild.innerHTML=`<b>${nC}</b> caught · <em>${nF}</em> false`; };
+    S.towers.filter(t=>t.back).forEach(draw); S.towers.filter(t=>!t.back).forEach(draw);
+    // the pointed tower's card: over its roof, kept inside the frame; the signs it would cover step aside while it shows
+    if (hov!==S.hovPrec){ S.hovPrec=hov; S.towers.forEach(t=>{ t.el.classList.toggle("hz-on",hov===t.i); t.el.style.opacity=hov===t.i?1:0; });
+      if (hov>=0){ const t=S.towers[hov], w=t.el.offsetWidth; S.put(t.el,clamp(t.x+t.w/2,w/2+8,W-w/2-8),Math.max(S.g.haut+4,yg-t.h-96)); }
+      S.cache=hov>=0; }
+    if (hov>=0){ const c=S.towers[hov].el.getBoundingClientRect(), b0=hero.getBoundingClientRect(), card={l:c.left-b0.left,r:c.right-b0.left,t:c.top-b0.top,b:c.bottom-b0.top};
+      S.towers.forEach(t=>{ const s=t.sign; t.sign.style.opacity=(t.i===hov||inter(card,{l:s.offsetLeft-s.offsetWidth/2,r:s.offsetLeft+s.offsetWidth/2,t:s.offsetTop,b:s.offsetTop+s.offsetHeight},3))?0:1; }); }
+    else if (S.cache){ S.cache=false; S.towers.forEach(t=>{ t.sign.style.opacity=1; }); }
+    ctx.globalCompositeOperation="source-over"; ctx.drawImage(S.off,0,0,W,H);
+    // the wet ground: the layer flipped, in slices that ripple (down to the bottom of its band on narrow screens)
+    ctx.save(); ctx.beginPath(); ctx.rect(0,yg,W,bas-yg); ctx.clip(); ctx.globalAlpha=.42;
+    for (let y=0;y<bas-yg;y+=3){ const src=yg-y*1.5, sh=Math.sin(y*.11+S.t*1.6)*(1.5+y*.05); if (src<0) break; ctx.drawImage(S.off,0,src*S.R,W*S.R,3*S.R,sh,yg+y,W,3); }
+    ctx.globalAlpha=1; const fade=ctx.createLinearGradient(0,yg,0,bas); fade.addColorStop(0,"rgba(10,17,31,.15)"); fade.addColorStop(1,"rgba(10,17,31,1)"); ctx.fillStyle=fade; ctx.fillRect(0,yg,W,bas-yg); ctx.restore();
+    ctx.fillStyle="rgba(195,216,255,.18)"; ctx.fillRect(x0-60,yg,x1-x0+120,1);
+    const b=hov>=0?S.towers[hov]:best; S.cpt.caught.textContent=fmt(b.n[0]); S.cpt.false.textContent=fmt(b.n[1]); S.cpt.scen.textContent=b.s.id;
+    S.cpt.scenL.textContent=hov>=0?"tower pointed":"tower catching most"; }
+};
+let frozen=null;
+function avancer(dt){ const h=horaire(S.t); let target=h.thr; S.hover=false; const z=sky.zone(S);
+  if (S.inside && S.mx>=z[0]&&S.mx<=z[1]&&S.my>=z[2]&&S.my<=z[3]){ target=.5+.5*clamp((S.mx-z[0])/(z[1]-z[0]),0,1); if (frozen==null) frozen=h.sc; S.hover=true; } else frozen=null;
+  S.sc=frozen??h.sc; S.thr+=(target-S.thr)*Math.min(1,dt*(S.hover?9:6)); }
+function dessiner(){ sky.draw(S); S.cpt.thr.textContent=S.thr.toFixed(2); }
+function fit(){ S.R=Math.min(1.5,devicePixelRatio||1); S.W=cv.clientWidth; S.H=cv.clientHeight; cv.width=S.W*S.R; cv.height=S.H*S.R; ctx.setTransform(S.R,0,0,S.R,0,0); S.sprites={}; S.hovPrec=undefined; sky.geo(S); if (calme) dessiner(); }
+hero.addEventListener("pointermove", e=>{ const b=cv.getBoundingClientRect(); S.mx=e.clientX-b.left; S.my=e.clientY-b.top; S.inside=true; }, {passive:true});
+hero.addEventListener("pointerleave", ()=>{ S.inside=false; });
+sky.init(S);
+const pas = dt=>{ if (!S.seen){ S.seen=true; S.t=0; } S.t+=dt; avancer(dt); dessiner(); };
+""" + _hv_boucle("hz") + r"""
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(()=>{
+  if (calme){ S.t=6.3; S.thr=horaire(S.t).thr; S.sc=horaire(S.t).sc; }   // reduced motion: the frame at 6.3 s of the schedule stays
+  fit(); new ResizeObserver(fit).observe(cv); hz_pret=true; hz_lancer(); });
+})();
+""").replace("__DATA__", json.dumps(_HZ_DATA, separators=(",", ":")))
+_HERO_HORIZON = f'''<section class="horizon-hero" aria-label="Monitoring, live">
+  <canvas aria-hidden="true"></canvas>
+  <div class="hz-grain"></div><div class="hz-vignette"></div><div class="hz-etiquettes" aria-hidden="true"></div>
+  <div class="hz-texte">
+    <div class="hz-kicker"><i></i>Monitoring &#183; measured live</div>
+    <h1>See what your scenarios catch, and what they <em>flag incorrectly.</em></h1>
+    <p class="hz-lede">A scenario's threshold is the score above which it raises an alert.<span>Crusetra Monitoring runs <b>{len(_HZ_SCEN)} scenarios</b> at <b>{len(_HZ_SEUILS)} thresholds</b> over the <b>{_HZ_CAS} alerts</b> your analysts already closed.</span><span class="hz-val"><b>{_HZ_REC["plusForteBorne"] * 100:.1f}%</b> is the strongest lower bound any scenario reaches: none is sure of the {round(_HZ_REC["plancher"] * 100)}% floor.</span></p>
+  </div>
+  <div class="hz-bande" aria-hidden="true"></div>
+  <div class="hz-cpt" aria-live="off">
+    <div><strong data-c="thr">{_HZ_DEPART[0]:.2f}</strong><span>threshold</span></div>
+    <div><strong class="hz-v" data-c="caught">{_HZ_DEPART[1]}</strong><span data-c="caughtL">suspicious caught</span></div>
+    <div><strong class="hz-a" data-c="false">{_HZ_DEPART[2]}</strong><span data-c="falseL">benign alerted</span></div>
+    <div><strong class="hz-m" data-c="scen">{_HZ_DEPART[3]}</strong><span data-c="scenL">tower catching most</span></div>
+  </div>
+</section>
+<script>{JS_HORIZON}</script>'''
+
+# the hero of each catalogue page, with its CSS: a page whose id is missing here keeps the plain hero
+HEROS_VIVANTS = {"screening": (CSS_SPHERE, _HERO_SPHERE), "scoring": (CSS_LAMPES, _HERO_LAMPES),
+                 "dossier": (CSS_TABLEAU, _HERO_TABLEAU), "monitoring": (CSS_HORIZON, _HERO_HORIZON)}
+for _id, (_css, _html) in HEROS_VIVANTS.items():
+    if "\u2014" in _css + _html or "\u2026" in _html:
+        sys.exit(f"the {_id} hero carries an em dash or an ellipsis")
+
+# \u2500\u2500 ONE ACTION BUTTON PER HERO (Arslane, 25/10, "Un bouton par page"). Under the hero text of each of the five
+# tool pages, one button, the same component everywhere: the markup of the pricing page's .cta / .b / .fl
+# (batir-offre.py), drawn since 25/10 evening as design 3 "Readout" of maquettes-bouton.py (Arslane's pick): a lit point
+# and brackets in the hero's mono small caps, no fill. Its label and target are READ from a call to action the page already carries further
+# down, never typed here: Routing, the "Try it free" link of its #report section; Screening, the link to its #report
+# that the plain hero carried (commit d6aa49d), whose delay is the offer's, stated again in that section's title;
+# Monitoring, Scoring and Dossier, their "See pricing" link. The label is the hero's text colour on its ground and the
+# focus ring the same colour (14.6:1 or more, computed 25/10); the point, brackets and arrow use the hero's accent,
+# 4.5:1 or more on the lightest point of each ground (asserted by maquettes-bouton.py).
+_m_essai = re.search(r'<a class="ouvrir" href="([^"]+)"><span><span class="ouvrir-t">([^<]+)</span>', _SECTION_RAPPORT_ROUTING)
+if not _m_essai:
+    sys.exit("the Routing #report section no longer carries its 'Try it' link: the hero button has no source")
+_ACTIONS = {
+    "routing": (_m_essai.group(1), _m_essai.group(2), "&#8594;"),
+    "screening": ("#report", "Send us your list for a sealed report within "
+                  f'{json.loads((BASE / "offre-screening.json").read_text())["delai_heures"]} hours', "&#8595;"),
+    "monitoring": (lien(OUTILS["monitoring"], "ENGAGEMENT.html"), "See pricing", "&#8594;"),
+    "scoring": (lien(OUTILS["scoring"], "ENGAGEMENT.html"), "See pricing", "&#8594;"),
+    "dossier": (lien(OUTILS["dossier"], "ENGAGEMENT.html"), "See pricing", "&#8594;"),
+}
+_ACTION_PALETTE = {   # (section class, text-block prefix, accent of the point and brackets, its glow, the label's colour)
+    # design 3 "Readout" (Arslane, 25/10, maquettes-bouton.py n=3): the accent and glow are the variables the mockup read
+    # from each hero (FILL and GLOW there); the label is the hero's text colour. Accent on the lightest point of each
+    # ground was asserted 4.5:1 or more by the mockup; the brackets and the arrow are decorative (aria-hidden or silent).
+    "routing": (".flux-hero", "fx", "var(--fx-vert)", "var(--fx-vert)", "var(--fx-sur)"),
+    "screening": (".sphere-hero", "sp", "var(--sp-rose)", "var(--sp-rubis)", "var(--sp-sur)"),
+    "monitoring": (".horizon-hero", "hz", "var(--hz-glace)", "var(--hz-bleu)", "var(--hz-sur)"),
+    "scoring": (".lampes-hero", "lp", "var(--lp-clair)", "var(--lp-vif)", "var(--lp-sur)"),
+    "dossier": (".tableau-hero", "tb", "var(--tb-arg)", "var(--tb-vert)", "var(--tb-sur)"),
+}
+
+def _action_css(c, acc, glow, sur):
+    """Design 3, "Readout", ported from maquettes-bouton.py (.act.a3) onto the button's existing markup (.cta > .b > .fl,
+    which _garde_action and the mockup generator both read): the lit point is .cta::before, the opening bracket
+    .b::before, the closing bracket .fl::before (it travels with the arrow, as in the mockup where both move 5px).
+    The brackets' text is silent to assistive tech (content alt text "")."""
+    mono = '"Roboto Mono",ui-monospace,Menlo,monospace'
+    return (f"""
+  {c} .cta{{display:inline-flex;align-items:center;max-width:100%;margin-top:30px;padding:6px 0;text-decoration:none;
+    pointer-events:auto;color:{sur};font:500 11.5px/1.9 {mono};letter-spacing:.12em;text-transform:uppercase;
+    cursor:pointer;-webkit-tap-highlight-color:transparent}}
+  {c} .cta::before{{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:{acc};box-shadow:0 0 10px {glow};
+    margin-right:14px;transition:transform .25s,box-shadow .25s}}
+  {c} .cta .b{{flex:1 1 auto;min-width:0;text-wrap:pretty}}
+  {c} .cta .b::before,{c} .cta .fl::before{{display:inline-block;font:400 11.5px/1 {mono};letter-spacing:.12em;color:{acc};
+    transition:transform .22s cubic-bezier(.2,.7,.2,1)}}
+  {c} .cta .b::before{{content:"[";content:"[" / "";margin-right:.6em}}
+  {c} .cta .fl{{display:inline-block;margin-left:-1.4px;color:{acc};font-family:"Literata",Georgia,serif;font-size:15px;
+    line-height:1;letter-spacing:0;transition:transform .22s cubic-bezier(.2,.7,.2,1)}}
+  {c} .cta .fl::before{{content:"]";content:"]" / "";margin-right:14.3px}}
+  {c} .cta:hover .b::before{{transform:translateX(-5px)}}
+  {c} .cta:hover .fl{{transform:translateX(5px)}}
+  {c} .cta[href^="#"]:hover .fl{{transform:translateY(3px)}}
+  {c} .cta[href^="#"]:hover .fl::before{{transform:translate(5px,-3px)}}
+  {c} .cta:hover::before{{transform:scale(1.4);box-shadow:0 0 18px {glow},0 0 4px {sur}}}
+  {c} .cta:active .b::before{{transform:translateX(0)}}
+  {c} .cta:active .fl{{transform:none}}{c} .cta:active .fl::before{{transform:none}}
+  {c} .cta:focus{{outline:none}}
+  {c} .cta:focus-visible{{outline:2px solid {sur};outline-offset:5px}}
+  @media (max-width:599px){{{c} .cta{{margin-top:22px;font-size:11px;letter-spacing:.1em;align-items:flex-start}}
+    {c} .cta::before{{margin-top:7px}}{c} .cta .b::before,{c} .cta .fl::before{{font-size:11px;letter-spacing:.1em}}}}
+  @media (prefers-reduced-motion:reduce){{{c} .cta::before,{c} .cta .b::before,{c} .cta .fl,{c} .cta .fl::before{{transition:none!important}}
+    {c} .cta:hover::before{{transform:none}}}}
+""")
+
+def _avec_action(oid, css, html):
+    """Puts the action button under the hero text: exactly once, after the lede, or the build stops."""
+    href, label, fleche = _ACTIONS[oid]
+    c, p, acc, glow, sur = _ACTION_PALETTE[oid]
+    ancre = f'</p>\n  </div>\n  <div class="{p}-bande"'
+    if html.count(ancre) != 1:
+        sys.exit(f"the {oid} hero no longer ends its text block where the action button goes ({html.count(ancre)} places)")
+    bouton = f'</p>\n    <a class="cta" href="{href}"><span class="b">{label} <span class="fl" aria-hidden="true">{fleche}</span></span></a>'
+    return css + _action_css(c, acc, glow, sur), html.replace(ancre, bouton + ancre[4:])
+
+CSS_FLUX, _HERO_FLUX = _avec_action("routing", CSS_FLUX, _HERO_FLUX)
+HEROS_VIVANTS = {k: _avec_action(k, *v) for k, v in HEROS_VIVANTS.items()}
+
+def _garde_action(page, nom):
+    """The hero button promises nothing the page does not already state: one button in the hero, its target is a
+    target the page carries elsewhere (an id, or the same link further down), every figure of its label is said
+    again on the page outside the hero. Refuses otherwise."""
+    m_h = re.search(r'<section class="[a-z]+-hero".*?</section>', page, re.S)
+    if not m_h:
+        sys.exit(f"{nom}: no living hero found for the action-button guard")
+    hero, reste = m_h.group(0), page[:m_h.start()] + page[m_h.end():]
+    boutons = re.findall(r'<a class="cta" href="([^"]+)"><span class="b">([^<]+?) <span class="fl"', hero)
+    if len(boutons) != 1:
+        sys.exit(f"{nom}: the hero carries {len(boutons)} action buttons, one expected")
+    href, label = boutons[0]
+    if href.startswith("#"):
+        if f'id="{href[1:]}"' not in reste:
+            sys.exit(f"{nom}: the hero button points to {href}, which the page does not carry")
+    elif f'href="{href}"' not in reste:
+        sys.exit(f"{nom}: the hero button points to {href}, a target no other call to action of the page uses")
+    texte = re.sub(r"\s+", " ", html_mod.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"<(style|script)\b.*?</\1>", " ", reste, flags=re.S))))
+    # a figure is checked with the word it counts ("48 hours", "100 of"): a bare 24 is somewhere on any page
+    if re.search(r"\d(?![\d,.]*\s+\w)", label):
+        sys.exit(f"{nom}: a figure of the hero button carries no word after it, so it cannot be checked")
+    for n, mot in re.findall(r"(\d[\d,.]*)\s+(\w+)", label):
+        if not re.search(rf"(?<![\d.,]){re.escape(n)}\s+{re.escape(mot)}\b", texte):
+            sys.exit(f"{nom}: the hero button says {n} {mot}, which the page does not state elsewhere")
+    return href, label
+
+CSS_CHAMPS = """
+  .champs{list-style:none;margin:44px auto 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:14px;max-width:1040px;perspective:900px}
+  .champ{display:flex;flex-direction:column;gap:10px;text-align:left;padding:18px 18px 16px;border-radius:14px;
+    border:1px solid color-mix(in srgb,var(--sur-vert) 16%,transparent);
+    background:color-mix(in srgb,var(--sur-vert) 4%,transparent);outline:none;
+    transform:translate3d(var(--dx,0px),var(--dy,0px),0) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+    transition:transform .45s cubic-bezier(.2,.7,.2,1),border-color .2s,background .2s,box-shadow .2s}
+  .champ:hover,.champ:focus-visible{border-color:var(--vert-vif);background:color-mix(in srgb,var(--vert-vif) 12%,transparent);
+    box-shadow:0 18px 40px -18px color-mix(in srgb,var(--vert-vif) 60%,transparent)}
+  .c-nom{font-size:15px;color:var(--sur-vert)}
+  .c-moteur{font:400 11px/1 var(--mono,ui-monospace,monospace);letter-spacing:.12em;text-transform:uppercase;
+    color:var(--sur-vert-pale)}
+  .champ.gratuit .c-moteur{color:var(--vert-vif)}
+  .c-acc{font-size:34px;line-height:1;font-weight:600;color:var(--sur-vert);margin-top:6px}
+  .c-acc small{font-size:16px;margin-left:2px;color:var(--sur-vert-pale)}
+  .c-cout{font:400 12px/1.3 var(--mono,ui-monospace,monospace);color:var(--sur-vert-pale)}
+  .champ.gratuit .c-cout{color:var(--vert-vif)}
+  .champs-note{margin:14px auto 0;max-width:72ch;font-size:13px;color:var(--sur-vert-pale)}
+  @media (max-width:900px){.champs{grid-template-columns:repeat(2,minmax(0,1fr))}.champ:last-child{grid-column:1/-1}}
+  @media (prefers-reduced-motion:reduce){.champ{transform:none!important;transition:border-color .2s,background .2s}}
+"""
+JS_CHAMPS = """
+(function(){var ul=document.querySelector('.champs');if(!ul||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var cs=[].slice.call(ul.children);
+addEventListener('pointermove',function(e){cs.forEach(function(c){var r=c.getBoundingClientRect(),
+x=(e.clientX-(r.left+r.width/2))/innerWidth,y=(e.clientY-(r.top+r.height/2))/innerHeight;
+c.style.setProperty('--dx',(-x*10).toFixed(1)+'px');c.style.setProperty('--dy',(-y*8).toFixed(1)+'px');
+c.style.setProperty('--ry',(x*10).toFixed(2)+'deg');c.style.setProperty('--rx',(-y*8).toFixed(2)+'deg');});},{passive:true});
+})();
+"""
+
+
 _SECTION_FILM_ROUTING = f'''<section class="film"><div class="colonne">
   <h2 class="h2">Crusetra, proven in 90 seconds.</h2>
   <p class="film-duree">{"The film, and the demo" if "routing" in DEMOS else "The five Routing findings"}</p>
   {lecteur_html("routing", "Routing", "", "affiche-film.jpg")}{liste_films("routing", "", "affiche-film.jpg")}
 </div></section>
 ''' if "routing" in FILMS_VISIBLES else ""
+
+# 25/10 (Arslane, look C kept in the retouch session): the measurement note under the Routing card as four labelled
+# footnotes; each figure is the variable the paragraph used (N_SOCLE, N_GEN, LONGUEUR_DOSSIER, HUMAIN).
+_NOTES_ROUTING = [
+    ("Measured on", f"{N_SOCLE:,} held-out records for the rules, small and large tiers; {N_GEN} for the generative tiers. "
+                    "A ring marks the published routing of each field."),
+    ("Corpus", f"Records we wrote, about {LONGUEUR_DOSSIER} characters each."),
+    ("Caveat", "The generative tiers' prompt was tuned on the held-out half: their figures are optimistic, by an amount not yet measured."),
+    ("Human", f"Accuracy assumed at {qte(HUMAIN)} % until you measure your own reviewers."),
+]
 
 PAGE = f'''<!doctype html><html lang="en">
 <meta charset="utf-8"><title>Crusetra &#183; Routing, the extraction cost audit</title>
@@ -1645,22 +3045,11 @@ PAGE = f'''<!doctype html><html lang="en">
 <link rel="stylesheet" href="fontes/roboto-mono.css">
 <script type="application/ld+json">{DONNEES_STRUCTUREES}</script>
 <script>document.documentElement.classList.add("js")</script>
-<style>{CSS}{_CSS_SCRUB_V}{CSS_BARRE_SITE}</style>
+<style>{CSS}{_CSS_SCRUB_V}{CSS_BARRE_SITE}{CSS_CHAMPS}{CSS_FLUX}</style>
 {barre_site(courant="HERO.html")}
 
 <main>
-<section class="hero">
-  <h1 class="h1 entree">See which engine each field of your documents actually needs.</h1>
-  <p class="lede entree">A model tier is the size of model a field is sent to, from a plain text pattern up to the largest.<br>
-    On our identity-record test set, three of the five fields are read by a text pattern alone, at no cost.</p>
-  <div class="commande entree" role="group" aria-label="The first measurement, before any install">
-    <code class="ln">git clone {DEPOT_URL}</code>
-    <code class="ln">cd {DEPOT_URL.rsplit("/", 1)[1]}</code>
-    <code class="ln">node src/premiere-reponse.mjs</code>
-    <span class="note">Prints the receipts result from the signed CORD record, then our KYC corpus. Under one second, before npm install.</span>
-  </div>
-  <div class="cue" aria-hidden="true"><span>scroll</span><span class="fil"></span></div>
-</section>
+{_HERO_FLUX}
 
 {choix_outils(OUTILS["routing"])}
 
@@ -1676,20 +3065,12 @@ PAGE = f'''<!doctype html><html lang="en">
 
 <section class="instrument" data-commun="instrument"><div class="colonne">
   <h2 class="h2">Try the Routing instrument on our public test set.</h2>
-  {affiche_html("paliers", LANDING, [], "INSTRUMENT.html", "Crusetra &#183; Routing",
+  {_tarif_et_notes(affiche_html("paliers", LANDING, [], "INSTRUMENT.html", "Crusetra &#183; Routing",
                 "See every field, tier, accuracy and cost, live from our public test set. Set the budget and watch the tool choose.",
-                "rendus/robot-vert-regarde.webp",
-                note=f"Measured on {N_SOCLE:,} held-out records for the rules, small and large tiers, and {N_GEN} for the generative tiers, "
-                     "with a ring on the published routing of each field. "
-                     f"{CAVEAT_CORPUS} "
-                     f"Human accuracy is assumed at {qte(HUMAIN)} % until you measure your own reviewers.", tarif="ENGAGEMENT.html")}
+                "rendus/robot-vert-regarde.webp"), "ENGAGEMENT.html", _NOTES_ROUTING)}
 </div></section>
 
-<div class="couture" aria-hidden="true"><div class="colonne">
-  <span class="filet"></span>
-  <span class="sceau-c">measured, then frozen &#183; content hash {SCEAU}</span>
-  <span class="filet"></span>
-</div></div>
+{couture_defile("measured, then frozen", SCEAU)}
 
 {_SECTION_FILM_ROUTING}
 {menus_html()}
@@ -1697,7 +3078,7 @@ PAGE = f'''<!doctype html><html lang="en">
 
 {pied_html(outil=OUTILS["routing"], sceau=SCEAU, tests=N_TESTS)}
 
-<script>{JS}</script>{_SCRUB_V}
+<script>{JS}</script><script>{JS_CHAMPS}</script>{_SCRUB_V}
 '''
 
 # Routing vit sous routing/ (décision A du 6/09) : chaque lien relatif de la page
@@ -1705,9 +3086,21 @@ PAGE = f'''<!doctype html><html lang="en">
 # ne le reçoivent pas deux fois ; les absolus, les ancres et les data: sont laissés
 PAGE = re.sub(r'(href|src|poster)="(?!(?:https?:|#|data:|mailto:|\.\./))([^"]+)"', r'\1="../\2"', PAGE)   # poster : l'affiche du lecteur (27/09)
 assert "—" not in PAGE, "un cadratin s'est glissé dans la page"
+print("HERO.html · hero button held:", " → ".join(_garde_action(PAGE, "HERO.html")[::-1]))
 (BASE / "HERO.html").write_text(PAGE, encoding="utf-8")
 print("HERO.html", f"{len(PAGE) / 1e3:.0f} ko")
 
+
+# the home's wordmark in the sky: the same drawn mark the assembler puts in the bar (marque/logo.svg)
+_LOGO_CIEL = (BASE / "marque" / "logo.svg").read_text().strip()
+
+def _rideau_paresseux(html):
+    """On the home the strip of tools sits under the sky and the hero, well below the first viewport: its robots wait
+    to be near (the assembler keeps the strip eager on the tool pages, where it is the second screen)."""
+    n = html.count('<img src="')
+    if n < 2:
+        sys.exit(f"the home strip carries {n} robots: the lazy rewrite has nothing to do")
+    return html.replace('<img src="', '<img loading="lazy" src="')
 
 def batir_accueil():
     """LA PAGE DE LA MARQUE, à la racine (décision A d'Arslane, 6/09) : un héros court
@@ -1809,7 +3202,8 @@ def batir_accueil():
 <link rel="stylesheet" href="fontes/roboto-mono.css">
 <script type="application/ld+json">{donnees}</script>
 <script>document.documentElement.classList.add("js")</script>
-<style>{CSS}{CSS_ACCUEIL}{CSS_PIED_SITE}.methode{{{tokens_papier}}}</style>
+<script>{JS_TETE}</script>
+<style>{CSS}{CSS_ACCUEIL}{CSS_PIED_SITE}.methode{{{tokens_papier}}}{CSS_CIEL}</style>
 <header class="barre sur-nuit">
   <a class="marque" href="ACCUEIL.html">CRUSETRA</a>
   <nav aria-label="Site">
@@ -1819,12 +3213,15 @@ def batir_accueil():
   </nav>
 </header>
 
+{ciel_html(_LOGO_CIEL)}
+
+
 <main>
 <section class="hero">
   <div class="hero-grille">
     <div class="hero-texte">
-      <h1 class="h1 entree">Compliance checks you can show.</h1>
-      <p class="lede entree">Crusetra turns compliance decisions into measurable evidence: tested against our public test set, reproducible on your own data, and open to inspection.</p>
+      <h1 class="h1 entree">Don’t trust compliance tools.<br><em>Test them.</em></h1>
+      <p class="lede entree">Compliance decisions you can <b>test</b>, <b>reproduce</b> and <b>inspect</b>.</p>
       <dl class="ledger entree" aria-label="The routing instrument, in figures">
         <div><dt><i class="pt" aria-hidden="true"></i>routing, mean accuracy per field</dt><dd>{acc_champ}</dd></div>
         <div><dt>accuracy per file</dt><dd>{acc_fichier}</dd></div>
@@ -1839,7 +3236,7 @@ def batir_accueil():
   </div>
 </section>
 
-{choix_outils(None)}
+{_rideau_paresseux(choix_outils(None))}
 
 <section class="methode" id="method">
   <div class="colonne">
@@ -1858,6 +3255,7 @@ def batir_accueil():
 {pied_html()}
 
 <script>{JS}</script>
+<script>{JS_CIEL}</script>
 '''
     assert "—" not in page, "un cadratin s'est glissé dans la page de la marque"
     (BASE / "ACCUEIL.html").write_text(page, encoding="utf-8")
@@ -2177,6 +3575,29 @@ def _note_outil(spec, releve, findings):
             f"Generated {_NOM_JEU[spec['table_ligne']]} are counted on their own, and the live instrument shows them.")
 
 
+def _notes_outil(spec, releve, findings):
+    """The note of _note_outil as labelled footnotes (25/10, the Routing look carried to Screening): the same counts
+    from the record, the same cell from the third finding, the same closing fact; nothing added, nothing typed."""
+    src = findings[2].get("source", {}).get("a") or {} if len(findings) > 2 else {}
+    palier_f, seuil_f = src.get("palier"), src.get("seuil")
+    auth = releve["authored"]
+    unites = spec["table_note_unites"].format(
+        nMatch=auth.get("nMatch", auth.get("nSuspicious", auth.get("nEscalated"))),
+        nDifferent=auth.get("nDifferent", auth.get("nBenign", auth.get("nMaintained"))))
+    if not unites.startswith("Measured on "):
+        sys.exit("table_note_unites ne commence plus par « Measured on » : la première note ne sait plus se poser")
+    champ_cite = src.get("champ", "taux")
+    if palier_f and champ_cite == "taux":
+        choix = ("Default cell", f"A ring marks the cell the tool picks by default, {palier_f} at {seuil_f}.")
+    elif palier_f:
+        choix = ("Marked cell", f"The marked cell, {palier_f} at {seuil_f}, comes closest to the 90% floor we set, which none reaches.")
+    else:
+        choix = ("Floor", "No setting reaches the 90% floor we set.")
+    jeu = _NOM_JEU[spec["table_ligne"]]
+    return [("Measured on", " ".join(unites[len("Measured on "):].split()) + ", at every threshold."), choix,
+            (f"Generated {jeu}", "Counted on their own, and the live instrument shows them.")]
+
+
 def _table_outil(spec, releve, findings):
     """La grille de l'outil sur son héros, comme le vert montre la sienne : chaque palier
     présent, à sept seuils dont celui de la frontière quand elle EXISTE, rappel sur
@@ -2270,34 +3691,65 @@ def _section_entites(o):
                                    "December").split()[a_m_j[1] - 1]
     pct = lambda n, d: f"{100 * n / d:.0f}"
     def grille(n, classe):
-        return '<div class="grille" aria-hidden="true">' + "".join(f'<i class="{classe(k)}"></i>' for k in range(n)) + "</div>"
+        return '<div class="ca-g grille" aria-hidden="true">' + "".join(f'<i class="{classe(k)}"></i>' for k in range(n)) + "</div>"
+    # 25/10 (Arslane, look kept in the retouch session): look A, three panels side by side. Each key is (swatch, text);
+    # a bracketed interval is kept on one line, the text itself unchanged.
     pops = [
         (f["populations"][0].format(sur=sur_v), f"{pct(vf, sur_v)}<small>%</small>",
          grille(sur_v, lambda k: "f" if k < vf else ("p" if k < vp else "")),
-         f'<span><i class="f"></i>{vf} found at the strong level, {pct(vf, sur_v)} % [{iv_f[0]}-{iv_f[1]}]</span>'
-         f'<span><i class="v"></i>{vp - vf} more at the possible level, {vp} in all, {pct(vp, sur_v)} % [{iv_p[0]}-{iv_p[1]}]</span>'
-         f'<span><i></i>{sur_v - vp} missed at both levels</span>'),
+         [("f", f"{vf} found at the strong level, {pct(vf, sur_v)} % [{iv_f[0]}-{iv_f[1]}]"),
+          ("v", f"{vp - vf} more at the possible level, {vp} in all, {pct(vp, sur_v)} % [{iv_p[0]}-{iv_p[1]}]"),
+          ("", f"{sur_v - vp} missed at both levels")]),
         (f["populations"][1].format(sur=f"{sur_f:,}"), f"{ff}",
          grille(sur_f, lambda k: "f" if k < ff else ("p" if k < fp else "")),
-         f'<span><i class="f"></i>{ff} of {sur_f:,} raised a strong alert [{if_f[0]}-{if_f[1]} %]</span>'
-         f'<span><i class="v"></i>{fp} raised a possible alert [{if_p[0]}-{if_p[1]} %]</span>'),
+         [("f", f"{ff} of {sur_f:,} raised a strong alert [{if_f[0]}-{if_f[1]} %]"),
+          ("v", f"{fp} raised a possible alert [{if_p[0]}-{if_p[1]} %]")]),
         (f["populations"][2].format(lignes=f"{lignes:,}", listes=listes_livre, jour=jour_livre), f"{forts + possibles}<small>/{lignes}</small>",
          grille(lignes, lambda k: "f" if k < forts else ("p" if k < forts + possibles else "")),
-         f'<span><i class="f"></i>{forts} strong</span><span><i class="v"></i>{possibles} possible</span><span><i></i>{sans} with no candidate</span>'),
+         [("f", f"{forts} strong"), ("v", f"{possibles} possible"), ("", f"{sans} with no candidate")]),
     ]
+    nw = lambda t: re.sub(r"(\[[^\]]+\])", r'<b class="nw">\1</b>', t)
+    blocs = "".join(f'''<div class="ca-p pop"><div class="ca-h"><span class="ca-n">{chiffre}</span><p class="ca-d">{texte}</p></div>{gr}<p class="ca-c">'''
+                    + "".join(f'<span><i class="{c}"></i><span>{nw(t)}</span></span>' if c else f'<span><i></i><span>{nw(t)}</span></span>' for c, t in cle)
+                    + '<span class="compteur" aria-live="polite"></span></p></div>'
+                    for texte, chiffre, gr, cle in pops)
+    titre = [x.strip() for x in f["titre"].split("<br>")]
+    if len(titre) != 2 or not all(titre):
+        sys.exit("findings-entites.json : le titre devait porter deux phrases séparées par <br>, le panneau A pose une ligne chacune : refusé")
+    # 25/10 (Arslane, look kept in the retouch session): the note as look B, a band of large figures. Every figure and date
+    # comes from the same variables the paragraph used; the easier set's date and the two closing sentences are read from
+    # the note of findings-entites.json, so the band and the note cannot drift apart.
     note = f["note"].format(date_gleif=g["date"], manques=sur_v - vp, sur=sur_v, tiers=pct(sur_v - vp, sur_v),
                             ia_trouves=ia["trouves"]["n"], ia_sur=ia["trouves"]["sur"], ia_fausses=ia["fausses"]["n"], ia_sur_f=ia["fausses"]["sur"])
-    blocs = "".join(f'''<div class="pop">
-    <div class="tete"><p>{texte}</p><span class="chiffre">{chiffre}</span></div>{g}<p class="cle">{cle}<span class="compteur" aria-live="polite"></span></p></div>'''
-                    for texte, chiffre, g, cle in pops)
+    m_ia = re.search(r"\((\d{1,2} [A-Z][a-z]+ \d{4}), before the tool was recalibrated on real names\)", note)
+    if not m_ia:
+        sys.exit("findings-entites.json : la note ne date plus le jeu plus facile « (<date>, before the tool was recalibrated on real names) » : la bande ne se pose pas")
+    date_ia = m_ia.group(1)
+    phrases_note = [x.strip() for x in re.split(r"(?<=[.)])\s+(?=[A-Z0-9])", note) if x.strip()]
+    fin_note = [next((x for x in phrases_note if x.startswith(debut)), None) for debut in ("A candidate is", "The counterparty book")]
+    if None in fin_note:
+        sys.exit("findings-entites.json : la note n'a plus sa phrase « A candidate is » ou « The counterparty book » : la bande ne se pose pas")
+    bande = [(f"Measured once, {g['date']}, on names the tool had never seen",
+              [(f"{sur_v - vp}<i> of {sur_v}</i>", "spelling variants missed even at the possible level"),
+               (f"{pct(sur_v - vp, sur_v)} %", "about a third: a name written very differently can get through")]),
+             (f"Easier set, {date_ia}, written by a separate AI agent that never saw the matcher, before the tool was recalibrated on real names",
+              [(f"{ia['trouves']['n']}<i> of {ia['trouves']['sur']}</i>", "true pairs came back strong"),
+               (f"{ia['fausses']['n']}<i> of {ia['fausses']['sur']}</i>", "neighbors came back strong")])]
+    note_b = (f"<style>{_ENTITES_NOTE_CSS}</style>" + '<span class="nc2"><span class="band">'
+              + "".join("<span class='g'><span class='h'>" + tete + "</span><span class='fs'>"
+                        + "".join(f"<span class='f'><span class='n'>{n}</span><span class='m'>{m}</span></span>" for n, m in chiffres)
+                        + "</span></span>" for tete, chiffres in bande)
+              + f"</span><span class='c'>{fin_note[0]} {fin_note[1]}</span></span>")
     depot = o["depot"].rstrip("/")
     html = f'''<section class="entites" id="companies"><div class="colonne">
-  <p class="marque-h">Company and vessel names</p>
-  <h2 class="h2">{f["titre"]}</h2>
-  <div class="pops">{blocs}</div>
-  <p class="note">{note}</p>
-  <p class="liens"><a class="lien-e" href="{depot}/blob/main/verification/GLEIF.md">Read the four verdicts on real names <span aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{depot}/blob/main/releve-entites.json">Open the sealed record <span aria-hidden="true">&#8594;</span></a></p>
-  <span class="sceau-l">measured {R["date"]} at commit {R["commit"]} &#183; sealed and signed &#183; content hash {R["empreinte"]}</span>
+  <style>{_ENTITES_PANNEAUX_CSS}</style>
+  <div class="ca-top"><p class="ca-k">Company and vessel names</p><h2 class="ca-t"><span>{titre[0]}</span> <span>{titre[1]}</span></h2></div>
+  <div class="ca-row">{blocs}</div>
+  <p class="note">{note_b}</p>
+  {liens_tuiles([(f"{depot}/blob/main/verification/GLEIF.md", "Read", "The four verdicts on real names", ""),
+                 (f"{depot}/blob/main/releve-entites.json", "Open", "The sealed record", "")])}
+  <style>{_SCEAUL_CSS}</style>
+  <span class="sceau-l sl3"><i></i><span><b></b>measured {R["date"]} at commit {R["commit"]} &#183; sealed and signed &#183; content hash {R["empreinte"]}</span><i></i></span>
 </div></section>
 <script>
 for (const pop of document.querySelectorAll('.entites .pop')) {{
@@ -2313,15 +3765,16 @@ for (const pop of document.querySelectorAll('.entites .pop')) {{
   g.addEventListener('pointerleave', () => {{ marks.forEach((m) => m.classList.remove('lu')); pop.classList.remove('suivi'); }});
 }}
 </script>
-<div class="couture" aria-hidden="true"><div class="colonne">
-  <span class="filet"></span>
-  <span class="sceau-c">company and vessel names &#183; measured, then frozen &#183; content hash {R["empreinte"]}</span>
-  <span class="filet"></span>
-</div></div>'''
+{couture_defile("company and vessel names &#183; measured, then frozen", R["empreinte"])}'''
     assert "\u2014" not in html, "un cadratin s'est glissé dans la section des entités"
     for attendu in (f"{pct(vf, sur_v)}<small>%</small>", f">{ff}<", f"{forts + possibles}<small>/{lignes}</small>", f"{vf} found at the strong level",
                     f"{vp} in all", f"{sur_v - vp} missed at both levels", f"{fp} raised a possible alert", f"{sans} with no candidate",
-                    f"{ia['trouves']['n']} of {ia['trouves']['sur']} true pairs", g["date"]):
+                    # the note's sentence « {ia} of {sur} true pairs » is now split in the band: each piece is checked
+                    f"<span class='n'>{ia['trouves']['n']}<i> of {ia['trouves']['sur']}</i></span><span class='m'>true pairs came back strong</span>",
+                    f"<span class='n'>{ia['fausses']['n']}<i> of {ia['fausses']['sur']}</i></span><span class='m'>neighbors came back strong</span>",
+                    f"<span class='n'>{sur_v - vp}<i> of {sur_v}</i></span>", f"<span class='n'>{pct(sur_v - vp, sur_v)} %</span>",
+                    f"Measured once, {g['date']},", f"Easier set, {date_ia},", fin_note[0], fin_note[1],
+                    f"<span>{titre[0]}</span> <span>{titre[1]}</span>", g["date"]):
         if attendu not in html:
             sys.exit(f"la section des entités n'affiche pas le chiffre refait « {attendu} » : refusé")
     return html
@@ -2385,21 +3838,60 @@ def _section_rapport(o):
     sujet = "Ten%20names%20to%20screen"
     pdf, img = "../rapports/screening-sample-report.pdf", "../rendus/rapport-exemple.webp"
     depot = o["depot"].rstrip("/")
+    # 25/10 (Arslane, the Routing looks carried to Screening): five rows of the committed sample list, one per kind of
+    # verdict the record gives (an entity with no candidate, a possible one, a strong one; a strong vessel, a clear one),
+    # in the record's own order; names, refs and verdicts read from rec, the count of names from ex.
+    _rangs = []
+    for statut, genre in (("no-match", "entity"), ("possible", "entity"), ("strong", "entity"), ("strong", "vessel"), ("no-match", "vessel")):
+        x = next((r for r in rec["resultats"] if r["statut"] == statut and r["type"] == genre), None)
+        if x is None:
+            sys.exit(f"le relevé exemple n'a plus de ligne {genre} « {statut} » : la page vivante du rapport perd une rangée")
+        _rangs.append(x)
+    _rangs.sort(key=lambda r: r["ligne"])
+    _VERDICT = {"strong": ("s", "strong"), "possible": ("p", "possible"), "no-match": ("n", "no candidate")}
+    _h8 = rendu["empreinte"][:8]
+    page_vivante = ('<div class="pg" aria-hidden="true"><div class="hd"><span>Sample list &#183; invented</span>'
+                    f'<span>{ex["lignes"]} names</span></div>'
+                    + "".join(f'<div class="rw" style="animation-delay:{k * .12:.2f}s"><code>{html_mod.escape(r["ref"])}</code><span>{html_mod.escape(r["nom"])}</span>'
+                              f'<em class="{_VERDICT[r["statut"]][0]}" style="animation-delay:{k * .25:.2f}s">{_VERDICT[r["statut"]][1]}</em></div>'
+                              for k, r in enumerate(_rangs))
+                    + f'<p class="ft">record {rendu["empreinte"]}</p><div class="sc"></div><svg class="st" viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="sk1g" cx="40%" cy="35%">'
+                      '<stop offset="0" class="g0"/><stop offset="1" class="g1"/></radialGradient><path id="sk1c" d="M50,50 m-33,0 a33,33 0 1,1 66,0 a33,33 0 1,1 -66,0"/></defs>'
+                      '<circle cx="50" cy="50" r="46" fill="url(#sk1g)"/><circle class="an" cx="50" cy="50" r="40"/>'
+                      '<text class="tx" font-family="Roboto Mono,ui-monospace" font-size="7.4" letter-spacing="1.6"><textPath href="#sk1c">SEALED &#183; SCREENED &#183; CRUSETRA &#183; SEALED &#183;</textPath></text>'
+                      f'<text class="ce" x="50" y="53" text-anchor="middle" font-family="Roboto Mono,ui-monospace" font-size="7.5">{_h8}</text></svg></div>')
+    # the sample-report caption as the seal on the page corner (_LEGENDE_SCEAU, look C kept on Routing), in rubis; the
+    # Screening sample is not a signed page, so the ring says SCREENED where Routing's says SIGNED. Every fact of the old
+    # caption stays: the count, the fresh run's date, commit and record, the committed record and its date.
+    _leg = _en_rubis(_LEGENDE_SCEAU)
+    for vieux, neuf in (("SEALED __D__ &#183; SIGNED &#183; CRUSETRA &#183;", "SEALED __D__ &#183; SCREENED &#183; CRUSETRA &#183;"),
+                        ("<b>__N__ real receipts</b><small>record __H__<br>signed page beside the PDF</small>",
+                         "<b>__N__ invented counterparties</b><small>sample report &#183; a fresh run of __E__ at commit __C__<br>"
+                         "record __H__<br>the committed record of the same file is __S__ (__SE__)</small>")):
+        if _leg.count(vieux) != 1:
+            sys.exit(f"_LEGENDE_SCEAU a changé : « {vieux[:40]} » ne s'y lit plus, la légende Screening ne se pose pas")
+        _leg = _leg.replace(vieux, neuf)
+    legende = (_leg.replace("__H8__", _h8).replace("__H__", rendu["empreinte"]).replace("__D__", rendu["emis"])
+               .replace("__N__", str(ex["lignes"])).replace("__PDF__", pdf).replace("__E__", rendu["emis"])
+               .replace("__C__", rendu["commit"]).replace("__SE__", ex["emis"]).replace("__S__", ex["sceau"]))
+    if "__" in legende:
+        sys.exit("la légende Screening garde un marqueur non remplacé")
     html = f"""<section class="rapport" id="report"><div class="colonne">
   <div class="r-grille">
   <div class="r-texte">
     <p class="marque-h">The screening report</p>
-    <h2 class="h2">Send us your list, and within {off["delai_heures"]} hours it comes back screened and sealed.</h2>
-    <ol class="r-pas">
-      <li><span><b>You send</b> a CSV or a spreadsheet with a column of company and vessel names, and the IMO number of a vessel when you have it.</span></li>
-      <li><span><b>We screen</b> each name against ten public sources: OFAC SDN, the OFAC consolidated (non-SDN) lists, the US Consolidated Screening List (its Commerce and State lists), the UN Security Council list, the EU financial sanctions list, the UK Sanctions List, the vessels the EU designates in Annex XLII of Regulation 833/2014, Australia's DFAT Consolidated List, the Consolidated Canadian Autonomous Sanctions List and New Zealand's Russia Sanctions Register, each as downloaded on the date the report states. Crusetra is not affiliated with or endorsed by any of their publishers.</span></li>
-      <li><span><b>You receive</b> a PDF, a spreadsheet and the sealed record: each candidate with its list entry and the words that matched, the dates of the lists, and a seal anyone can check with one command, <code>npm run sceller -- &lt;record&gt;.screening.json --check</code>.</span></li>
-    </ol>
+    <h2 class="h2" style="font-size:clamp(24px,2vw,30px);line-height:1.2;max-width:28ch">Send us your list, and within {off["delai_heures"]} hours it comes back screened and sealed.</h2>{_LISTE_VIVANTE_CSS}
+    <div class="sk1">{page_vivante}
+    <ol>
+      <li><b>You send</b><small>a CSV or a spreadsheet with a column of company and vessel names, and the IMO number of a vessel when you have it.</small></li>
+      <li><b>We screen</b><small>each name against ten public sources: OFAC SDN, the OFAC consolidated (non-SDN) lists, the US Consolidated Screening List (its Commerce and State lists), the UN Security Council list, the EU financial sanctions list, the UK Sanctions List, the vessels the EU designates in Annex XLII of Regulation 833/2014, Australia's DFAT Consolidated List, the Consolidated Canadian Autonomous Sanctions List and New Zealand's Russia Sanctions Register, each as downloaded on the date the report states. Crusetra is not affiliated with or endorsed by any of their publishers.</small></li>
+      <li><b>You receive</b><small>a PDF, a spreadsheet and the sealed record: each candidate with its list entry and the words that matched, the dates of the lists, and a seal anyone can check with one command, <code>npm run sceller -- &lt;record&gt;.screening.json --check</code>.</small></li>
+    </ol></div>
   </div>
   <figure class="r-feuille">
     <a href="{pdf}" download><img src="{img}" width="1224" height="1584" loading="lazy" decoding="async"
       alt="First page of the sample report: {ex["lignes"]} invented counterparties, {ex["forts"]} strong candidates, {ex["possibles"]} possible, {ex["sans"]} with no candidate."></a>
-    <figcaption>sample report &#183; {ex["lignes"]} invented counterparties &#183; a fresh run of {rendu["emis"]} at commit {rendu["commit"]}, record {rendu["empreinte"]} &#183; the committed record of the same file is {ex["sceau"]} ({ex["emis"]})</figcaption>
+    <figcaption style="text-transform:none;letter-spacing:0;opacity:1">{legende}</figcaption>
   </figure>
   </div>
   <div class="r-offre" data-offre="{data}">
@@ -2430,11 +3922,13 @@ def _section_rapport(o):
       <p class="r-phrase" aria-live="polite">{phrase(r0["noms"], "mois")}</p>
     </div>
   </div>
-  <p class="r-note">{off["conservation"]} A candidate is a name for your compliance officer to check: the report does not decide, does not screen ownership, and is not legal advice.</p>
+  <p class="r-note">{_rnote_cartes(off["conservation"])}</p>
   <div class="ouvrir-ligne"><a class="ouvrir" href="mailto:{off["contact"]}?subject={sujet}"><span><span class="ouvrir-t">Try it on {EN_LETTRES.get(off["essai_noms"], off["essai_noms"])} of your names</span>
     <span class="ouvrir-s">Email them to {off["contact"]}. The report comes back within {off["delai_heures"]} hours, at no charge.</span></span>
     <span class="fl" aria-hidden="true">&#8594;</span></a></div>
-  <p class="liens"><a class="lien-e" href="{pdf}" download>Download the sample report <span aria-hidden="true">&#8594;</span></a><a class="lien-e" href="../rapports/screening-sample-report.screening.json">Open the record this PDF renders <span aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{depot}/blob/main/exemple/contreparties-exemple.screening.json">Open the committed example record <span aria-hidden="true">&#8594;</span></a></p>
+  {liens_tuiles([(pdf, "Download", "The sample report", " download"),
+                 ("../rapports/screening-sample-report.screening.json", "Open", "The record this PDF renders", ""),
+                 (f"{depot}/blob/main/exemple/contreparties-exemple.screening.json", "Open", "The committed example record", "")])}
 </div></section>
 <script>
 (() => {{
@@ -2503,7 +3997,7 @@ def _section_rapport(o):
 }})();
 </script>"""
     assert "—" not in html, "un cadratin s'est glissé dans la section du rapport"
-    for attendu in (usd(r0["prix_usd"]), *(usd(x["prix_usd_mois"]) for x in rc), ex["sceau"], off["conservation"]):
+    for attendu in (usd(r0["prix_usd"]), *(usd(x["prix_usd_mois"]) for x in rc), ex["sceau"], *re.split(r"(?<=\.)\s+", off["conservation"].strip())):   # 25/10: the retention text now spans two cards, each sentence must show
         if attendu not in html:
             sys.exit(f"la section du rapport n'affiche pas « {attendu} » : refusé")
     return html
@@ -2613,9 +4107,38 @@ def batir_outil_catalogue(o, spec):
     vers_rapport = ('\n  <a class="vers-rapport entree" href="#report">Send us your list for a sealed report within '
                     f'{json.loads((BASE / "offre-screening.json").read_text())["delai_heures"]} hours '
                     '<span aria-hidden="true">&#8595;</span></a>') if o["id"] == "screening" else ""
+    # 25/10: on Screening, the Routing retouches carried over (pricing tile and numbered footnotes, the seam as a ticker);
+    # the other tools keep their card and seam as they were.
+    _sorte = "horloge" if o["id"] == "dossier" else "courbes"
+    _robot = "../rendus/robot-" + ICONES_COULEUR[o["id"]] + "-regarde.webp"
+    if o["id"] == "screening":
+        instrument_affiche = _tarif_et_notes(affiche_html(_sorte, RELEVE, FINDINGS, spec["instrument_page"], spec["instrument_eti"],
+                                                          spec["instrument_sub"], _robot),
+                                             lien(o, "ENGAGEMENT.html"), _notes_outil(spec, RELEVE, FINDINGS))
+        couture_html = couture_defile("measured, then frozen", SCEAU_O)
+    else:
+        instrument_affiche = affiche_html(_sorte, RELEVE, FINDINGS, spec["instrument_page"], spec["instrument_eti"], spec["instrument_sub"], _robot,
+                                          note="" if o["id"] == "dossier" else _note_outil(spec, RELEVE, FINDINGS), tarif=lien(o, "ENGAGEMENT.html"))
+        couture_html = f'''<div class="couture" aria-hidden="true"><div class="colonne">
+  <span class="filet"></span>
+  <span class="sceau-c">measured, then frozen &#183; content hash {SCEAU_O}</span>
+  <span class="filet"></span>
+</div></div>'''
+    # 25/10: the four catalogue pages open on the living hero Arslane picked (HEROS_VIVANTS); a tool without one
+    # keeps the plain hero with its commands
+    hero_css, hero_html = HEROS_VIVANTS.get(o["id"], ("", None))
     commandes_html = "".join(f'<code class="ln">{c}</code>\n    ' for c in
                              ([f"git clone {o['depot']}", f"cd {o['depot'].rstrip('/').rsplit('/', 1)[1]}"] + spec["commandes"]))
 
+    if hero_html is None:
+        hero_html = f'''<section class="hero">
+  <h1 class="h1 entree{" h1-long" if len(spec["h1"]) > 48 else ""}">{spec["h1"]}</h1>
+  <p class="lede entree">{spec["lede"]}</p>
+  <div class="commande entree" role="group" aria-label="{spec["aria_commande"]}">
+    {commandes_html}
+  </div>{vers_rapport}
+  <div class="cue" aria-hidden="true"><span>scroll</span><span class="fil"></span></div>
+</section>'''
     page = f"""<!doctype html><html lang="en">
 <meta charset="utf-8"><title>{spec["titre"]}</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -2631,18 +4154,11 @@ def batir_outil_catalogue(o, spec):
 <link rel="stylesheet" href="{p}fontes/roboto-mono.css">
 <script type="application/ld+json">{donnees}</script>
 <script>document.documentElement.classList.add("js")</script>
-<style>{css_o}{css_scrub_o}{CSS_BARRE_SITE}</style>
+<style>{css_o}{css_scrub_o}{CSS_BARRE_SITE}{hero_css}</style>
 {barre_site(courant=o["page_hero"], racine=o["prefixe_racine"])}
 
 <main>
-<section class="hero">
-  <h1 class="h1 entree{" h1-long" if len(spec["h1"]) > 48 else ""}">{spec["h1"]}</h1>
-  <p class="lede entree">{spec["lede"]}</p>
-  <div class="commande entree" role="group" aria-label="{spec["aria_commande"]}">
-    {commandes_html}
-  </div>{vers_rapport}
-  <div class="cue" aria-hidden="true"><span>scroll</span><span class="fil"></span></div>
-</section>
+{hero_html}
 
 {choix_outils(o)}
 
@@ -2658,16 +4174,10 @@ def batir_outil_catalogue(o, spec):
 {_section_rapport(o)}
 <section class="instrument" data-commun="instrument"><div class="colonne">
   <h2 class="h2">Try the {o["nom"]} instrument on our public test set.</h2>
-  {affiche_html("horloge" if o["id"] == "dossier" else "courbes", RELEVE, FINDINGS, spec["instrument_page"],
-                spec["instrument_eti"], spec["instrument_sub"], "../rendus/robot-" + ICONES_COULEUR[o["id"]] + "-regarde.webp",
-                note="" if o["id"] == "dossier" else _note_outil(spec, RELEVE, FINDINGS), tarif=lien(o, "ENGAGEMENT.html"))}
+  {instrument_affiche}
 </div></section>
 
-<div class="couture" aria-hidden="true"><div class="colonne">
-  <span class="filet"></span>
-  <span class="sceau-c">measured, then frozen &#183; content hash {SCEAU_O}</span>
-  <span class="filet"></span>
-</div></div>
+{couture_html}
 {film_html(o)}
 <nav class="menus" aria-label="Appendices"><div class="colonne">
   <h2 class="h2">Appendices</h2>
@@ -2685,6 +4195,8 @@ def batir_outil_catalogue(o, spec):
 <script>{JS}</script>{scrub_o}
 """
     assert "\u2014" not in page, "un cadratin s'est glissé dans la page"
+    if o["id"] in HEROS_VIVANTS:
+        print(o["page_hero"], "· hero button held:", " → ".join(_garde_action(page, o["page_hero"])[::-1]))
     (BASE / o["page_hero"]).write_text(page, encoding="utf-8")
     etat = f"états {spec['etats']}" if _etats_dispo(spec) else "PLACEHOLDERS (plateau vert) : refusé en prod"
     print(o["page_hero"], f"{len(page) / 1e3:.0f} ko", "·", etat)
