@@ -38,8 +38,10 @@ DEPOTS = {"routing": "crusetra-routing", "screening": "crusetra-screening",
 DEPOT_SITE = "crusetra-site"   # the site's own repository, under its GitHub name (the local folder keeps cascade-site)
 ORGANISATION = {"@type": "Organization", "@id": f"{SITE_URL}#org", "name": "Crusetra",
                 "url": SITE_URL, "logo": f"{SITE_URL}og.png", "email": CONTACT}
-# Films hidden because the six mp4 files and their YouTube uploads still say "Cascade"; set True once they are re-voiced to bring back every player, card and link.
-FILMS_VISIBLES = False
+# The films shown on the site, by file name in source/films (10 October 2026, Arslane: "vas y fais le").
+# Routing, Dossier and Screening are re-voiced as Crusetra; Monitoring, Scoring and the Routing demo still say
+# "Cascade" and stay hidden (unlinked) until they are remade. A demo shows only when "<tool>-demo" is listed.
+FILMS_VISIBLES = frozenset({"routing", "dossier", "screening"})
 
 
 def depot_url(outil_id):

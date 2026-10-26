@@ -78,6 +78,7 @@ PROD = {
     "ANNEXE-PRIVACY.html": "privacy.html",
     "ANNEXE-ACCESSIBILITE.html": "accessibility.html",
     "CONTACT.html": "contact.html",
+    "ANALYSE-OFAC-2026-07-14.html": "ofac-2026-07-14.html",   # 9/10: the first analysis, Arslane's yes
     "MENTIONS.html": "colophon.html",
     "404.html": "404.html",
 }
@@ -116,6 +117,13 @@ def verifier_pieces_stables(avant, apres):
                  "passée sous l'assemblage ; la poser entière, puis relancer")
 
 _PIECES_AVANT = photo_pieces()
+
+# slice S4 (11/10): the Monitoring sample report is checked BEFORE anything is built or docs/ is touched: its record must match its
+# seal (cascade-monitoring's own sceller --check), the sidecar must quote that seal and recount on it. A refusal says so in words;
+# left to batir-hero.py it would reach this script as a bare CalledProcessError, the builders' output being captured.
+import echantillon_monitoring as _em
+_EX_MON, _REC_MON = _em.verifier(MAQ)
+print(f"  Monitoring sample report: seal {_EX_MON['sceau']} holds (record checked by sceller --check, counts recounted)")
 
 for batisseur in ("batir-hero.py", "batir-instrument.py", "batir-instrument-screening.py",
                   "batir-instrument-monitoring.py", "batir-instrument-scoring.py",
@@ -755,7 +763,8 @@ for rb in (MAQ / "rendus").glob("robot-*.webp"):          # les robots de toutes
 # et, depuis le 30/09, celui de la page Routing (batir-rapport-routing.py, le relevé réel CORD) : même contrôle
 (DOCS / "rapports").mkdir(exist_ok=True)
 for _pdf, _img, _bat in ((MAQ / "rapports" / "screening-sample-report.pdf", MAQ / "rendus" / "rapport-exemple.webp", "batir-rapport-exemple.py"),
-                         (MAQ / "rapports" / "routing-sample-report.pdf", MAQ / "rendus" / "rapport-routing.webp", "batir-rapport-routing.py")):
+                         (MAQ / "rapports" / "routing-sample-report.pdf", MAQ / "rendus" / "rapport-routing.webp", "batir-rapport-routing.py"),
+                         (MAQ / "rapports" / "monitoring-sample-report.pdf", MAQ / "rendus" / "rapport-monitoring.webp", "batir-rapport-monitoring.py")):
     if not _pdf.exists() or _pdf.read_bytes()[:5] != b"%PDF-":
         sys.exit(f"source/rapports/{_pdf.name} absent ou illisible : relancer {_bat}")
     if _pdf.stat().st_size > 2 * 1048576:
@@ -790,6 +799,25 @@ if _inc:
              + "\n  ".join(_inc) + "\n  → compléter emisLe, client, corpus.empreinte, corpus.dossiers, outil.commit dans le rendu, re-signer")
 print("  " + _v.stdout.strip().splitlines()[0].strip() + " (routing-sample-report.html, servie ; "
       + ", ".join(l.strip() for l in _v.stdout.splitlines() if l.strip().startswith(("Issued", "For ", "Corpus", "Tool"))) + ")")
+# slice S4 (11/10): the Monitoring sample page is served only when the sidecar says it is signed, and then it must pass
+# cascade-monitoring's public verifier. An unsigned sample (signe false, until Arslane signs with the house key) serves its PDF and
+# its image, not its page, and the report section says nothing about a signature: nothing is refused for being unsigned, nothing
+# unsigned is passed off as signed.
+if _EX_MON.get("signe"):
+    _pm = MAQ / "rapports" / "monitoring-sample-report.html"
+    if not _pm.exists():
+        sys.exit("source/rapports/monitoring-sample-report.html absent : run batir-rapport-monitoring.py --signe (the sidecar says the page is signed)")
+    shutil.copy(_pm, DOCS / "rapports" / _pm.name)
+    _vm = subprocess.run(["node", str(_OUTILS0["monitoring"]["outil_chemin"] / "src" / "verifier-rapport.mjs"), str(DOCS / "rapports" / _pm.name)],
+                         capture_output=True, text=True)
+    if _vm.returncode != 0 or "Signature valid" not in _vm.stdout:
+        sys.exit(f"the SERVED signed Monitoring sample page does not verify:\n{_vm.stdout}{_vm.stderr}")
+    _incm = _lignes_incompletes(_vm.stdout)
+    if _incm:
+        sys.exit("the SERVED signed Monitoring sample page carries an incomplete data block (the verifier prints a ?):\n  " + "\n  ".join(_incm))
+    print("  " + _vm.stdout.strip().splitlines()[0].strip() + " (monitoring-sample-report.html, served)")
+else:
+    print("  Monitoring sample report: the page is not signed (signe false); its PDF and image are served, the page is not")
 # Crusetra V4, 6 October 2026: a page that says WHOSE corpus the signed example of the Routing repository was issued on
 # quotes that signed file, never a renamed version of it. rapport-exemple.html was signed on 3 September and says
 # « cascade's own held-out corpus »; the FAQ had turned it into « Crusetra's ». The signed file cannot be re-signed to
@@ -1189,26 +1217,39 @@ def _film_absent(texte, oid):
 
 _pages_outils = {"routing": "routing/index.html"} | {n.split("/", 1)[0]: n for n in EMISES_EN_BLOC.values()
                                                      if n.endswith("/index.html")}
-if FILMS_VISIBLES:
-    if not _film_absent("<main></main>", "routing") or _film_absent(
-            '<section class="film"><video><source src="../films/routing.mp4"></video></section>', "routing"):
-        sys.exit("BROKEN GUARD: the shown-films check no longer tells a page with its film from one without")
-    _sans_film = [n for oid, n in sorted(_pages_outils.items()) if _film_absent((DOCS / n).read_text(), oid)]
-    if _sans_film:
-        sys.exit(f"FILMS_VISIBLES is True but these tool pages carry no film of their own: {_sans_film}")
-    print(f"  films guard held: shown, {len(_pages_outils)} tool pages carry their film (witness bitten)")
-else:
-    _zzf = DOCS / "zz-temoin-films.html"
-    _zzf.write_text('<video><source src="films/routing.mp4"></video><a href="https://youtu.be/x">YouTube</a>')
-    _vu = any(x.startswith("zz-temoin-films.html") for x in _traces_de_film(DOCS))
-    _zzf.unlink()
-    if not _vu:
-        sys.exit("BROKEN GUARD: the hidden-films scan did not see the planted page: its zero is worth nothing")
-    _traces = _traces_de_film(DOCS)
-    if _traces:
-        sys.exit("FILMS_VISIBLES is False but served files still point at a film:\n  " + "\n  ".join(_traces))
-    print(f"  films guard held: hidden, 0 film trace in the served files (witness bitten); "
-          f"{len(list((DOCS / 'films').glob('*.mp4')))} mp4 files left unlinked in docs/films")
+# 10/10: FILMS_VISIBLES is a set of film names (outil.py). A tool whose film is listed must carry it on its page;
+# every other film (Monitoring, Scoring, the demos: still "Cascade") must be linked from NO served file, and the
+# old YouTube uploads (the "Cascade" cuts) neither. Each half bites its witness before its green is believed.
+_YT_CASCADE = ("SXxViU7rhU8", "aNZ5uks7ibE", "AoINd6J2XMI", "xx_1lFJsw9E", "mCybN-xq4jA", "mTlpC9yXnXo")
+
+
+def _traces_cachees(dossier):
+    """Every served trace of a film that is not shown: a link to its mp4, or an old "Cascade" YouTube upload."""
+    return [t for t in _traces_de_film(dossier)
+            if (re.search(r'films/([\w-]+)\.mp4', t) and re.search(r'films/([\w-]+)\.mp4', t).group(1) not in FILMS_VISIBLES)
+            or any(y in t for y in _YT_CASCADE)] + [
+            f"{f.relative_to(dossier)} : {y}" for f in sorted(dossier.rglob("*.html")) for y in _YT_CASCADE if y in f.read_text(errors="replace")]
+
+
+if not _film_absent("<main></main>", "routing") or _film_absent(
+        '<section class="film"><video><source src="../films/routing.mp4"></video></section>', "routing"):
+    sys.exit("BROKEN GUARD: the shown-films check no longer tells a page with its film from one without")
+_zzf = DOCS / "zz-temoin-films.html"
+_zzf.write_text('<video><source src="films/monitoring.mp4"></video><a href="https://youtu.be/SXxViU7rhU8">YouTube</a>')
+_vu = any(x.startswith("zz-temoin-films.html") for x in _traces_cachees(DOCS))
+_zzf.unlink()
+if not _vu:
+    sys.exit("BROKEN GUARD: the hidden-films scan did not see the planted page: its zero is worth nothing")
+_sans_film = [n for oid, n in sorted(_pages_outils.items()) if oid in FILMS_VISIBLES and _film_absent((DOCS / n).read_text(), oid)]
+if _sans_film:
+    sys.exit(f"these tool pages should carry their film (FILMS_VISIBLES) and do not: {_sans_film}")
+_pages_cachees = [(oid, n) for oid, n in sorted(_pages_outils.items()) if oid not in FILMS_VISIBLES]
+_traces = [f"{n} : {m.group(0)}" for oid, n in _pages_cachees for m in _TRACE_FILM.finditer((DOCS / n).read_text())] + _traces_cachees(DOCS)
+if _traces:
+    sys.exit("a hidden film is still linked from the served files:\n  " + "\n  ".join(sorted(set(_traces))))
+print(f"  films guard held: {sum(1 for o in _pages_outils if o in FILMS_VISIBLES)} tool pages carry their film "
+      f"({', '.join(sorted(o for o in _pages_outils if o in FILMS_VISIBLES))}), {len(_pages_cachees)} without "
+      f"({', '.join(o for o, _ in _pages_cachees)}), 0 link to a hidden film or an old upload (witnesses bitten)")
 
 # ── le contrôle de liens, témoin d'abord ─────────────────────────────────────
 def liens_casses(dossier):

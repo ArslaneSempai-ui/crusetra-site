@@ -82,6 +82,56 @@
           ]
         }
       ]
+    },
+    {
+      "html": "ANALYSE-OFAC-2026-07-14.html",
+      "titre_onglet": "Crusetra &#183; OFAC&#8217;s July 14 shipping sanctions: name variants",
+      "fno": "Analysis &#183; 9 October 2026",
+      "retour_href": "screening/index.html",
+      "retour_texte": "&#8592; Back to Screening",
+      "titre": "Name variants to catch in OFAC's July 14 shipping sanctions",
+      "lede": "On July 14, 2026, OFAC sanctioned a group of container lines, ship owners and freight firms. If one of these names appears in a file you screen, it may be spelled differently, because shipping papers pass through many hands. Here are the variants we found, and how our screening tool handled them.",
+      "description": "On July 14, 2026, OFAC sanctioned container lines, ship owners and freight firms tied to the Shamkhani network. The name variants in OFAC's own documents, and how our screening tool handled 103 of these names.",
+      "sections": [
+        {
+          "h2": "What OFAC listed",
+          "html": [
+            "<p>That day OFAC <a href=\"https://ofac.treasury.gov/recent-actions/20260714\">added 54 entries to its Specially Designated Nationals List (SDN List)</a>, covering 10 people, 24 companies and 20 ships. Treasury's <a href=\"https://home.treasury.gov/news/press-releases/sb0562\">press release</a> ties them to the shipping network of an individual, which it calls \"a major force behind Iran's oil exports.\"</p>",
+            "<p>The release names Sea Lead Shipping PTE. Ltd. of Singapore and three of its subsidiaries. Sea Lead managed and operated three ships that OFAC lists as container ships. Treasury also says a We Freight group provided \"transportation intermediary services\" to the network's container shipping. A <a href=\"https://ofac.treasury.gov/media/932746/download?inline\">2024 note from Treasury, Commerce and Justice</a> explains that OFAC can fine a firm under US jurisdiction even if it did not know, or have reason to know, that a deal was prohibited.</p>"
+          ]
+        },
+        {
+          "h2": "The variants in OFAC's own documents",
+          "html": [
+            "<ul><li><b>NUVETRRO or Nuvettro.</b> The SDN List spells the owner of the ship JADE as NUVETRRO SHIPPING INC. The annex of <a href=\"https://ofac.treasury.gov/media/936551/download?inline\">General License Z</a> spells it Nuvettro.</li><li><b>We Freight or WeFreight.</b> Its SDN entry uses WE FREIGHT in three names and WEFREIGHT in one.</li><li><b>One brand for four companies.</b> Each Sea Lead company has its own SDN entry, so a document that names only the brand does not say which one is meant.</li><li><b>Short ship names.</b> In our test, OPAL, JADE and NADIA each returned another listed ship. The ship ELPINIKI also goes by \"CORN,\" which OFAC marks as a weak alias. OFAC <a href=\"https://ofac.treasury.gov/faqs/122\">says</a> such an alias \"may generate a large volume of false hits.\"</li><li><b>A street that is also a ship.</b> Sea Lead's listed address is 78 Shenton Way, Singapore, and OFAC links the ship SHENTON WAY to Sea Lead.</li><li><b>Names in other scripts.</b> OFAC prints 15 of the new names in Arabic or Chinese script. None of them was in the copy of the SDN List our tool used for the test below, which OFAC published on October 5.</li></ul>"
+          ]
+        },
+        {
+          "h2": "How our tool did",
+          "html": [
+            "<p>On October 7, 2026, we ran our tool, Crusetra Screening 0.1.0, on 103 names, against ten lists downloaded the day before. They were the listed names as OFAC prints them, the ships again with their IMO numbers, and 32 variants we wrote, one of them Sea Lead's address. We left out the 10 people, because the tool is built for companies and vessels.</p>",
+            "<p>Scores run from 0 to 1. At 0.81 or more the match is strong. From 0.80 to just under 0.81 it is possible, and the tool caps a match at 0.80 when it has a reason to doubt it. A person confirms or clears every match.</p>",
+            "<p>Each of the other 102 names should match a July 14 entry. The tool found the right one as a strong match for 96, as a possible match for 3, and missed 3.</p>",
+            "<p><b>What worked.</b> Every company name, company alias and ship name typed as OFAC prints it scored 1.000 on the right entry. \"Nuvettro Shipping Inc\" scored 0.933, and both spellings of We Freight scored 1.000. Without its IMO number, OPAL returned two entries for another listed OPAL, both ranked above the right one, and NADIA returned the listed ship NADIYA. The IMO number removed both. A made-up ship name with SHENTON WAY's IMO number matched SHENTON WAY, and the tool treated our name as a new name for that ship.</p>",
+            "<p><b>What fell short.</b> \"SEALEAD\" alone found none of the four Sea Lead entries. It showed four unrelated entries at 0.800, and a reviewer who cleared them would let the brand through. Both names we tried in Arabic script missed. Three names reached only 0.800, among them \"TANJONG PAGAR\" without its 1 and the alias \"CORN.\"</p>",
+            "<p><b>Extra alerts.</b> The address returned the ship SHENTON WAY as a possible match. That entry is wrong, but it still points to Sea Lead. Another 13 names brought up 30 entries from outside the July 14 listings, 26 of them possible matches, plus 5 the tool counted without showing. The IMO number removed the other ships but no company entries, so a person still has to clear those.</p>"
+          ]
+        },
+        {
+          "h2": "What to ask for",
+          "html": [
+            "<p>Ask for the IMO number of every vessel and screen it with the name. It is a <a href=\"https://www.imo.org/en/OurWork/MSAS/Pages/IMO-identification-number-scheme.aspx\">permanent number</a> that is never given to another ship, and in our test it told same-name ships apart. Ask for full legal names in Latin letters too. The tool missed the brand alone and the Arabic names, but it caught the same companies under their full legal names.</p>"
+          ]
+        },
+        {
+          "h2": "What this test does not show",
+          "html": [
+            "<p>These counts come from one day of OFAC listings, so they do not show how often the tool catches names in general. We wrote the variants knowing the listed names, and your files may hold forms we did not imagine. The tool compares names and IMO numbers only. It does not check ownership. A company owned 50 percent or more by blocked parties is blocked too, <a href=\"https://ofac.treasury.gov/media/6186/download?inline\">even when it is not on the SDN List</a>.</p>",
+            "<p>This article reports one test of our tool. It is not legal advice. Read about the tool at <a href=\"https://crusetra.com/screening/\">crusetra.com/screening</a>.</p>",
+            "<p>How we ran it: Crusetra Screening 0.1.0, commit a2a9633, offline, with <code>CRUSETRA_OFFLINE=1 npm run cribler -- --names=&lt;the file of 103 names&gt;</code>.</p>"
+          ]
+        }
+      ]
     }
   ]
 }

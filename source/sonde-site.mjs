@@ -28,6 +28,18 @@ const LARGEURS = [320, 375, 500, 641, 768, 900, 1024, 1081, 1150, 1280, 1440, 16
 // défile) ; le défaut du 13/09 en faisait 2478. La borne est à 200 px, loin des deux, et le
 // banc DIT le maximum observé à chaque passage pour qu'une dérive se voie avant de casser.
 const HORS_SECTION = 200;
+// LES DOCUMENTS À TAILLE FIXE (10/10/2026). Une page sans <meta name="viewport"> est posée par un
+// téléphone sur 980 px puis réduite à l'écran, comme un PDF : pas de débord, on zoome. Le banc la
+// mesurait en mode bureau (mobile: false) à 320 px et criait « DEBORD +496px » là où aucun
+// téléphone n'en montre (vérifié sur crusetra.com en émulation mobile : 980 de mise en page,
+// échelle 0,38, scrollWidth = innerWidth). Ces pages-là sont mesurées COMME UN TÉLÉPHONE, sous
+// 1024 px. La liste est fermée et chaque entrée dit pourquoi : toute AUTRE page servie sans
+// viewport est un défaut (« SANS-VIEWPORT »), parce qu'une page du site doit se lire sur un
+// téléphone sans zoom.
+const DOCUMENTS_FIXES = {
+  "rapports/routing-sample-report.html": "page signée au format lettre (verifier-rapport.mjs) : la modifier casse sa signature",
+};
+const A_UN_VIEWPORT = `!!document.querySelector('meta[name="viewport"]')`;
 const PROBE = `JSON.stringify((()=>{const w=innerWidth,d=document.documentElement;
 const o={ov:d.scrollWidth-w,bad:[],haut:0,hors:[]};
 for(const s of document.querySelectorAll('main > section, main > nav, body > section, body > nav, body > footer, body > header')){
@@ -98,12 +110,34 @@ for (const [avecRegle, doitVoir] of [[false, true], [true, false]]) {
     process.exit(2);
   }
 }
+// le témoin du viewport : la page témoin n'en a pas, la même avec la balise en a un ; et un document
+// sans viewport, mesuré en téléphone à 320 px, doit être posé sur 980 (sinon l'émulation ne fait pas
+// ce que le banc lui prête, et la mesure des documents ne vaudrait rien)
+for (const [html, attendu] of [[temoin(true), false], [temoin(true).replace(encodeURIComponent("<meta charset=utf-8>"),
+    encodeURIComponent('<meta charset=utf-8><meta name="viewport" content="width=device-width,initial-scale=1">')), true]]) {
+  await send("Page.navigate", { url: html });
+  await new Promise((r) => setTimeout(r, 300));
+  if ((await send("Runtime.evaluate", { expression: A_UN_VIEWPORT, returnByValue: true })).result.value !== attendu) {
+    console.error(`GARDE CASSÉE : la détection du viewport ne distingue plus une page ${attendu ? "qui en a un" : "sans"}.`);
+    process.exit(2);
+  }
+}
+await send("Emulation.setDeviceMetricsOverride", { width: 320, height: 900, deviceScaleFactor: 1, mobile: true });
+await send("Page.navigate", { url: temoin(true) });
+await new Promise((r) => setTimeout(r, 300));
+const _l = (await send("Runtime.evaluate", { expression: "innerWidth", returnByValue: true })).result.value;
+if (_l !== 980) {
+  console.error(`GARDE CASSÉE : en téléphone à 320 px, une page sans viewport est posée sur ${_l} px et non 980 ; `
+    + "les documents à taille fixe ne seraient plus mesurés comme un téléphone les montre.");
+  process.exit(2);
+}
 
 let defauts = 0;
 let hautMax = 0;
 for (const page of PAGES) {
   for (const larg of LARGEURS) {
-    await send("Emulation.setDeviceMetricsOverride", { width: larg, height: 900, deviceScaleFactor: 1, mobile: false });
+    const telephone = page in DOCUMENTS_FIXES && larg < 1024;
+    await send("Emulation.setDeviceMetricsOverride", { width: larg, height: 900, deviceScaleFactor: 1, mobile: telephone });
     events.length = 0;
     await send("Page.navigate", { url: `http://127.0.0.1:${process.env.PORT || 8802}/${page}` });
     const charge = await new Promise((r) => {
@@ -118,11 +152,16 @@ for (const page of PAGES) {
     await new Promise((r) => setTimeout(r, 250));
     const res = await send("Runtime.evaluate", { expression: PROBE, returnByValue: true });
     const o = JSON.parse(res.result.value);
+    if (larg === LARGEURS[0]) {
+      const vp = (await send("Runtime.evaluate", { expression: A_UN_VIEWPORT, returnByValue: true })).result.value;
+      if (!vp && !(page in DOCUMENTS_FIXES)) { defauts++; console.log(`SANS-VIEWPORT ${page} : pas de <meta name="viewport"> ; un téléphone la montre réduite, illisible sans zoom`); }
+      if (vp && page in DOCUMENTS_FIXES) console.log(`note ${page} : a maintenant un viewport, l'entrée de DOCUMENTS_FIXES peut partir`);
+    }
     if (o.ov > 1) { defauts++; console.log(`DEBORD ${page} @${larg} : +${o.ov}px ${o.bad.join(" | ")}`); }
     if (o.haut > hautMax) hautMax = o.haut;
     if (o.hors.length) { defauts++; console.log(`HORS-SECTION ${page} @${larg} : ${o.hors.join(" | ")}`); }
   }
-  console.log(`ok ${page} (${LARGEURS.length} largeurs)`);
+  console.log(`ok ${page} (${LARGEURS.length} largeurs${page in DOCUMENTS_FIXES ? ", mesurée comme un téléphone sous 1024 px : " + DOCUMENTS_FIXES[page] : ""})`);
 }
 console.log(defauts ? `${defauts} DÉFAUTS`
   : `ZÉRO débord sur ${PAGES.length * LARGEURS.length} combos, dans les DEUX axes `
