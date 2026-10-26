@@ -10,9 +10,9 @@
   "listes": "2026-09-26",
   "source": "cascade-screening/exemple/contreparties-exemple.screening.json",
   "rendu": {
-    "empreinte": "7ed156de257225c1",
+    "empreinte": "afafcc133a556d2e",
     "emis": "2026-10-26",
-    "commit": "048d672",
+    "commit": "1cee73f",
     "listes": [
       "2026-10-26"
     ],

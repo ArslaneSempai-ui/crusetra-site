@@ -1,9 +1,9 @@
 {
   "version": 1,
   "genre": "crusetra-screening/counterparty-screening",
-  "emisLe": "2026-10-26T18:26:02.536Z",
+  "emisLe": "2026-10-26T20:19:05.413Z",
   "client": "Example Forwarding Inc. (invented)",
-  "commit": "048d672",
+  "commit": "1cee73f",
   "fichier": {
     "nom": "contreparties-exemple.csv",
     "sha256": "fab131564c82ea6c859845e4cf53207059d66e0acb75d1603c5d12974f6cbf89",
@@ -66,7 +66,7 @@
         "nom": "United Nations website Terms of Use (no open license)",
         "url": "https://www.un.org/en/about-us/terms-of-use",
         "mention": null,
-        "note": "the Terms grant Users permission to download and copy the Materials for the User's personal, non-commercial use, without any right to resell or redistribute them; the Consolidated List page says the list exists to facilitate the implementation of the measures. No attribution wording is prescribed. We asked the United Nations Security Council Sanctions Lists Team (sc-sanctionslists@un.org) in writing whether a paid screening may download the list on the customer's machine, compare the customer's names against it and show the matching entries in the customer's report, without ever reselling, republishing or redistributing the list itself; on 6 October 2026 the team answered that the Consolidated List \"is free to use for all legal purposes\". This repository does not republish the list: each user downloads it from the United Nations, and the test fixture src/fixtures/onu.xml is an invented file in the list's format that names no real person.",
+        "note": "the Terms grant Users permission to download and copy the Materials for the User's personal, non-commercial use, without any right to resell or redistribute them; the Consolidated List page says the list exists to facilitate the implementation of the measures. No attribution wording is prescribed. We asked the United Nations Security Council Sanctions Lists Team in writing whether a paid screening may download the list on the customer's machine, compare the customer's names against it and show the matching entries in the customer's report, without ever reselling, republishing or redistributing the list itself; on 6 October 2026 the team confirmed commercial reuse in writing, and the message is kept outside the repository. This repository does not republish the list: each user downloads it from the United Nations, and the test fixture src/fixtures/onu.xml is an invented file in the list's format that names no real person.",
         "lue": "2026-10-05"
       }
     },
@@ -1200,5 +1200,5 @@
     "6 counterparties are a vessel by your type column or by an explicit marker in the name, with no readable IMO number: the IMO rule, which decides, could not apply; they are marked.",
     "Word weights are those of the pinned table counted on 2026-10-04 over OFAC, OFAC-CONS, CSL, UN, EU, UK, EU-VESSELS, the table every published rate was measured on; AU, CA, NZ were screened with the same weights, a word absent from the table weighing as a word seen in no listed entry."
   ],
-  "empreinte": "7ed156de257225c1"
+  "empreinte": "afafcc133a556d2e"
 }
