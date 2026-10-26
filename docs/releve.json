@@ -19,7 +19,7 @@
   "16807": "routages énumérés par le banc, sept paliers puissance cinq champs",
   "33": "valeurs justes parmi les 53 livrées",
   "53": "valeurs livrées après abstention, 150 moins 97",
-  "0": "dossiers perdus par le routage visé : aucun dossier complet du publié n'est cassé : document.json, bloc apparié ; fausses alertes au fort sur les 200 voisins réalistes du jeu 20, 0 sur 200, scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening) ; alertes fortes pour mille sur le livre de Hambourg (exemple/contreparties-mille-2.csv, sceau 83b78d5b131ea06b, lu pour fixer le budget de revue, donc pas aveugle), scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening)",
+  "0": "dossiers perdus par le routage visé : aucun dossier complet du publié n'est cassé : document.json, bloc apparié ; fausses alertes au fort sur les 200 voisins réalistes du jeu 20, 0 sur 200, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening) ; alertes fortes pour mille sur le livre de Hambourg (exemple/contreparties-mille-2.csv, sceau f1a6aa3c48408b19, lu pour fixer le budget de revue, donc pas aveugle), scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
   "48.8": "borne basse de Wilson à 95 % sur 33/53, recalculée",
   "74.1": "borne haute de Wilson à 95 % sur 33/53, recalculée",
   "50": "paquets sous licence permissive : LICENCES.md:17, généré par src/licences.ts",
@@ -27,7 +27,7 @@
   "77": "paquets du verrou avec empreinte : SECURITE.md:16 et package-lock.json",
   "523": "ligne de exigerHoteLocal dans src/tiers.ts : retrouvée par la passe du 31/08",
   "129": "ligne du test de refus dans src/poids.test.ts : retrouvée par la passe du 31/08",
-  "24": "version minimale de Node : package.json:57, engines ; alertes possibles pour mille sur le livre de Hambourg (exemple/contreparties-mille-2.csv, sceau 83b78d5b131ea06b, lu pour fixer le budget de revue, donc pas aveugle), scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening)",
+  "24": "version minimale de Node : package.json:57, engines ; alertes possibles pour mille sur le livre de Hambourg (exemple/contreparties-mille-2.csv, sceau f1a6aa3c48408b19, lu pour fixer le budget de revue, donc pas aveugle), scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
   "295": "ligne du défaut OLLAMA boucle locale dans src/tiers.ts : passe du 31/08",
   "164": "ligne du type Split dans src/corpus.ts : passe du 31/08",
   "47": "ligne du test de partage entre moitiés, src/crusetra.test.ts : passe du 31/08",
@@ -54,7 +54,7 @@
   "34": "ligne du renommage NonTransportable dans contrainte.json",
   "21": "relevés d'échantillonnage egress, zéro connexion observée : egress.json:12",
   "633": "commits balayés par la passe secrets scellée du 27/08 : SECURITE.md:41",
-  "400": "Mo de packages npm avant les poids : README.md:154 ; paires vraies du jeu réaliste 20, scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening)",
+  "400": "Mo de packages npm avant les poids : README.md:154 ; paires vraies du jeu réaliste 20, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
   "20": "plancher d'observations sous lequel l'outil refuse un taux (ENOUGH) : et repère d'échelle des instruments du héros",
   "30": "jours de l'Evaluation Grant : LICENSE:8 (et précision de départ sans abstention, 45 sur 150)",
   "70": "repère de l'échelle des intervalles : spans HTML depuis le 31/08",
@@ -64,7 +64,7 @@
   "25": "repère d'échelle des instruments par état : spans HTML depuis le 31/08",
   "40": "repère d'échelle des instruments par état : spans HTML depuis le 31/08",
   "75": "repère d'échelle des instruments par état : spans HTML depuis le 31/08",
-  "200": "repère d'échelle des instruments par état : spans HTML depuis le 31/08 ; voisins réalistes du jeu 20 (paires différentes), scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening)",
+  "200": "repère d'échelle des instruments par état : spans HTML depuis le 31/08 ; voisins réalistes du jeu 20 (paires différentes), scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
   "880": "tests de Crusetra Routing, comptés depuis les sources : README.md:284 de crusetra-routing, vérifié par la garde de dérive de assembler.py",
   "486": "tests de Crusetra Screening, comptés depuis les sources : README.md:150 de crusetra-screening, vérifié par la garde de dérive de assembler.py",
   "298": "ligne d'empreinteDuReleve dans src/measure.ts : tenue par la garde des citations",
@@ -73,14 +73,14 @@
   "530": "ligne de la garde Origin dans src/server.ts : tenue par la garde des citations",
   "728": "ligne de l'écoute boucle locale dans src/server.ts : tenue par la garde des citations",
   "3508": "ligne du test-témoin anti-fuite dans src/crusetra.test.ts : tenue par la garde des citations",
-  "83": "vrais noms de sociétés et navires retrouvés au fort sur le jeu réaliste, 332 sur 400, scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening)",
-  "79": "borne basse de Wilson à 95 % sur 332/400, ligne du Juge, scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening)",
-  "86": "borne haute de Wilson à 95 % sur 332/400, ligne du Juge, scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening)",
-  "2": "borne haute de Wilson à 95 % sur 0/200, scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening)",
-  "1000": "contreparties du livre de Hambourg (exemple/contreparties-mille-2.csv, sceau 83b78d5b131ea06b, lu pour fixer le budget de revue, donc pas aveugle), scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening)",
-  "332": "paires vraies du jeu réaliste retrouvées au fort, sur 400, scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening)",
-  "68": "paires vraies du jeu réaliste laissées au possible ou en dessous, 400 moins 332, scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening)",
-  "976": "contreparties du livre de Hambourg (exemple/contreparties-mille-2.csv, sceau 83b78d5b131ea06b, lu pour fixer le budget de revue, donc pas aveugle) sans candidat, 1000 moins 24, scellé ea01de439f1f2478 (releve-entites.json, crusetra-screening)"
+  "83": "vrais noms de sociétés et navires retrouvés au fort sur le jeu réaliste, 332 sur 400, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
+  "79": "borne basse de Wilson à 95 % sur 332/400, ligne du Juge, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
+  "86": "borne haute de Wilson à 95 % sur 332/400, ligne du Juge, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
+  "2": "borne haute de Wilson à 95 % sur 0/200, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
+  "1000": "contreparties du livre de Hambourg (exemple/contreparties-mille-2.csv, sceau f1a6aa3c48408b19, lu pour fixer le budget de revue, donc pas aveugle), scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
+  "332": "paires vraies du jeu réaliste retrouvées au fort, sur 400, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
+  "68": "paires vraies du jeu réaliste laissées au possible ou en dessous, 400 moins 332, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
+  "976": "contreparties du livre de Hambourg (exemple/contreparties-mille-2.csv, sceau f1a6aa3c48408b19, lu pour fixer le budget de revue, donc pas aveugle) sans candidat, 1000 moins 24, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)"
  },
  "derive": {
   "17.7": "94,4 moins 76,7, sur les mêmes 120 dossiers",
@@ -128,6 +128,6 @@
   "-16": "drapeau de la commande head -16 dans le terminal de vérification",
   "-20": "segment « -20 » du nom de fichier daté, lu comme négatif par le parseur",
   "2026-09-28": "date du relevé des entités, lue dans le relevé",
-  "ea01de439f1f2478": "scellé du relevé des entités, lu dans le relevé"
+  "07e10f13812d8f3c": "scellé du relevé des entités, lu dans le relevé"
  }
 }

@@ -38,7 +38,7 @@
             "n": "reports date, content hash state and entry counts, with no network touched"
           }
         ],
-        "refs": "src/listes.ts:1124 &#183; src/listes.ts:1149"
+        "refs": "src/listes.ts:1125 &#183; src/listes.ts:1150"
       }
     },
     {
@@ -56,7 +56,7 @@
             "n": "prints the ten sources, each with its entry count and download date"
           }
         ],
-        "refs": "src/listes.ts:346 &#183; src/listes.ts:457"
+        "refs": "src/listes.ts:347 &#183; src/listes.ts:458"
       }
     },
     {
@@ -77,7 +77,7 @@
             "n": "refuses, names the flag and what to do next, writes nothing"
           }
         ],
-        "refs": "src/listes.ts:1243"
+        "refs": "src/listes.ts:1272"
       }
     },
     {

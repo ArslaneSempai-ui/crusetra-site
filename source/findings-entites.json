@@ -1,6 +1,6 @@
 {
   "_": "The section « Company and vessel names » of the Screening page, form M4F validated by Arslane on 28/09, lead finding changed on 4 October 2026: the first two populations are the fourth verdict on real company names from the GLEIF register, read line by line from the tool's own output (`gleif.fichier`, refused when its SHA-256 is not `gleif.sha256`); the third is the second thousand-name book of ~/Documents/cascade-screening/releve-entites.json at seal `sceau`. The builder refuses to build if the record on disk no longer carries that seal or the verdict file that hash, recomputes every count and refuses a figure the HTML does not show. The date, the commit and the seal shown come from the record itself. {sur}, {lignes} and the figures of the note are filled from those two sources. No em dash anywhere.",
-  "sceau": "ea01de439f1f2478",
+  "sceau": "07e10f13812d8f3c",
   "titre": "Nearly half of real spelling variants come back strong. <br>None of a thousand different companies do.",
   "populations": [
     "{sur} real companies, each under two spellings of its name in the GLEIF register: each mark is one pair, lit when the tool finds it.",
