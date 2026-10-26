@@ -80,6 +80,7 @@ PROD = {
     "CONTACT.html": "contact.html",
     "ANALYSE-OFAC-2026-07-14.html": "ofac-2026-07-14.html",   # 9/10: the first analysis, Arslane's yes
     "MENTIONS.html": "colophon.html",
+    "AVIS-2610.html": "notice-2026-10.html",   # 26/10: Art. 34(3)(c) public notice, footer link only
     "404.html": "404.html",
 }
 

@@ -110,6 +110,7 @@ PROD = {
     "CONTACT.html": "contact.html",
     "ANALYSE-OFAC-2026-07-14.html": "ofac-2026-07-14.html",   # 9/10: the first analysis, Arslane's yes
     "MENTIONS.html": "colophon.html",
+    "AVIS-2610.html": "notice-2026-10.html",   # 26/10: Art. 34(3)(c) public notice, footer link only
     "404.html": "404.html",
 }
 
@@ -452,7 +453,7 @@ for _attendu in (f"${_OFS['rapport']['prix_usd']:,}", *(f"${x['prix_usd_mois']:,
 PLOMBERIE = json.loads((BASE / "plomberie.json").read_text())
 for page in PLOMBERIE["pages"]:
     sections = "".join(
-        f'<div class="pl-sec"><h2>{s["h2"]}</h2>{"".join(s["html"])}</div>'
+        f'<div class="pl-sec">{"<h2>" + s["h2"] + "</h2>" if s.get("h2") else ""}{"".join(s["html"])}</div>'
         for s in page["sections"])
 
     (BASE / page["html"]).write_text(f"""<!doctype html><html lang="en">

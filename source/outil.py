@@ -484,7 +484,8 @@ PIED_PROMESSE = "The tools run on your machine. Nothing reaches us unless you se
 LIENS_MAISON = [("ANNEXE-METHODE.html", "Method"), ("ANNEXE-SECURITE.html", "Security"),
                 ("ANNEXE-QUESTIONS.html", "Questions"), ("ANNEXE-TERMS.html", "Terms"),
                 ("ANNEXE-PRIVACY.html", "Privacy"), ("ANNEXE-ACCESSIBILITE.html", "Accessibility"),
-                ("CONTACT.html", "Contact"), ("MENTIONS.html", "The fine print")]
+                ("CONTACT.html", "Contact"), ("MENTIONS.html", "The fine print"),
+                ("AVIS-2610.html", "Notice, October 2026")]
 _PROPRES_A_L_OUTIL = {"ANNEXE-METHODE.html", "ANNEXE-SECURITE.html", "ANNEXE-QUESTIONS.html"}
 
 
