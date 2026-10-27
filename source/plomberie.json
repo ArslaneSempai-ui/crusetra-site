@@ -146,14 +146,14 @@
       "retour_href": "index.html",
       "retour_texte": "&#8592; Back to the home page",
       "titre": "Notice: public sanctions-list copies in our code repositories",
-      "lede": "Published 26 October 2026 by HS Industries LLC (Crusetra).",
+      "lede": "Published 26 October 2026 by HS Industries LLC (Crusetra). Corrected 27 October 2026.",
       "description": "Test files in our public code repositories held copies of entries from the OFAC SDN list and other public sanctions lists. What they held, what we did, and how to write to us.",
       "sections": [
         {
           "html": [
             "<p>Test files in our public code repositories held copies of entries from the OFAC SDN list (excerpt of 25 August 2026) and from other public sanctions lists.</p>",
             "<p>26 of those entries had been removed from the SDN list on 5 October 2026. Our copy still showed them.</p>",
-            "<p>The files left every branch of the repositories on 20 and 21 October 2026. We have asked GitHub to remove them from the references it still keeps.</p>"
+            "<p>The files left every public branch of the repositories between 20 and 26 October 2026. We have asked GitHub to remove them from the references it still keeps.</p>"
           ]
         },
         {
