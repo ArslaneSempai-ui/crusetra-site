@@ -16,6 +16,12 @@
           ]
         },
         {
+          "h2": "Who runs Crusetra",
+          "html": [
+            "<p>Crusetra is run by <b>Arslane Chaouche</b>, Founder of <b>HS Industries LLC</b>, a Wyoming limited liability company (file no. 2026-002073840). You can find him on LinkedIn: <a href=\"https://www.linkedin.com/in/arslane-chaouche-ramdane-95595a388/\">linkedin.com/in/arslane-chaouche-ramdane-95595a388</a>. By post: HS Industries LLC, 1550 Wilson Blvd, Ste 700 PMB 599, Arlington, VA 22209, USA. The register entry, the hosting and the licenses are on <a href=\"colophon.html\">The fine print</a>.</p>"
+          ]
+        },
+        {
           "h2": "What to bring",
           "html": [
             "<p>The page you are on and the figure you dispute: each one here has a declared source, so we can meet at it. If you disagree with a measurement, <b>bring your own rerun</b>. The record is frozen and the command is public, so you can reproduce it. If you measured your own cases, bring the report the tool wrote beside your CSV: it contains rates and their confidence intervals, and no values from your documents.</p>"
