@@ -1,9 +1,9 @@
 {
   "version": 1,
   "genre": "crusetra-screening/counterparty-screening",
-  "emisLe": "2026-10-06T16:42:21.127Z",
+  "emisLe": "2026-10-26T20:19:05.413Z",
   "client": "Example Forwarding Inc. (invented)",
-  "commit": "3083aff",
+  "commit": "1cee73f",
   "fichier": {
     "nom": "contreparties-exemple.csv",
     "sha256": "fab131564c82ea6c859845e4cf53207059d66e0acb75d1603c5d12974f6cbf89",
@@ -14,9 +14,9 @@
       "source": "OFAC",
       "titre": "OFAC Specially Designated Nationals (SDN) list",
       "url": "https://sanctionslistservice.ofac.treas.gov/api/publicationpreview/exports/sdn.xml",
-      "telechargeLe": "2026-10-06T16:23:16.258Z",
-      "sha256": "b61f54eafad72134e49f99bc2b819fed8ac307b6cc71ab3fe52d6a63b4de5e72",
-      "entrees": 19363,
+      "telechargeLe": "2026-10-26T15:16:02.306Z",
+      "sha256": "421c5f6ee841eb7c0e327eb0d6bdbe24cbb58091e3cbfd77d83dd41c7b5a5e08",
+      "entrees": 19471,
       "licence": {
         "nom": "United States Government work: not subject to copyright (17 U.S.C. § 105)",
         "url": "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title17-section105&num=0&edition=prelim",
@@ -29,9 +29,9 @@
       "source": "OFAC-CONS",
       "titre": "OFAC Consolidated Sanctions List (the non-SDN lists)",
       "url": "https://sanctionslistservice.ofac.treas.gov/api/publicationpreview/exports/consolidated.xml",
-      "telechargeLe": "2026-10-06T16:35:35.216Z",
-      "sha256": "69bdc476597a8ebb14eb9b7ca61f763e7755e1f45ebd420dd61591da40ed7842",
-      "entrees": 481,
+      "telechargeLe": "2026-10-26T15:16:10.224Z",
+      "sha256": "24bdc571a451676e684084ff8750f105481f82e37ef92fa1429b32072518f7b9",
+      "entrees": 486,
       "licence": {
         "nom": "United States Government work: not subject to copyright (17 U.S.C. § 105)",
         "url": "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title17-section105&num=0&edition=prelim",
@@ -44,8 +44,8 @@
       "source": "CSL",
       "titre": "US Consolidated Screening List: its Commerce and State lists (trade.gov)",
       "url": "https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv",
-      "telechargeLe": "2026-10-06T16:36:52.342Z",
-      "sha256": "5d03ff6fd19c4079fa8ab9a3bb1ad51207e68196645e4759e31a58b1ccb50590",
+      "telechargeLe": "2026-10-26T15:16:14.444Z",
+      "sha256": "15ff1bbee8a4af32f6f31186b3ea5e192361d9db33f11d52ed3e8889a047f0e6",
       "entrees": 6213,
       "licence": {
         "nom": "United States Government work: not subject to copyright (17 U.S.C. § 105)",
@@ -59,24 +59,24 @@
       "source": "UN",
       "titre": "UN Security Council Consolidated List",
       "url": "https://scsanctions.un.org/resources/xml/en/consolidated.xml",
-      "telechargeLe": "2026-10-06T16:37:06.526Z",
-      "sha256": "300a92157704876a21df5e1ffb60c9eafccaeb90fc0a7729a5f165bf843bd7ea",
-      "entrees": 1010,
+      "telechargeLe": "2026-10-26T15:16:43.711Z",
+      "sha256": "3230350e4ffab2b2e00877664ae4209e2c5e9fa7ad23966d6e591773f95b6793",
+      "entrees": 1007,
       "licence": {
-        "nom": "United Nations website Terms of Use (no open licence)",
+        "nom": "United Nations website Terms of Use (no open license)",
         "url": "https://www.un.org/en/about-us/terms-of-use",
         "mention": null,
-        "note": "the Terms grant Users permission to download and copy the Materials for the User's personal, non-commercial use, without any right to resell or redistribute them; the Consolidated List page says the list exists to facilitate the implementation of the measures. No attribution wording is prescribed. Commercial reuse is not settled by the publisher's page: to be confirmed with the United Nations before a sale.",
+        "note": "the Terms grant Users permission to download and copy the Materials for the User's personal, non-commercial use, without any right to resell or redistribute them; the Consolidated List page says the list exists to facilitate the implementation of the measures. No attribution wording is prescribed. We asked the United Nations Security Council Sanctions Lists Team in writing whether a paid screening may download the list on the customer's machine, compare the customer's names against it and show the matching entries in the customer's report, without ever reselling, republishing or redistributing the list itself; on 6 October 2026 the team confirmed commercial reuse in writing, and the message is kept outside the repository. This repository does not republish the list: each user downloads it from the United Nations, and the test fixture src/fixtures/onu.xml is an invented file in the list's format that names no real person.",
         "lue": "2026-10-05"
       }
     },
     {
       "source": "EU",
       "titre": "EU consolidated financial sanctions list (FSF, XML v1.1)",
-      "url": "https://webgate.ec.europa.eu/fsd/fsf/public/files/xmlFullSanctionsList_1_1/content?token=dG9rZW4tMjAxNw",
-      "telechargeLe": "2026-10-06T16:37:24.713Z",
-      "sha256": "cd59eccb0278d33181c1d87814236109287c9ea5925502f00acfd2e0fd7fe440",
-      "entrees": 6241,
+      "url": "https://webgate.ec.europa.eu/fsd/fsf/public/files/xmlFullSanctionsList_1_1/content?token=[username]",
+      "telechargeLe": "2026-10-26T15:16:48.625Z",
+      "sha256": "636800c3e494b2ef8934f51f5e23c914a6208a383ac850e674b1b35a7d49d34f",
+      "entrees": 6269,
       "licence": {
         "nom": "Commission Decision 2011/833/EU on the reuse of Commission documents; Creative Commons Attribution 4.0 International (CC BY 4.0)",
         "url": "https://commission.europa.eu/legal-notice_en",
@@ -89,9 +89,9 @@
       "source": "UK",
       "titre": "UK Sanctions List (FCDO): individuals, entities and ships",
       "url": "https://sanctionslist.fcdo.gov.uk/docs/UK-Sanctions-List.xml",
-      "telechargeLe": "2026-10-06T16:37:45.390Z",
-      "sha256": "563c1dda36949afa97fc74cce4208de47badf6ad9ce0710d3cbb8b4356cea4ef",
-      "entrees": 6369,
+      "telechargeLe": "2026-10-26T15:16:56.106Z",
+      "sha256": "907508664dfb9b5978f9cffd3feac8b39ecd8082949dd73285dc99d293a6b2dd",
+      "entrees": 6423,
       "licence": {
         "nom": "Open Government Licence v3.0",
         "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
@@ -104,7 +104,7 @@
       "source": "EU-VESSELS",
       "titre": "EU designated vessels: Annex XLII of Regulation (EU) No 833/2014, consolidated text 2026-07-24",
       "url": "https://publications.europa.eu/resource/celex/02014R0833-20260724",
-      "telechargeLe": "2026-10-06T16:38:13.028Z",
+      "telechargeLe": "2026-10-26T15:17:34.652Z",
       "sha256": "2682ecf3442d2f16a3b36ef4d9bbb6fde43fd4d6743bcd991bd4a8e14857770b",
       "entrees": 672,
       "licence": {
@@ -119,9 +119,9 @@
       "source": "AU",
       "titre": "Australia: DFAT Consolidated List (Australian Sanctions Office)",
       "url": "https://www.dfat.gov.au/sites/default/files/Australian_Sanctions_Consolidated_List.xlsx",
-      "telechargeLe": "2026-10-06T16:38:22.974Z",
-      "sha256": "0936243df3269ba127709353bc0f26128f7268cbee4133e64cbbb81311def679",
-      "entrees": 4010,
+      "telechargeLe": "2026-10-26T15:17:39.691Z",
+      "sha256": "65ba2cd37a999c59bf3838b0b0cda7cf80957a245a598f4d2c5f1e5dedcd0c06",
+      "entrees": 4013,
       "licence": {
         "nom": "Creative Commons Attribution 4.0 International (CC BY 4.0), Commonwealth of Australia (DFAT)",
         "url": "https://www.dfat.gov.au/about-us/about-this-website/copyright",
@@ -134,9 +134,9 @@
       "source": "CA",
       "titre": "Canada: Consolidated Canadian Autonomous Sanctions List (Global Affairs Canada)",
       "url": "https://www.international.gc.ca/world-monde/assets/office_docs/international_relations-relations_internationales/sanctions/sema-lmes.xml",
-      "telechargeLe": "2026-10-06T16:42:11.149Z",
-      "sha256": "cf413b2dee406c209a010d53faeeb9c0ae6c046670f628132c02d16718bf085b",
-      "entrees": 5707,
+      "telechargeLe": "2026-10-26T15:17:52.200Z",
+      "sha256": "61a9064720d9f35884ead9387158b708882d63c615981034cb9557d038d55bcf",
+      "entrees": 5708,
       "licence": {
         "nom": "Open Government Licence - Canada",
         "url": "https://open.canada.ca/en/open-government-licence-canada",
@@ -149,7 +149,7 @@
       "source": "NZ",
       "titre": "New Zealand: Russia Sanctions Register (MFAT): individuals, entities and ships",
       "url": "https://www.mfat.govt.nz/assets/Countries-and-Regions/Europe/Ukraine/Russia-Sanctions-Register.xlsx",
-      "telechargeLe": "2026-10-06T16:40:22.507Z",
+      "telechargeLe": "2026-10-26T15:17:54.707Z",
       "sha256": "d5ae6f2c18163c8045689338fb961977c61e12a64dd97f60ae9c31d6b89057f0",
       "entrees": 2135,
       "licence": {
@@ -167,16 +167,36 @@
     "© European Union, 1998-2026. Source: EUR-Lex, consolidated text of Regulation (EU) No 833/2014 (Annex XLII), reused under Commission Decision 2011/833/EU (CC BY 4.0)",
     "Department of Foreign Affairs and Trade website – www.dfat.gov.au",
     "Contains information licensed under the Open Government Licence – Canada.",
-    "Source: New Zealand Ministry of Foreign Affairs and Trade, Russia Sanctions Register, Crown copyright, licensed under CC BY 4.0"
+    "Source: New Zealand Ministry of Foreign Affairs and Trade, Russia Sanctions Register, Crown copyright, licensed under CC BY 4.0",
+    "Changes made: each list was parsed from its publisher's file and its names normalized for matching; only the entries that match are shown."
   ],
   "nonCriblees": [],
+  "complementUe": {
+    "celex": "32026R2193",
+    "annexe": "IV",
+    "url": "https://publications.europa.eu/resource/celex/32026R2193",
+    "luLe": "2026-10-26",
+    "entrees": [
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108
+    ],
+    "dejaDansLeFlux": []
+  },
   "methode": {
     "palier": "entite",
     "description": "company and vessel names: words aligned in any order and weighted by their rarity on the lists, typos, OCR slips and romanisation variants tolerated, vessel numbers must agree, a listed name found inside a longer one is a possible match, and former names, trading names and document annotations are read as such",
     "poids": "word weights are the smoothed inverse document frequency of the pinned table data/frequences.885b92c25ddf5d30.json: the 40,435 entries of 7 sources as recorded on 2026-10-04, the table every published rate was measured on; a list screened here that was not counted in it is weighed with the same weights, a word absent from the table weighing as a word seen in no entry",
     "tablePoids": {
       "fichier": "frequences.885b92c25ddf5d30.json",
-      "sha256": "31351eec053292b01e7f435bd971f2d2349422d00c5081c8d5b0c6e8e582e2c7",
+      "sha256": "d654d0b2d4ec82d6b289400d0367bdbaac8c857665801c7026b32d1d87a81ae4",
       "entrees": 40435,
       "compteeLe": "2026-10-04",
       "sources": [
@@ -221,14 +241,14 @@
         {
           "quoi": "company and vessel name pairs: same legal entity or same vessel (match), or not (different)",
           "provenance": "authored on 2026-09-27 by a separate agent that never saw the matcher nor any other pair set, as final held-out set #2; every name invented; no client data, no list data. It judged method v4.1 once (entites.ts sha256 5f963c22…): strong 0.81 found 99/150 [58-73 %] with 7/150 false alerts [2-9 %]; possible 0.74 found 109/150 [65-79 %] with 22/150 [10-21 %]; v1 found 103/150 with 35/150. Its misses were then studied, and from that moment it is a TRAINING set: its rates are not quoted as held-out.",
-          "sha256": "135eff3f73436612cd629505c9d5107dab168804345cb64d51ef60699d52bdcc",
+          "sha256": "67f4cdee44e22f1811488eff9f6c202c4dfaca1a4cc53b218ee486063f116ac1",
           "match": 150,
           "different": 150
         },
         {
           "quoi": "company and vessel name pairs: same legal entity or same vessel (match), or not (different)",
           "provenance": "authored on 2026-09-27 by a separate agent that never saw the matcher nor any other pair set, as final held-out set #3 (sha256 c53a55c5…); every name invented; no client data, no list data. It judged method v6 once (entites.ts 4ce80263…, cribler.ts f23ecac0…): at 0.81 found 167/200 [78-88 %], false alerts 25/200 [9-18 %]. Its misses were then studied, and from that moment it is a TRAINING set: its rates are not quoted as held-out.",
-          "sha256": "acc52065767316686b0c001c7d2ce5c9192a3d34e9ba07a6c3778d19b8545f87",
+          "sha256": "ccbf875de370f3e60ff3d66c7ed833d4366aaa399c0df0dc756a4223bd73b54e",
           "match": 200,
           "different": 200
         },
@@ -242,7 +262,7 @@
         {
           "quoi": "company and vessel name pairs: same legal entity or same vessel (match), or not (different)",
           "provenance": "authored on 2026-09-27 by a separate agent (a New Jersey distributor and Los Angeles NVOCC brief, organised by document type, a third model) that never saw the matcher nor any other pair set, as blind test set #6 (sha256 639915d6…); every name invented; no client data, no list data. It judged method v8 once (entites.ts 90098118…, cribler.ts f23ecac0…): strong 0.81 found 119/200 [53-66 %] with 1/200 [0-3 %] false alerts; possible 0.80 found 175/200 [82-91 %] with 35/200 [13-23 %]. Its misses were then studied, and from that moment it is a TRAINING set: its rates are not quoted as held-out.",
-          "sha256": "8af46f85daa9d42a9511bf14e513c758a0015949359b95df1fe935116f4b646c",
+          "sha256": "18ef9a0608dd54fc5bdf32235534fc4dfe810362b1e5701c9aed96f59430976a",
           "match": 200,
           "different": 200
         },
@@ -256,7 +276,7 @@
         {
           "quoi": "company and vessel name pairs: same legal entity or same vessel (match), or not (different)",
           "provenance": "authored on 2026-09-27 by a separate agent (a Singapore trade-finance KYC desk brief, organised by counterparty type: ASEAN SMEs, Gulf and South Asian houses, regional vessels, commodity traders, group structures; a fifth model) that never saw the matcher nor any other pair set, as blind test set #8 (sha256 197c7ead…); every name invented; no client data, no list data; overlap with the eight earlier training sets: 0 pairs, 1 name. It judged method v10 once (entites.ts b05e1be0…, cribler.ts 7f564556…): strong 0.81 found 110/200 [48-62 %] with 3/200 false alerts [1-4 %]; possible 0.80 found 129/200 [58-71 %] with 48/200 [19-30 %]. Studied afterwards and promoted to training set 9 on 2026-09-27, so it no longer measures anything held out.",
-          "sha256": "6138af41a7d670cb9528818bc8def3e2c39ff2cd4042af0a8495f1f644291562",
+          "sha256": "f866b018cc479bd243c3ba4e2d076b141b8cef336011eeefef422562651baf70",
           "match": 200,
           "different": 200
         },
@@ -284,21 +304,21 @@
         {
           "quoi": "company and vessel name pairs: same legal entity or same vessel (match), or not (different)",
           "provenance": "authored on 2026-09-28 by a separate agent (a Mumbai trade-finance desk and Australian exporter brief, organised by document: Indian registry invoices, AU/NZ documents, bulk vessels, SWIFT MT700 fields, chat; explicit verdict conventions; Sonnet) that never saw the matcher nor any other pair set, as blind test set #12 (sha256 3bc2d0f0…); every name invented; no client data, no list data; overlap with the twelve earlier training sets: 0 pairs, 0 names. Judged once by the judge session on method v14 (entites.ts 3b94f68d…, cribler.ts a85e7c3c…, ecritures.ts aec60a13…): strong 0.81 found 149/200 [68-80 %] with 34/200 false alerts [12-23 %]; possible 0.80 found 187/200 [89-96 %] with 72/200 [30-43 %]. Studied afterwards and promoted to training set 13 on 2026-09-28, so it no longer measures anything held out.",
-          "sha256": "66468ee8d5867aa099bc9cabc66bf2cc59169d0c8ff4e3f19c19fdb396a28c29",
+          "sha256": "5665e85909326fb6319286d07a3bbaeb1dc54b0e1feff96c86b07b0b53bb1f7a",
           "match": 200,
           "different": 200
         },
         {
           "quoi": "company and vessel name pairs: same legal entity or same vessel (match), or not (different)",
           "provenance": "authored on 2026-09-28 by a separate agent (a Rotterdam customs broker and Dubai free-zone bank brief, organised by trap family: Benelux and Gulf forms, Arabic and Persian romanisations, Rhine barges and Gulf tankers, EDI and SWIFT residues, chat and OCR; explicit verdict conventions, corrected so that one letter changed in a company name is the same name misspelt except in a vessel name; Opus) that never saw the matcher nor any other pair set, as blind test set #13 (sha256 79a6a291…); every name invented; no client data, no list data; overlap with the thirteen earlier training sets: 0 pairs, 0 names. Judged once by the judge session on method v15 (entites.ts ea838aa2…, cribler.ts 292e9ddb…, ecritures.ts bdd60326…): strong 0.81 found 120/200 [53-67 %] with 16/200 false alerts [5-13 %]; possible 0.80 found 155/200 [71-83 %] with 59/200 [24-36 %]. Studied afterwards and promoted to training set 14 on 2026-09-28, so it no longer measures anything held out.",
-          "sha256": "4b1fa10dab87aa217757428d4dd0bae6078af26b36f4fdccfffdc769935dd3c3",
+          "sha256": "d4051052b299a42b7087a9bcf78eb0f0a2b32d58af1c2b8bdcb0309fba3da361",
           "match": 200,
           "different": 200
         },
         {
           "quoi": "company and vessel name pairs: same legal entity or same vessel (match), or not (different)",
           "provenance": "authored on 2026-09-28 by a separate agent (a Mombasa clearing and forwarding agent and Karachi trade-finance brief, organised by document: East African registries and invoices, Pakistani registry and bank documents, Indian Ocean shipping, letters of credit and SWIFT, chat and OCR; explicit verdict conventions, one letter changed in a company name being the same name misspelt except in a vessel name) that never saw the matcher nor any other pair set, as blind test set #14 (sha256 ee673be7…); every name invented; no client data, no list data; overlap with the fourteen earlier training sets: 0 pairs, 0 names. Judged once by the judge session on method v16 (entites.ts ebbd2990…, cribler.ts 6ad910de…, ecritures.ts bdd60326…): strong 0.81 found 141/200 [64-76 %] with 2/200 false alerts [0-4 %]; possible 0.80 found 173/200 [81-91 %] with 23/200 [8-17 %]. Studied afterwards and promoted to training set 15 on 2026-09-28, so it no longer measures anything held out.",
-          "sha256": "715eeb73edfca96169a12fb59f598f0d4e7b0906df1b26a2cb96b915d9993021",
+          "sha256": "98f2009e761449505c1317aca201d75cfa2569cc81aca115e878ff8a3779f691",
           "match": 200,
           "different": 200
         },
@@ -347,7 +367,7 @@
         {
           "quoi": "company and vessel name pairs: same legal entity or same vessel (match), or not (different)",
           "provenance": "blind test set #22, authored on 2026-09-28 by a separate agent (a Bangkok freight forwarder and Yangon bank brief, organised by document, with explicit verdict conventions) that never saw the matcher nor any other pair set; every name invented; no client data, no list data. Overlap with the 22 earlier training sets: 0 pairs, 0 names. Judged once by the judge session on method v23 (entites.ts 29f57a26…, cribler.ts 8a0d336c…, ecritures.ts 26b17532…): strong 0.81 found 87/200 [37-50 %] with 7/200 false alerts [2-7 %]; possible 0.80 found 109/200 [48-61 %] with 31/200 [11-21 %]. Studied afterwards and promoted to training set 22 on 2026-09-28, so it no longer measures anything held out.",
-          "sha256": "62305d7c944353a39cc5e4f8ca96879423378b4b6bfeb0c4a206cb8ff1dc4873",
+          "sha256": "6f63afaa0db53b4369350eca523c6863e37bc9cb8c014218e81f8b9c8fb19a28",
           "match": 200,
           "different": 200
         },
@@ -361,11 +381,11 @@
       ],
       "fort": {
         "rappel": {
-          "succes": 3815,
+          "succes": 3799,
           "n": 4170,
-          "taux": 0.9148681055155875,
-          "bas": 0.9060109685899473,
-          "haut": 0.9229615539897309
+          "taux": 0.911031175059952,
+          "bas": 0.9020073680711043,
+          "haut": 0.9192983566118833
         },
         "fauxPositifs": {
           "succes": 126,
@@ -377,18 +397,18 @@
       },
       "possible": {
         "rappel": {
-          "succes": 4060,
+          "succes": 4041,
           "n": 4170,
-          "taux": 0.973621103117506,
-          "bas": 0.9683037194801323,
-          "haut": 0.9780666458926219
+          "taux": 0.9690647482014388,
+          "bas": 0.9633625040995675,
+          "haut": 0.9739035387708663
         },
         "fauxPositifs": {
-          "succes": 885,
+          "succes": 881,
           "n": 4170,
-          "taux": 0.21223021582733814,
-          "bas": 0.20008740614687306,
-          "haut": 0.22490275160132714
+          "taux": 0.21127098321342927,
+          "bas": 0.19914956507340556,
+          "haut": 0.22392389320062198
         }
       }
     },
@@ -396,17 +416,17 @@
       "jeu": {
         "quoi": "TRAINING sample (seed 20261001), drawn to calibrate the method and free to study: company name pairs from the GLEIF register: two names recorded for the same LEI (match), or the legal names of two distinct LEIs sharing a distinctive word (different)",
         "provenance": "GLEIF golden copy published 2026-09-30 08:00:00 UTC, listed by https://goldencopy.gleif.org/api/v2/golden-copies/publishes/latest. Level 1 (LEI-CDF 3.1, full file, CSV): https://goldencopy.gleif.org/storage/golden-copy-files/2026/09/30/1282700/20260930-0800-gleif-goldencopy-lei2-golden-copy.csv.zip, 506285686 bytes, sha256 62b7307663b412cd8d4b7226e4c6ccccb7b22066efea98a500ad2b205db2ce99. Level 2 relationships (RR 2.1, full file, CSV): https://goldencopy.gleif.org/storage/golden-copy-files/2026/09/30/1282745/20260930-0800-gleif-goldencopy-rr-golden-copy.csv.zip, 24413344 bytes, sha256 b348cdef56834609bbf98b1e37545ab90b2be55d8cc5b436dca7980846157110. GLEIF data is released under CC0 1.0 (no rights reserved, commercial use allowed). Built by node src/gleif-paires.ts --graine 20261001 --sortie src/paires-gleif-apprentissage.json --exclure verification/paires-gleif.json, which checks both hashes and rewrites this file byte for byte; seed 20261001 (every draw is a cyrb53 hash of the seed, the stratum and the LEI). The labels come from the registry records, not from anyone judging whether two names match: a match pair is the legal name of one LEI record and another name recorded on that same record; a different pair is the legal names of two distinct LEIs. MATCH (1000): records with registration status ISSUED or LAPSED only (never DUPLICATE, ANNULLED, RETIRED, MERGED, TRANSFERRED, PENDING_*); one pair per LEI per stratum; at most 250 per stratum; no country (legal jurisdiction, else legal address) above 15 % of a stratum. Strata: previous-legal-name (OtherEntityName PREVIOUS_LEGAL_NAME), trading-name (TRADING_OR_OPERATING_NAME), alternative-language-name (ALTERNATIVE_LANGUAGE_LEGAL_NAME), transliteration (TransliteratedOtherEntityName PREFERRED_ or AUTO_ASCII_TRANSLITERATED_LEGAL_NAME, kept only where most letters of the legal name are outside the Latin script). Dropped before the draw: other names that are empty, a placeholder, carry no letter or repeat the LEI; pairs identical after NFKC, case, whitespace and punctuation folding; pairs with a name that, folded the same way, is in a training set (src/paires-entites*.json) or in verification/paires-entites-verdict.json. Excluded, in the match and the different pairs alike: pairs with a name that, folded the same way, is a name of verification/paires-gleif.json (4494 distinct folded names), so that no name of that set reappears here. Counts: previous-legal-name 250 (from 202989 eligible LEIs; of 248946 name slots, dropped 5931 identical, 19 not a name, 0 overlapping, 640 excluded); trading-name 250 (from 140823 eligible LEIs; of 151688 name slots, dropped 2724 identical, 237 not a name, 6 overlapping, 612 excluded); alternative-language-name 250 (from 43863 eligible LEIs; of 47938 name slots, dropped 16 identical, 4 not a name, 1 overlapping, 366 excluded); transliteration 250 (from 19752 eligible LEIs; of 20227 name slots, dropped 0 identical, 0 not a name, 0 overlapping, 287 excluded). DIFFERENT (1000, plus the contained stratum): two distinct ISSUED, non-branch LEIs from a seeded 25 % sample of the 1979107 ISSUED records, whose legal names share a distinctive word: at least 3 characters, a letter, not a stopword, not a legal-form word (in at least 25 % of the sampled names of one ISO 20275 ELF code with at least 10 of them: 586 words, mostly legal forms and their fragments, plus generic entity words such as bank, fund, trust or holding and a few place names; the rebuild writes them to data/gleif/legal-form-words-20261001.tsv), in at most 0.5 % of the ISSUED legal names. Each drawn LEI appears once per stratum, and no country above 15 % of a stratum. Strata: same shared word and same country; same shared word, different country; same legal-address city, same country and same ELF legal form code (not 8888 or 9999), with a shared word. Set aside: pairs linked in the Level 2 file (any relationship, or a common direct or ultimate parent, head office or umbrella fund) or through the Level 1 associated or successor entity; pairs identical after folding (3 of 1162 drawn: different entities with the same name cannot be separated by a name matcher); pairs where every word of one name, legal-form words and stopwords set aside, is in the other (152 of 1162 drawn); pairs with an excluded name (7 of 1162 drawn). Counts: different-same-word-same-country 334 (of 380 drawn: 2 identical after folding, 43 contained, 0 overlapping, 1 excluded, 0 duplicates); different-same-word-other-country 333 (of 415 drawn: 0 identical after folding, 78 contained, 0 overlapping, 4 excluded, 0 duplicates); different-same-city-same-form 333 (of 367 drawn: 1 identical after folding, 31 contained, 0 overlapping, 2 excluded, 0 duplicates). CONTAINED (250, nature different-contained): the contained pairs, drawn on their own from the same sample: two distinct ISSUED LEIs, any country, sharing a distinctive word, not identical after folding, not related, and every word of one name (legal-form words and stopwords set aside) in the other. Screening practice may want them to alert: they are reported as their own stratum and never counted in the false-alert rate of the other negatives. Of 252 contained pairs drawn, 2 had an excluded name. TRAINING: drawn to calibrate the method. Its pairs and the matcher's scores on them may be studied freely; a figure measured on it is a training figure, never a verdict.",
-        "sha256": "356fca407dd75273a2198f545722b0afc28a8427677b8297547555437f988b9b",
+        "sha256": "32f763650d13946b24f2e2666f7b4f54ab48acdf005e624c9c5b724a6d715ced",
         "match": 1000,
         "different": 1000
       },
       "fort": {
         "rappel": {
-          "succes": 271,
+          "succes": 269,
           "n": 1000,
-          "taux": 0.271,
-          "bas": 0.24436624773932128,
-          "haut": 0.2993864718132457
+          "taux": 0.269,
+          "bas": 0.24243772072492567,
+          "haut": 0.2973303064219868
         },
         "fauxPositifs": {
           "succes": 0,
@@ -418,11 +438,11 @@
       },
       "possible": {
         "rappel": {
-          "succes": 410,
+          "succes": 408,
           "n": 1000,
-          "taux": 0.41,
-          "bas": 0.37991671320713805,
-          "haut": 0.4407721285384123
+          "taux": 0.408,
+          "bas": 0.3779471781311396,
+          "haut": 0.4387569712087563
         },
         "fauxPositifs": {
           "succes": 0,
@@ -437,17 +457,17 @@
       "jeu": {
         "quoi": "company and vessel name pairs: same legal entity or same vessel (match), or not (different)",
         "provenance": "realistic set #20, authored on 2026-09-29 by a separate agent (an Antwerp forwarder's quarter of counterparties, at the natural difficulty of ordinary documents, with 200 realistic distinct-counterparty negatives) that never saw the matcher nor any other pair set; every name invented; no client data, no list data",
-        "sha256": "2054c1248c3977a3146c91a727f887b0aa2154e3e991c937891923890b8b526b",
+        "sha256": "a8ca895dd18fe5fe16c8fcdfa70435cab9b2a95d679c3efc1837d9e7590cd22a",
         "match": 400,
         "different": 200
       },
       "fort": {
         "rappel": {
-          "succes": 334,
+          "succes": 333,
           "n": 400,
-          "taux": 0.835,
-          "bas": 0.7954710126340742,
-          "haut": 0.8681555181641397
+          "taux": 0.8325,
+          "bas": 0.7927791128508475,
+          "haut": 0.8658949811503649
         },
         "fauxPositifs": {
           "succes": 0,
@@ -459,11 +479,11 @@
       },
       "possible": {
         "rappel": {
-          "succes": 355,
+          "succes": 354,
           "n": 400,
-          "taux": 0.8875,
-          "bas": 0.8527757236239129,
-          "haut": 0.9148519799113346
+          "taux": 0.885,
+          "bas": 0.8500077446624668,
+          "haut": 0.9126675220757792
         },
         "fauxPositifs": {
           "succes": 0,
@@ -1169,14 +1189,16 @@
   ],
   "reserves": [
     "A candidate is not a finding. Each one is for your compliance officer to confirm or clear; this report does not decide, and it is not legal advice.",
-    "The lists are those downloaded on 2026-10-06. A name added to a list after that date is not in this report.",
+    "A name with no candidate is not cleared: it was not found on the lists as downloaded, under the spellings we tried, and nothing more.",
+    "The lists are those downloaded on 2026-10-26. A name added to a list after that date is not in this report.",
     "Names and IMO numbers only are compared. Dates of birth, addresses and other identifiers on the lists are not.",
     "Ownership is not screened. Under OFAC's 50 Percent Rule, an entity owned 50 % or more, directly or indirectly, by one or more blocked persons is itself blocked even when it appears on no list; no name screening can see that.",
     "The type and country columns are carried into the report, not used to filter: a counterparty listed under another type or country is still shown.",
     "At most 5 candidates are shown per name, highest score first; the count of the others is given.",
     "The rates quoted first come from 400 matching pairs and 200 hard negatives written by a separate author who never saw the method, and never used to set a threshold. They are rates on authored names, not on your counterparties.",
+    "10 EU entries (added to Annex IV to Regulation (EU) 2024/1485 by Council Implementing Regulation (EU) 2026/2193 (CELEX 32026R2193), entries 99 to 108) come from the Official Journal, read on 2026-10-26, and not from the EU feed, which does not carry them yet; each hit on one says so.",
     "6 counterparties are a vessel by your type column or by an explicit marker in the name, with no readable IMO number: the IMO rule, which decides, could not apply; they are marked.",
     "Word weights are those of the pinned table counted on 2026-10-04 over OFAC, OFAC-CONS, CSL, UN, EU, UK, EU-VESSELS, the table every published rate was measured on; AU, CA, NZ were screened with the same weights, a word absent from the table weighing as a word seen in no listed entry."
   ],
-  "empreinte": "0b7f471641d39abe"
+  "empreinte": "afafcc133a556d2e"
 }

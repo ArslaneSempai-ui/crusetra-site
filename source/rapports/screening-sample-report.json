@@ -10,11 +10,11 @@
   "listes": "2026-09-26",
   "source": "cascade-screening/exemple/contreparties-exemple.screening.json",
   "rendu": {
-    "empreinte": "0b7f471641d39abe",
-    "emis": "2026-10-06",
-    "commit": "3083aff",
+    "empreinte": "afafcc133a556d2e",
+    "emis": "2026-10-26",
+    "commit": "1cee73f",
     "listes": [
-      "2026-10-06"
+      "2026-10-26"
     ],
     "fichier": "rapports/screening-sample-report.screening.json",
     "chaine": "rapport.py + pieces/pdf.mjs, the client chain of rapport-essai.sh"
