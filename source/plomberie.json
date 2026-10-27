@@ -115,7 +115,7 @@
         {
           "h2": "How our tool did",
           "html": [
-            "<p>On October 7, 2026, we ran our tool, Crusetra Screening 0.1.0, on 103 names, against ten lists downloaded the day before. They were the listed names as OFAC prints them, the ships again with their IMO numbers, and 32 variants we wrote, one of them Sea Lead's address. We left out the 10 people, because the tool is built for companies and vessels.</p>",
+            "<p>On October 7, 2026, we ran our tool, Crusetra Screening 0.1.0, on 103 names, against ten lists downloaded the day before. They were the listed names as OFAC prints them, the ships again with their IMO numbers, and 32 variants, one of them Sea Lead's address. We left out the 10 people, because the tool is built for companies and vessels.</p>",
             "<p>Scores run from 0 to 1. At 0.81 or more the match is strong. From 0.80 to just under 0.81 it is possible, and the tool caps a match at 0.80 when it has a reason to doubt it. A person confirms or clears every match.</p>",
             "<p>Each of the other 102 names should match a July 14 entry. The tool found the right one as a strong match for 96, as a possible match for 3, and missed 3.</p>",
             "<p><b>What worked.</b> Every company name, company alias and ship name typed as OFAC prints it scored 1.000 on the right entry. \"Nuvettro Shipping Inc\" scored 0.933, and both spellings of We Freight scored 1.000. Without its IMO number, OPAL returned two entries for another listed OPAL, both ranked above the right one, and NADIA returned the listed ship NADIYA. The IMO number removed both. A made-up ship name with SHENTON WAY's IMO number matched SHENTON WAY, and the tool treated our name as a new name for that ship.</p>",
@@ -132,7 +132,7 @@
         {
           "h2": "What this test does not show",
           "html": [
-            "<p>These counts come from one day of OFAC listings, so they do not show how often the tool catches names in general. We wrote the variants knowing the listed names, and your files may hold forms we did not imagine. The tool compares names and IMO numbers only. It does not check ownership. A company owned 50 percent or more by blocked parties is blocked too, <a href=\"https://ofac.treasury.gov/media/6186/download?inline\">even when it is not on the SDN List</a>.</p>",
+            "<p>These counts come from one day of OFAC listings, so they do not show how often the tool catches names in general. Of the 32 variants, 27 we wrote, 4 are forms OFAC itself prints (two spellings from the General License Z annex, two names in Arabic script), and one is Sea Lead's address. Your files may hold forms we did not imagine. The tool compares names and IMO numbers only. It does not check ownership. A company owned 50 percent or more by blocked parties is blocked too, <a href=\"https://ofac.treasury.gov/media/6186/download?inline\">even when it is not on the SDN List</a>.</p>",
             "<p>This article reports one test of our tool. It is not legal advice. Read about the tool at <a href=\"https://crusetra.com/screening/\">crusetra.com/screening</a>.</p>",
             "<p>How we ran it: Crusetra Screening 0.1.0, commit a2a9633, offline, with <code>CRUSETRA_OFFLINE=1 npm run cribler -- --names=&lt;the file of 103 names&gt;</code>.</p>"
           ]
