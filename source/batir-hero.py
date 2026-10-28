@@ -1536,6 +1536,19 @@ _CANEVAS_V, _CSS_SCRUB_V, _SCRUB_V = sequence_scrub(ETATS_PREFIXE["routing"])
 # 25/10 (Arslane, look B kept in the retouch session): the data-and-limits note as three cards with a drawn icon each.
 _RNOTE_CSS = "<style>#report p.r-note{max-width:none;font-size:inherit;line-height:inherit;color:inherit}#report .rn2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}#report .rn2>span{display:flex;flex-direction:column;gap:10px;padding:20px;border-radius:14px;border:1px solid color-mix(in srgb,var(--sur-vert) 12%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--pan-a,#33191f) 64%,transparent),color-mix(in srgb,var(--pan-b,#241217) 80%,transparent))}\n#report .rn2 svg{width:30px;height:30px;color:var(--pan-vif,#d64a5c)}#report .rn2 b{font:600 18px/1.2 \"Literata\",Georgia,serif;color:var(--sur-vert)}#report .rn2 i{font:400 13.5px/1.55 \"Literata\",Georgia,serif;font-style:normal;color:var(--sur-vert-pale)}\n@media (max-width:900px){#report .rn2{grid-template-columns:1fr}}</style>"
 _RNOTE_ICONES = ["<path d=\"M9 9h18l-2 20H11z M7 9h22 M14 9V6h8v3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/>", "<path d=\"M28 18a10 10 0 1 1-3-7 M28 7v5h-5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/>", "<circle cx=\"18\" cy=\"14\" r=\"5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M8 29c1-6 5-9 10-9s9 3 10 9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/>"]
+# 28/10 (Arslane): the Routing data note as a short list with bold labels, set like the pricing footnotes (the chief's split
+# of the offer's two sentences; the offer file keeps the full text for the other readers of it).
+_RNOTE_LISTE = ("<style>#report ul.r-note{list-style:none;margin:34px 0 0;padding:0;max-width:none;font-size:inherit;line-height:inherit;color:inherit}"
+                '#report ul.r-note li{margin:0 0 14px;font:400 13px/1.55 "Literata",Georgia,serif;color:var(--sur-vert-pale);max-width:none}'
+                "#report ul.r-note li b{color:var(--sur-vert);font-weight:600}</style>"
+                '<ul class="r-note">'
+                "<li><b>Offline.</b> The measurement runs on your machine.</li>"
+                "<li><b>What reaches us.</b> One sealed record: counts, a right, wrong or blank verdict per case and field, your file's name and its hash, and the prices and volume you declared. No document, no value read from one.</li>"
+                "<li><b>Cloud extractors.</b> Testing one sends pages to that vendor under your own account, as it does today; the local tiers keep each page on your machine.</li>"
+                "<li><b>Vendor fees.</b> For the pages you run through cloud extractors, billed to you by those vendors, on your own keys.</li>"
+                "</ul>")
+
+
 def _rnote_cartes(conservation):
     # the offer's retention text holds two sentences (the file, then the re-screen list); one card each, the limits third
     phrases = [x.strip() for x in re.split(r"(?<=\.)\s+", conservation.strip()) if x.strip()]
@@ -1642,7 +1655,7 @@ def _tarif_et_notes(affiche, href, notes):
     if not fin.endswith("</div>") or 'class="affiche-tarif"' in fin or 'class="t-note"' in fin:
         sys.exit("affiche_html a changé de forme : la tuile des tarifs ne sait plus où se poser")
     bloc = (f'{_TARIF_CSS}<div class="tn3"><a class="affiche-tarif" href="{href}"><small>See</small> <b>Pricing</b><i aria-hidden="true">&#8594;</i></a>'
-            '<ol>' + "".join(f"<li><span><b>{t}.</b> {d}</span></li>" for t, d in notes) + "</ol></div>")
+            + ('<ol>' + "".join(f"<li><span><b>{t}.</b> {d}</span></li>" for t, d in notes) + "</ol>" if notes else "") + "</div>")
     return fin[:-len("</div>")] + bloc + "\n  </div>"
 
 
@@ -1886,7 +1899,7 @@ def _section_rapport_routing():
       </article>
     </div>
   </div>
-  <p class="r-note">{off["donnees"]} {off["frais_fournisseurs"]}</p>
+  {_RNOTE_LISTE}
   <div class="ouvrir-ligne"><a class="ouvrir" href="mailto:{off["contact"]}?subject={sujet}"><span><span class="ouvrir-t">Try it free on {es["pages"]} of your pages</span>
     <span class="ouvrir-s">One document type and up to {es["extracteurs"]} extractors. Write to {off["contact"]}.</span></span>
     <span class="fl" aria-hidden="true">&#8594;</span></a></div>
@@ -1908,9 +1921,14 @@ def _section_rapport_routing():
 }})();
 </script>"""
     assert "—" not in html, "un cadratin s'est glissé dans la section du rapport Routing"
-    for attendu in (usd(sn["prix_usd"]), usd(au["prix_usd"]), usd(tr["prix_usd_an"]), ex["sceau"], off["donnees"], off["frais_fournisseurs"]):
+    for attendu in (usd(sn["prix_usd"]), usd(au["prix_usd"]), usd(tr["prix_usd_an"]), ex["sceau"]):
         if attendu not in html:
             sys.exit(f"la section du rapport Routing n'affiche pas « {attendu} » : refusé")
+    # 28/10: the data note is a list now; its two long sentences of the offer are still shown, word for word, in the labelled items
+    for attendu in ("counts, a right, wrong or blank verdict per case and field, your file's name and its hash, and the prices and volume you declared. No document, no value read from one.",
+                    "billed to you by those vendors, on your own keys.", "Testing one sends pages to that vendor under your own account, as it does today; the local tiers keep each page on your machine."):
+        if attendu not in html:
+            sys.exit(f"la liste des données du rapport Routing n'affiche pas « {attendu} » : refusé")
     return html
 
 
@@ -3597,6 +3615,37 @@ def _notes_outil(spec, releve, findings):
             (f"Generated {jeu}", "Counted on their own, and the live instrument shows them.")]
 
 
+def _notes_trois(spec, releve, findings):
+    """28/10: the note of _note_outil split in three labelled footnotes (Measured on / Corpus / Caveat) for the Scoring
+    and Monitoring tiles, with the same words and figures: the counts and the marked cell, the corpus we wrote and the
+    generated set counted on its own, the floor none reaches and the live instrument. Nothing added, nothing typed."""
+    src = findings[2].get("source", {}).get("a") or {} if len(findings) > 2 else {}
+    palier_f, seuil_f = src.get("palier"), src.get("seuil")
+    if not palier_f or src.get("champ", "taux") == "taux":
+        sys.exit("_notes_trois ne sait couper que la note à cellule la plus proche du plancher : revoir la note de l'outil")
+    auth = releve["authored"]
+    unites = " ".join(spec["table_note_unites"].format(
+        nMatch=auth.get("nMatch", auth.get("nSuspicious", auth.get("nEscalated"))),
+        nDifferent=auth.get("nDifferent", auth.get("nBenign", auth.get("nMaintained")))).split())
+    m = re.match(r"^Measured on (.+?),? (all written by us|we wrote)$", unites)
+    if not m:
+        sys.exit("table_note_unites ne finit plus par « we wrote » ou « all written by us » : revoir _notes_trois")
+    jeu = _NOM_JEU[spec["table_ligne"]]
+    return [("Measured on", f"{m.group(1)}, at every threshold; the marked cell, {palier_f} at {seuil_f}, comes closest to the 90% floor we set."),
+            ("Corpus", f"{'All written by us' if m.group(2).startswith('all') else 'Written by us'}. Generated {jeu} are counted on their own, and the live instrument shows them."),
+            ("Caveat", "None reaches the 90% floor.")]
+
+
+def _notes_dossier(releve):
+    """28/10: the two footnotes beside the Dossier tile, from the sealed record the page already reads: the coverage and
+    the consistent count of the public test set, and the content hash the ticker shows. No figure typed."""
+    cv = releve["couverture"]
+    coherents = sum(1 for q in releve["questions"].values()
+                    if any(v["controle"] == "consistent" and v["tenu"] for v in q.get("verdicts", [])))
+    return [("Measured on", f"Our public test set, live: {cv['n']} of {cv['sur']} reports present, {coherents} of {cv['sur']} consistent."),
+            ("Frozen", f"Measured, then frozen; content hash {releve['empreinte']}.")]
+
+
 def _table_outil(spec, releve, findings):
     """La grille de l'outil sur son héros, comme le vert montre la sienne : chaque palier
     présent, à sept seuils dont celui de la frontière quand elle EXISTE, rappel sur
@@ -4110,10 +4159,13 @@ def batir_outil_catalogue(o, spec):
     # the other tools keep their card and seam as they were.
     _sorte = "horloge" if o["id"] == "dossier" else "courbes"
     _robot = "../rendus/robot-" + ICONES_COULEUR[o["id"]] + "-regarde.webp"
-    if o["id"] == "screening":
+    if o["id"] in ("screening", "scoring", "monitoring", "dossier"):
+        # 28/10: the pricing tile and numbered footnotes on every tool page (Dossier had no sentence: its two items come from its sealed record)
+        _notes = (_notes_outil(spec, RELEVE, FINDINGS) if o["id"] == "screening" else
+                  _notes_dossier(RELEVE) if o["id"] == "dossier" else _notes_trois(spec, RELEVE, FINDINGS))
         instrument_affiche = _tarif_et_notes(affiche_html(_sorte, RELEVE, FINDINGS, spec["instrument_page"], spec["instrument_eti"],
                                                           spec["instrument_sub"], _robot),
-                                             lien(o, "ENGAGEMENT.html"), _notes_outil(spec, RELEVE, FINDINGS))
+                                             lien(o, "ENGAGEMENT.html"), _notes)
         couture_html = couture_defile("measured, then frozen", SCEAU_O)
     else:
         instrument_affiche = affiche_html(_sorte, RELEVE, FINDINGS, spec["instrument_page"], spec["instrument_eti"], spec["instrument_sub"], _robot,
