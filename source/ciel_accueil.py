@@ -45,7 +45,7 @@ def _layer(l):
     assert abs(fw - w) <= 2 and abs(fh - h) <= 2, f"{src}: {fw}x{fh} is not its box {w}x{h}"
     vid = '<video class="cl-v" preload="none" muted playsinline loop hidden></video>' if l in LOOPS else ""
     return (f'<div class="cl-lay cl-{l}" data-l="{l}" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px">'
-            f'<img src="{PREFIX}{src}" alt="" width="{fw}" height="{fh}" loading="lazy" decoding="async">{vid}</div>')
+            f'<img src="{PREFIX}{src}" alt=""{' fetchpriority="high"' if l == "robot" else ''} width="{fw}" height="{fh}" decoding="async">{vid}</div>')
 
 def ciel_html(logo_svg):
     svg = logo_svg.replace("<svg ", '<svg class="cl-logo-svg" aria-hidden="true" focusable="false" ', 1)
@@ -54,7 +54,7 @@ def ciel_html(logo_svg):
     return f'''<section class="cl" aria-label="Crusetra">
   <div class="cl-piste"><div class="cl-etage">
     <div class="cl-monde" aria-hidden="true">
-      <img class="cl-base" src="{PREFIX}nuit-base-fixe.webp" alt="" width="{bw}" height="{bh}" loading="lazy" fetchpriority="high" decoding="async">
+      <img class="cl-base" src="{PREFIX}nuit-base-fixe.webp" alt="" width="{bw}" height="{bh}" fetchpriority="high" decoding="async">
       <canvas class="cl-etoiles"></canvas>
       {"".join(_layer(l) for l in LAYERS)}
     </div>
@@ -70,6 +70,25 @@ def ciel_html(logo_svg):
   </div></div>
 </section>'''
 
+def tete_chargement():
+    """The head of the home for a fast first paint: the two @font-face sheets inline (no render-blocking stylesheet; the
+    urls are rewritten to resolve from the site root), the two woff2 the first screen uses (latin Literata, Roboto Mono)
+    and the two pictures it needs first (the sky base, the lit robot) preloaded. Other pages keep linking the sheets."""
+    css = ""
+    for nom in ("literata.css", "roboto-mono.css"):
+        t = (ICI / "fontes" / nom).read_text()
+        assert "url(fontes/" not in t, nom   # the sheets hold bare file names
+        css += t.replace("url(", "url(fontes/")
+        assert "\u2014" not in css
+    lat = "fontes/literata-02.woff2"   # the latin range of Literata: the only Literata file the first screen fetches
+    for f in (lat, "fontes/roboto-mono.woff2"):
+        assert (ICI / f).exists(), f
+    return (f'<style>{css}</style>\n'
+            f'<link rel="preload" href="{lat}" as="font" type="font/woff2" crossorigin>\n'
+            f'<link rel="preload" href="fontes/roboto-mono.woff2" as="font" type="font/woff2" crossorigin>\n'
+            f'<link rel="preload" href="{PREFIX}nuit-base-fixe.webp" as="image" type="image/webp" fetchpriority="high">\n'
+            f'<link rel="preload" href="{PREFIX}nuit-robot-eveil-fixe.webp" as="image" type="image/webp" fetchpriority="high">')
+
 # the hero's night, where the dive ends: the Earth fades into it and the hero starts from it (no band between)
 _FIN = "var(--nuit-b)"
 CSS_CIEL = f"""
@@ -80,6 +99,10 @@ CSS_CIEL = f"""
   .cl-piste{{position:relative;height:100vh}}
   .cl-etage{{position:sticky;top:0;height:100vh;overflow:hidden;background:#04050a;contain:strict}}
   .cl-etage.cl-loin{{visibility:hidden}}
+  /* the stage stays hidden (the night under it stays) until the base and the robot have decoded, then one short fade in
+     (JS_CIEL sets cl-pret; JS_TETE sets it anyway after a timeout, so the sky can never stay hidden) */
+  html.cl-vol .cl-etage{{transition:opacity .3s ease-out}}
+  html.cl-vol:not(.cl-pret) .cl-etage{{opacity:0}}
   .cl-monde{{position:absolute;left:0;top:0;width:2400px;height:2200px;transform-origin:0 0;will-change:transform}}
   .cl-base{{position:absolute;left:0;top:0;width:2400px;height:2200px;max-width:none}}
   .cl-etoiles{{position:absolute;left:0;top:-800px;width:2400px;height:3800px;pointer-events:none}}
@@ -137,6 +160,7 @@ CSS_CIEL = f"""
     .cl-logo-svg{{height:38px}}.cl-titre::before{{inset:-170px -20px -150px -20px;background:linear-gradient(rgba(4,6,16,.5),rgba(4,6,16,.5) 62%,transparent)}}.cl-titre{{font-size:36px;margin-top:16px;max-width:none}}.cl-cue{{bottom:20px}}
   }}
   @media (prefers-reduced-motion:reduce){{
+    html.cl-vol .cl-etage{{transition:none}}
     html.cl-vol main{{margin-top:0}}html.cl-vol main::before{{content:none}}
     .cl-fil b{{animation:none;transform:translateY(20px);opacity:1}}
     /* the still sky ends in the hero's night too: its last quarter fades into it, no edge */
@@ -145,7 +169,9 @@ CSS_CIEL = f"""
 """
 
 # before anything paints: a deep link never gets the sky; otherwise the bar's mark waits for the flying logo
-JS_TETE = 'document.documentElement.classList.add(location.hash.length > 1 ? "sans-ciel" : "cl-vol")'
+# the safety net: whatever happens to the main script or to an image, the sky shows 3 s after the navigation began
+JS_TETE = ('var H=document.documentElement;H.classList.add(location.hash.length > 1 ? "sans-ciel" : "cl-vol");'
+           'setTimeout(function(){H.classList.add("cl-pret")},Math.max(300,3000-performance.now()))')
 
 JS_CIEL = r"""
 (function () {
@@ -193,11 +219,15 @@ JS_CIEL = r"""
   let lances = false;
   function lancerBoucles() { if (RED || lances || !enVue) return; lances = true;
     // one decoder at a time, a quarter second apart: seven starting together cost a 133 ms frame once (measured 25/10)
-    LOOPS.forEach((l, i) => setTimeout(() => { const v = C.lay[l] && C.lay[l].querySelector("video"); if (!enVue) { lances = false; return; } if (v && !v.getAttribute("src")) joue(v, l); }, i * 250)); }
+    LOOPS.forEach((l, i) => setTimeout(() => { const v = C.lay[l] && C.lay[l].querySelector("video"), im = C.lay[l] && C.lay[l].querySelector("img"); if (!enVue) { lances = false; return; }
+      if (v && !v.getAttribute("src") && im && im.complete && im.naturalWidth > 0) joue(v, l); }, i * 250)); }
   const auRepos = () => (window.requestIdleCallback ? requestIdleCallback(lancerBoucles, { timeout: 2500 }) : setTimeout(lancerBoucles, 1200));
-  // the stills first (they are lazy, so the load event does not wait for them), then the loops
-  const stills = [...sec.querySelectorAll("img")].map(i => i.complete ? Promise.resolve() : new Promise(r => { i.addEventListener("load", r, { once: true }); i.addEventListener("error", r, { once: true }); }));
-  Promise.all(stills).then(() => { if (document.readyState === "complete") auRepos(); else addEventListener("load", auRepos, { once: true }); });
+  // the stills first (none is lazy: they are the first screen), the sky shows once they have decoded (the base and the robot
+  // first of all), then the loops start, each one only if its own still is there
+  const imgs = [...sec.querySelectorAll("img")];
+  const decodees = imgs.map(i => i.decode ? i.decode().catch(() => {}) : new Promise(r => { if (i.complete) r(); else { i.addEventListener("load", r, { once: true }); i.addEventListener("error", r, { once: true }); } }));
+  const montrer = () => H.classList.add("cl-pret");
+  Promise.all(decodees).then(() => { montrer(); if (document.readyState === "complete") auRepos(); else addEventListener("load", auRepos, { once: true }); });
   const pose = (dx, dy, z, ax, ay) => { const { s, ox, oy } = F; const S = s * z, X = ox + ax * s - ax * S + dx * S, Y = oy + ay * s - ay * S + dy * S;
     C.monde.style.transform = `translate(${X.toFixed(1)}px,${Y.toFixed(1)}px) scale(${S.toFixed(5)})`; };
   const posLay = (l, dx, dy, sc) => { C.lay[l].style.transform = `translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px) scale(${sc.toFixed(5)})`; };
