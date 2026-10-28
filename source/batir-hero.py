@@ -52,7 +52,7 @@ N_TESTS, N_FICHIERS = _m.group(1), _m.group(2)
 from outil import SCEAU_ROUTING, etiquette_sur_objet, SEUIL_OBJET, etiquettes_qui_se_recouvrent, barre_site, CSS_BARRE_SITE, CSS_PIED_SITE, OUTILS, pied_html, n_tests
 from outil import SITE_URL, ORGANISATION   # the house address, written once in outil.py
 from outil import FILMS_VISIBLES   # the films switch, written once in outil.py
-from ciel_accueil import CSS_CIEL, JS_CIEL, JS_TETE, ciel_html   # the home's night sky (25/10)
+from ciel_accueil import CSS_CIEL, JS_CIEL, JS_TETE, ciel_html, tete_chargement   # the home's night sky (25/10)
 from instrument_carte import (CSS_AFFICHE, affiche_html, CSS_ACCUEIL, eventail_html, methode_html,   # l'affiche (10/09), l'accueil (10/09)
                               _svg_courbes, _svg_paliers, _svg_horloge)
 SCEAU = SCEAU_ROUTING   # lu dans le relevé scellé du vert, jamais tapé (8/09)
@@ -3198,8 +3198,7 @@ def batir_accueil():
 <meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="{description}">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M0 0h16L0 16z' fill='%2314251e'/%3E%3Cpath d='M16 0v16H0z' fill='%2323543f'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="fontes/literata.css">
-<link rel="stylesheet" href="fontes/roboto-mono.css">
+{tete_chargement()}
 <script type="application/ld+json">{donnees}</script>
 <script>document.documentElement.classList.add("js")</script>
 <script>{JS_TETE}</script>

@@ -157,6 +157,29 @@ def relever(html, hero_routing, findings_dossier):
         dire("ciel : the three verbs are not white with a glow (pas en vert, Arslane 25/10)")
     if 'class="cl"' in hero_routing or "cl-vol" in hero_routing:
         dire("ciel : a tool page carries the night sky, only the home does")
+    # H. the first load (28/10): no render-blocking stylesheet in the home's head, the fonts inline and the two files the
+    # first screen uses preloaded, the sky base and the robot still preloaded and never lazy, the sky hidden until it is
+    # ready and shown anyway after a timeout (never stuck hidden)
+    tete = html[:html.find("<header")]
+    if re.search(r'<link[^>]*rel="stylesheet"', tete):
+        dire("chargement : the home's head links a stylesheet, it blocks the first paint (inline the fonts)")
+    if "@font-face" not in tete or "url(fontes/literata-02.woff2)" not in tete:
+        dire("chargement : the home's head does not carry the @font-face rules with root-relative urls")
+    for f in ("fontes/literata-02.woff2", "fontes/roboto-mono.woff2"):
+        if not re.search(r'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' % re.escape(f), tete):
+            dire(f"chargement : {f} is not preloaded")
+    for f in ("ciel/nuit-base-fixe.webp", "ciel/nuit-robot-eveil-fixe.webp"):
+        if not re.search(r'<link rel="preload" href="%s" as="image"[^>]*fetchpriority="high"' % re.escape(f), tete):
+            dire(f"chargement : {f} is not preloaded with a high priority")
+    ciel_sec = html[html.find('<section class="cl"'):html.find("<main>")]
+    if "loading=\"lazy\"" in ciel_sec:
+        dire("chargement : a picture of the first screen is lazy-loaded")
+    if not re.search(r'<img class="cl-base"[^>]*fetchpriority="high"', ciel_sec):
+        dire("chargement : the sky base has no high fetch priority")
+    if "html.cl-vol:not(.cl-pret) .cl-etage{opacity:0}" not in html or 'classList.add("cl-pret")' not in tete:
+        dire("chargement : the sky is not hidden until ready, or has no timeout that shows it anyway")
+    if not re.search(r"prefers-reduced-motion:reduce\)\{\s*html\.cl-vol \.cl-etage\{transition:none", html):
+        dire("chargement : the fade is not off under prefers-reduced-motion")
     return fautes
 
 
@@ -181,6 +204,12 @@ def temoin(html, hero, fd):
         (html.replace("<b>inspect</b>", "inspect", 1), "ciel :", "un verbe éteint"),
         (html.replace(".cl-titre b{", ".cl-titre b{color:var(--vert-vif);", 1).replace("color:#fff;text-shadow", "text-shadow", 1), "ciel :", "les verbes en vert"),
     ]
+    mutations += [
+        (html.replace("<script>document.documentElement.classList.add", '<link rel="stylesheet" href="fontes/literata.css"><script>document.documentElement.classList.add', 1), "chargement :", "une feuille bloquante remise"),
+        (html.replace('<link rel="preload" href="ciel/nuit-base-fixe.webp"', '<link rel="x" href="ciel/nuit-base-fixe.webp"', 1), "chargement :", "le préchargement du ciel retiré"),
+        (html.replace('<img class="cl-base"', '<img loading="lazy" class="cl-base"', 1), "chargement :", "le ciel remis en paresseux"),
+        (html.replace('setTimeout(function(){H.classList.add("cl-pret")}', 'setTimeout(function(){}', 1), "chargement :", "le délai de secours retiré"),
+    ]
     mutations.append((html, "ciel :", "le ciel sur une page outil", hero + '<section class="cl"></section>'))
     for mue, attendu, nom, *h in mutations:
         fautes = relever(mue, h[0] if h else hero, fd)
@@ -201,4 +230,4 @@ if __name__ == "__main__":
             print("  ROUGE", f)
         sys.exit(f"{len(fautes)} refus : l'accueil ne tient pas ses affirmations")
     print("témoin de l'accueil : le grand livre recompose son sceau, l'éventail suit le rideau, "
-          "la méthode cite le dossier, le ciel tient son titre blanc, et les douze mutations rougissent encore")
+          "la méthode cite le dossier, le ciel tient son titre blanc, et les seize mutations rougissent encore")
