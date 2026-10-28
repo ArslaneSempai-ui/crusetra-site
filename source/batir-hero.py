@@ -925,8 +925,6 @@ CSS = '''
 ''' + CSS_AFFICHE + '''
   /* les annexes en tuiles */
   .menus{padding:110px 0 90px;background:var(--papier)}
-  /* With the films hidden, the seam sits right on the appendices: drop their top padding so the seam keeps 56px of air on both sides */
-  .couture+.menus{padding-top:0}
   .grille{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
   .tuile{display:flex;flex-direction:column;gap:0;background:var(--papier-haut);
     border:1px solid color-mix(in srgb,var(--filet) 55%,transparent);border-radius:14px;
