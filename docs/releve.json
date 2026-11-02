@@ -80,7 +80,10 @@
   "1000": "contreparties du livre de Hambourg (exemple/contreparties-mille-2.csv, sceau f1a6aa3c48408b19, lu pour fixer le budget de revue, donc pas aveugle), scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
   "332": "paires vraies du jeu réaliste retrouvées au fort, sur 400, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
   "68": "paires vraies du jeu réaliste laissées au possible ou en dessous, 400 moins 332, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
-  "976": "contreparties du livre de Hambourg (exemple/contreparties-mille-2.csv, sceau f1a6aa3c48408b19, lu pour fixer le budget de revue, donc pas aveugle) sans candidat, 1000 moins 24, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)"
+  "976": "contreparties du livre de Hambourg (exemple/contreparties-mille-2.csv, sceau f1a6aa3c48408b19, lu pour fixer le budget de revue, donc pas aveugle) sans candidat, 1000 moins 24, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
+  "0.5": "seuil 0,50 : choix de l'outil pour le suivi des transactions (amount, 40 sur 42, borne basse 0,842) et premier repère de l'axe des seuils ; instrument-monitoring-donnees.json, scellé 5e2a96e22fa0b59c",
+  "0.56": "seuil retenu par l'outil pour la comparaison de noms (jaro-winkler, 59 sur 60) ; recommandee.seuil de instrument-screening-donnees.json, scellé 556bb39ec055a091",
+  "42": "cas écrits à la main, 42 suspects et 42 bénins (suivi des transactions, scellé 5e2a96e22fa0b59c) ; 42 dossiers escaladés et 42 maintenus (scoring, scellé 3cee43edfa7c0064)"
  },
  "derive": {
   "17.7": "94,4 moins 76,7, sur les mêmes 120 dossiers",
@@ -105,10 +108,18 @@
   "11.1": "contraste encre sur papier, calculé depuis la charte le 31/08",
   "5.6": "pire paire de contraste de la charte, arrondie vers le bas : calcul du 31/08",
   "4.5": "plancher WCAG AA pour le texte courant, convention",
-  "16807": "sept paliers puissance cinq champs, recalculé : affiché 16 807 (espace fine)"
+  "16807": "sept paliers puissance cinq champs, recalculé : affiché 16 807 (espace fine)",
+  "84": "42 + 42, les cas ou dossiers écrits à la main du jeu public de scoring (nEscalated 42, nMaintained 42, scellé 3cee43edfa7c0064)",
+  "180": "repère de l'axe en jours : 6 pas de 30 j ; l'axe va jusqu'à 2 fois la durée de validité déclarée de 90 jours"
  },
  "graduation": {
-  "_": "vide depuis le 31/08 : les repères sont des spans HTML, déclarés en mesure"
+  "_": "vide depuis le 31/08 : les repères sont des spans HTML, déclarés en mesure",
+  "0.6": "repère de l'axe des seuils (seuilsMontres de instrument-*-donnees.json, grille 0,50 à 1,00) : seul dans son texte, dans un svg",
+  "0.7": "repère de l'axe des seuils (seuilsMontres de instrument-*-donnees.json, grille 0,50 à 1,00) : seul dans son texte, dans un svg",
+  "0.8": "repère de l'axe des seuils (seuilsMontres de instrument-*-donnees.json, grille 0,50 à 1,00) : seul dans son texte, dans un svg",
+  "0.85": "repère de l'axe des seuils (seuilsMontres de instrument-*-donnees.json, grille 0,50 à 1,00) : seul dans son texte, dans un svg",
+  "0.9": "repère de l'axe des seuils (seuilsMontres de instrument-*-donnees.json, grille 0,50 à 1,00) : seul dans son texte, dans un svg",
+  "0.95": "repère de l'axe des seuils (seuilsMontres de instrument-*-donnees.json, grille 0,50 à 1,00) : seul dans son texte, dans un svg"
  },
  "ignorer": {
   "01": "numéro d'ordre d'écran",
