@@ -22,9 +22,9 @@
   "0": "dossiers perdus par le routage visé : aucun dossier complet du publié n'est cassé : document.json, bloc apparié ; fausses alertes au fort sur les 200 voisins réalistes du jeu 20, 0 sur 200, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening) ; alertes fortes pour mille sur le livre de Hambourg (exemple/contreparties-mille-2.csv, sceau f1a6aa3c48408b19, lu pour fixer le budget de revue, donc pas aveugle), scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
   "48.8": "borne basse de Wilson à 95 % sur 33/53, recalculée",
   "74.1": "borne haute de Wilson à 95 % sur 33/53, recalculée",
-  "50": "paquets sous licence permissive : LICENCES.md:17, généré par src/licences.ts",
-  "51": "deux sens. (a) paquets installés sur une machine : LICENCES.md:4. (b) 51 seuils de 0,50 à 1,00 par pas de 0,01 (51 valeurs), écrits « 51 thresholds » sur monitoring/index ; construction de l'axe des seuils des instruments scoring, monitoring et screening, seuilsMontres de source/extraire-instrument-*.mjs étant le sous-ensemble montré",
-  "77": "paquets du verrou avec empreinte : SECURITE.md:16 et package-lock.json",
+  "50": "paquets sous licence permissive : LICENCES.md:17 de cascade au commit 8fbf197 (la même ligne dit 63 aujourd'hui), généré par src/licences.ts",
+  "51": "deux sens. (a) paquets installés sur une machine : LICENCES.md:4 de cascade au commit 8fbf197 (la même ligne dit 64 aujourd'hui). (b) 51 seuils de 0,50 à 1,00 par pas de 0,01 (51 valeurs), écrits « 51 thresholds » sur monitoring/index ; construction de l'axe des seuils des instruments scoring, monitoring et screening, seuilsMontres de source/extraire-instrument-*.mjs étant le sous-ensemble montré",
+  "77": "paquets du verrou avec empreinte : SECURITE.md:16 de cascade au commit 8fbf197 et package-lock.json à ce commit (la même ligne dit 90 aujourd'hui)",
   "523": "ligne de exigerHoteLocal dans src/tiers.ts : retrouvée par la passe du 31/08",
   "129": "ligne du test de refus dans src/poids.test.ts : retrouvée par la passe du 31/08",
   "24": "version minimale de Node : package.json:57, engines ; alertes possibles pour mille sur le livre de Hambourg (exemple/contreparties-mille-2.csv, sceau f1a6aa3c48408b19, lu pour fixer le budget de revue, donc pas aveugle), scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
@@ -49,12 +49,12 @@
   "1094": "ligne du commentaire anti-télémétrie dans src/crusetra.test.ts : passe du 31/08",
   "341": "ligne du caviardage des chemins dans src/egress.ts : passe du 31/08",
   "15": "ligne de la licence commerciale séparée dans LICENSE : passe du 31/08",
-  "8": "ligne du grant de 30 jours dans LICENSE : et poids en Go de l'échelle générative, README.md:259",
+  "8": "ligne du grant de 30 jours dans LICENSE : et poids en Go de l'échelle générative, README.md:302 de cascade au commit 72be17e (« a further eight gigabytes »)",
   "17": "ligne des durées divergentes dans rapports/2026-08-22-contrainte-de-sortie.md",
   "34": "ligne du renommage NonTransportable dans contrainte.json",
   "21": "relevés d'échantillonnage egress, zéro connexion observée : egress.json:12",
   "633": "commits balayés par la passe secrets scellée du 27/08 : SECURITE.md:41",
-  "400": "Mo de packages npm avant les poids : README.md:154 ; paires vraies du jeu réaliste 20, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
+  "400": "Mo de packages npm avant les poids : README.md:293 de cascade au commit 72be17e (ligne « about 400 MB of npm packages ») ; paires vraies du jeu réaliste 20, scellé 07e10f13812d8f3c (releve-entites.json, crusetra-screening)",
   "20": "plancher d'observations sous lequel l'outil refuse un taux (ENOUGH) : et repère d'échelle des instruments du héros",
   "30": "jours de l'Evaluation Grant : LICENSE:8 (et précision de départ sans abstention, 45 sur 150)",
   "70": "repère de l'échelle des intervalles : spans HTML depuis le 31/08",
@@ -158,7 +158,13 @@
   "225": "ligne de src/intake.ts de cascade citée par les conditions : retenue par source/ancres-citations.json et vérifiée par la garde des citations de l'assembleur",
   "0.72": "releve-public.json de crusetra-monitoring, scellé 5e2a96e22fa0b59c, authored.tables.zscore[0.72] : seuil de la lecture en direct du bandeau (35 suspects retrouvés, 14 cas sains en alerte sur 42 et 42) ; la lecture balaie les seuils de la table",
   "37": "releve-public.json de crusetra-monitoring, scellé 5e2a96e22fa0b59c, authored.tables.amount[0.59].rappel.succes : 37 suspects retrouvés sur 42, valeur de passage de la lecture en direct du bandeau, qui balaie les cellules de la table",
-  "0.75": "releve-public.json de crusetra-screening, scellé 556bb39ec055a091, authored.tables.jaro-winkler[0.75] : seuil de la lecture en direct du bandeau (52 vraies correspondances retrouvées sur 60, 40 fausses alertes sur 60) ; la lecture balaie les seuils de la table"
+  "0.75": "releve-public.json de crusetra-screening, scellé 556bb39ec055a091, authored.tables.jaro-winkler[0.75] : seuil de la lecture en direct du bandeau (52 vraies correspondances retrouvées sur 60, 40 fausses alertes sur 60) ; la lecture balaie les seuils de la table",
+  "92.9": "rappel du facteur product au seuil 0,50 : 39 sur 42 dossiers escaladés, source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, authored.grille.product.0.50.rappel",
+  "39": "dossiers escaladés retrouvés par le facteur product au seuil 0,50, sur 42 : source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, authored.grille.product.0.50.rappel.succes",
+  "23.8": "fausses alertes du facteur product au seuil 0,50 : 10 sur 42 dossiers maintenus, source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, authored.grille.product.0.50.fauxPositifs",
+  "81": "plus forte borne basse de l'intervalle de rappel, atteinte par product (0,8099 arrondi) sous le plancher 0,90 : source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, recommandee.plusForteBorne",
+  "51.6": "borne basse de l'intervalle de rappel du facteur behaviour au seuil 0,50 (28 sur 42, 0,5155), sans fausse alerte : source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, authored.grille.behaviour.0.50",
+  "79.4": "rappel du facteur product au seuil 0,50 sur les dossiers générés : 100 sur 126, source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, synthetic.grille.product.0.50.rappel"
  },
  "suppose": {
   "48": "délai en heures, terme de l'offre décidé par Arslane le 2026-09-29 (grille B) : livraison du rapport de screening, source/offre-screening.json:4 (delai_heures) ; et, autre enregistrement, délai de l'instantané de routage, source/offre-routing.json:10 et :17 (delai_heures)",
@@ -225,7 +231,7 @@
   "0.46": "prix de gen-8b sur birth pour mille extractions : même construction",
   "0.42": "prix de gen-8b sur document pour mille extractions : même construction",
   "0.3": "prix de gen-8b sur country pour mille extractions : même construction",
-  "0.45": "trois sens. (a) prix de gen-8b sur address pour mille extractions, 0,45 dollar : même construction. (b) p = 0,45 sur le total (5 contre 2, 7 désaccords) entre deux fournisseurs de reçus : README.md:90 de cascade/examples/cord-receipts, écrit sur routing/index. (c) taux 0,45 soit 27 sur 60 (rappel au seuil 0,91, fausses alertes du choix de l'outil sur screening) : source/instrument-screening-donnees.json, scellé 556bb39ec055a091, dans les données de screening/instrument",
+  "0.45": "trois sens. (a) prix de gen-8b sur address pour mille extractions, 0,45 dollar : même construction. (b) p = 0,45 sur le total (5 contre 2, 7 désaccords) entre deux fournisseurs de reçus : README.md:90 de cascade/examples/cord-receipts, écrit sur routing/index. (c) taux 0,45 soit 27 sur 60 de la méthode phonetic, non du choix de l'outil (jaro-winkler, 46 sur 60 de fausses alertes) : rappel au seuil 0,91 et fausses alertes aux seuils 0,63 à 0,66, source/instrument-screening-donnees.json (authored.grille.phonetic), scellé 556bb39ec055a091, dans les données embarquées de screening/instrument, jamais en texte",
   "54.3": "coût du routage visé pour cent mille documents, 54,3 : somme des cinq prix par champ du routage publié avec name passé à gen-4b (0,5431 pour mille documents, fois 100), calculée par source/extraire-instrument.mjs",
   "790": "79 x 10 : douze mois moins deux offerts (« annuel », source/offre-screening.json) ; prix annuel du re-criblage de 500 noms",
   "1990": "199 x 10 : douze mois moins deux offerts (« annuel », source/offre-screening.json) ; prix annuel du re-criblage de 5 000 noms",
@@ -236,7 +242,8 @@
   "252": "releve-public.json de crusetra-monitoring, scellé 5e2a96e22fa0b59c, synthetic.nSuspicious + synthetic.nBenign : 126 + 126 cas générés",
   "3.2": "examples/cord-receipts/cord-labels-grouped-measured.json de cascade, scellé ac7d0adbe4907caf, audit.fields.total.sources, (0,9684 - 0,9368) x 100 = 3,16 points entre gemini-flash et google-expense sur les totaux, recalculé comme source/batir-hero.py (ecart_pts)",
   "5.2": "somme des octets des deux fichiers de langue épinglés dans src/tessdata.ts de cascade (4 113 088 + 1 122 661 = 5,24 Mo), lue par source/batir-hero.py (tess_mb)",
-  "1.91": "coût routé pour mille documents : 1,6 (large sur le nom, supposé) + 0,3066 (gen-4b sur l'adresse, dérivé de src/assumptions.ts et des latences figées) = 1,9066 (D.total dans la page) ; la page écrit « assumed prices »"
+  "1.91": "coût routé pour mille documents : 1,6 (large sur le nom, supposé) + 0,3066 (gen-4b sur l'adresse, dérivé de src/assumptions.ts et des latences figées) = 1,9066 (D.total dans la page) ; la page écrit « assumed prices »",
+  "0.01": "pas de la grille des seuils, 0,50 à 1,00 : liste seuils de source/instrument-monitoring-donnees.json (51 valeurs)"
  },
  "graduation": {
   "_": "vide : les seuils 0,6 à 0,95 s'écrivent aussi dans les en-têtes de la table et dans « floor 0.90 », donc ils sont déclarés en suppose, avec leur grille écrite à l'écran"
