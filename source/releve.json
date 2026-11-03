@@ -164,7 +164,12 @@
   "23.8": "fausses alertes du facteur product au seuil 0,50 : 10 sur 42 dossiers maintenus, source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, authored.grille.product.0.50.fauxPositifs",
   "81": "plus forte borne basse de l'intervalle de rappel, atteinte par product (0,8099 arrondi) sous le plancher 0,90 : source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, recommandee.plusForteBorne",
   "51.6": "borne basse de l'intervalle de rappel du facteur behaviour au seuil 0,50 (28 sur 42, 0,5155), sans fausse alerte : source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, authored.grille.behaviour.0.50",
-  "79.4": "rappel du facteur product au seuil 0,50 sur les dossiers générés : 100 sur 126, source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, synthetic.grille.product.0.50.rappel"
+  "79.4": "rappel du facteur product au seuil 0,50 sur les dossiers générés : 100 sur 126, source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, synthetic.grille.product.0.50.rappel",
+  "0.81": "deux sens. (a) plus forte borne basse de rappel d'un facteur (product, 0,8099 arrondi), écrite en gras sur scoring/index : source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, recommandee.plusForteBorne. (b) seuil FORT de l'outil de screening (« At 0.81 or more the match is strong »), le possible étant 0,80 : exemple/contreparties-exemple.screening.json de crusetra-screening, seuils.fort, scellé fe75f2ae1033acc0, valeur tenue depuis le commit 3053d6c du 2026-09-27",
+  "71": "deux sens. (a) borne basse 0,7148 arrondie de l'intervalle de rappel de product au seuil 0,50 sur les 126 dossiers générés (« interval 71% to 86% ») : source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, synthetic.grille.product.0.50.rappel.bas. (b) numéro de ligne de src/measure.ts:71 dans les renvois « Where it lives » de monitoring/method, tenu par source/ancres-citations-monitoring.json",
+  "0.65": "seuil lu par le compteur animé de la bande de scoring/index : le compteur balaie les 51 seuils de la liste seuils de source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064",
+  "0.84": "seuil lu par le compteur animé de la bande de scoring/index, version sans mouvement : le compteur balaie les 51 seuils de la liste seuils de source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064",
+  "629": "tests de Crusetra Screening : README.md l.161 de crusetra-screening au commit eb64d21 et à la tête de la branche principale, lu à la construction par source/outil.py ; remplace le 624 périmé du pied de page"
  },
  "suppose": {
   "48": "délai en heures, terme de l'offre décidé par Arslane le 2026-09-29 (grille B) : livraison du rapport de screening, source/offre-screening.json:4 (delai_heures) ; et, autre enregistrement, délai de l'instantané de routage, source/offre-routing.json:10 et :17 (delai_heures)",
@@ -280,6 +285,10 @@
   "2014": "année du règlement (UE) n° 833/2014, nom d'un texte",
   "-2073840": "segment du numéro de dossier 2026-002073840 de HS Industries LLC au registre du Wyoming (source/plomberie.json), un identifiant, lu comme négatif par le parseur",
   "1234": "exemple de format dans le mode d'emploi (« $1,234.50 » et « 1234.50 ») : une illustration, pas une mesure",
-  "1234.5": "exemple de format dans le mode d'emploi (« $1,234.50 » et « 1234.50 ») : une illustration, pas une mesure"
+  "1234.5": "exemple de format dans le mode d'emploi (« $1,234.50 » et « 1234.50 ») : une illustration, pas une mesure",
+  "41": "numéro de ligne dans le renvoi « Where it lives » de monitoring/method (src/cas-etiquetes.test.ts:41) : la ligne et son texte sont tenus par source/ancres-citations-monitoring.json et vérifiés contre l'outil à la construction ; un repère, pas une mesure",
+  "102": "numéro de ligne dans le renvoi « Where it lives » de monitoring/method (src/interval.ts:102) : la ligne et son texte sont tenus par source/ancres-citations-monitoring.json et vérifiés contre l'outil à la construction ; un repère, pas une mesure",
+  "170": "numéro de ligne dans le renvoi « Where it lives » de monitoring/method (src/optimise.ts:170) : la ligne et son texte sont tenus par source/ancres-citations-monitoring.json et vérifiés contre l'outil à la construction ; un repère, pas une mesure",
+  "9": "jour de la date d'écriture de l'analyse OFAC (« 9 October 2026 »), un repère de calendrier, pas une mesure"
  }
 }
