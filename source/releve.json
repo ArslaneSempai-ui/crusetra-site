@@ -32,7 +32,7 @@
   "164": "ligne du type Split dans src/corpus.ts : passe du 31/08",
   "47": "ligne du test de partage entre moitiés, src/crusetra.test.ts : passe du 31/08",
   "379": "ligne de la marche récursive dans src/optimise.ts : passe du 31/08",
-  "63": "paquets sous licence permissive : LICENCES.md:17 de cascade au commit 72be17e (ligne « Permissive | 63 »), généré par src/licences.ts",
+  "63": "plusieurs sens. (a) paquets sous licence permissive : LICENCES.md:17 de cascade au commit 72be17e (ligne « Permissive | 63 »), généré par src/licences.ts, imprimé sur security.html et questions.html. (b) numéro de ligne de src/inventory.ts dans cascade, l'aveu du défaut hérité (« 95 % because that is wilson()'s default »), cité en « Where it lives » sur method.html, ligne identique au commit 72be17e, ancre de source/ancres-citations.json. (c) numéro de ligne de src/empreinte.ts dans cascade-dossier (export function scelleIntact), cité en « Where it lives » sur dossier/security.html, ancre de source/ancres-citations-dossier.json",
   "1185": "ligne de l'usage measure:yours dans src/your-cases.ts : passe du 31/08",
   "18": "ligne des en-têtes de colonnes dans src/your-cases.ts : passe du 31/08",
   "313": "ligne de la question fabriquée dans src/your-cases.ts : passe du 31/08",
@@ -59,7 +59,7 @@
   "30": "jours de l'Evaluation Grant : LICENSE:8 (et précision de départ sans abstention, 45 sur 150)",
   "70": "repère de l'échelle des intervalles : spans HTML depuis le 31/08",
   "80": "repère de l'échelle des intervalles : spans HTML depuis le 31/08",
-  "90": "paquets du verrou avec empreinte : SECURITE.md:16 de cascade au commit 72be17e (« package-lock.json, 90 dependencies »)",
+  "90": "plusieurs sens. (a) paquets du verrou avec empreinte : SECURITE.md:16 de cascade au commit 72be17e (« package-lock.json, 90 dependencies »), imprimé sur security.html. (b) plancher de rappel de 90 %, choisi par nous : PLANCHER = 0.90 de source/extraire-instrument-monitoring.mjs, extraire-instrument-scoring.mjs et extraire-instrument-screening.mjs, imprimé « 90% floor » ou « 90% of true » sur monitoring/index et scoring/index, « at least 90% » sur screening/index. (c) durée de validité déclarée de 90 jours : « validity period 90 day(s) » de source/instrument-dossier-donnees.json, scellé 67ff03042f26708e, imprimée « 90 days » sur dossier/index, dossier/instrument et index, et « of 90 » (rapport le plus ancien à 18 j) sur dossier/index. (d) repère « 90 d » de l'axe en jours, 6 pas de 30 j (voir 180), imprimé sur index et dossier/index. (e) 90 secondes du film de Routing : docs/films/routing.mp4 dure 89,6 s (« 1 minute 30 » dans le aria-label), titre « proven in 90 seconds » sur routing/index",
   "100": "repère de l'échelle des intervalles : spans HTML depuis le 31/08",
   "25": "repère d'échelle des instruments par état : spans HTML depuis le 31/08",
   "40": "repère d'échelle des instruments par état : spans HTML depuis le 31/08",
@@ -169,7 +169,8 @@
   "71": "deux sens. (a) borne basse 0,7148 arrondie de l'intervalle de rappel de product au seuil 0,50 sur les 126 dossiers générés (« interval 71% to 86% ») : source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064, synthetic.grille.product.0.50.rappel.bas. (b) numéro de ligne de src/measure.ts:71 dans les renvois « Where it lives » de monitoring/method, tenu par source/ancres-citations-monitoring.json",
   "0.65": "seuil lu par le compteur animé de la bande de scoring/index : le compteur balaie les 51 seuils de la liste seuils de source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064",
   "0.84": "seuil lu par le compteur animé de la bande de scoring/index, version sans mouvement : le compteur balaie les 51 seuils de la liste seuils de source/instrument-scoring-donnees.json, scellé 3cee43edfa7c0064",
-  "629": "tests de Crusetra Screening : README.md l.161 de crusetra-screening au commit eb64d21 et à la tête de la branche principale, lu à la construction par source/outil.py ; remplace le 624 périmé du pied de page"
+  "629": "tests de Crusetra Screening : README.md l.161 de crusetra-screening au commit eb64d21 et à la tête de la branche principale, lu à la construction par source/outil.py ; remplace le 624 périmé du pied de page",
+  "64": "plusieurs sens. (a) paquets installés sur une machine : LICENCES.md:4 de cascade au commit 72be17e (« 64 packages are installed under node_modules/ »), généré par src/licences.ts, imprimé sur security.html. (b) borne haute de l'intervalle de Wilson à 95 % des fausses alertes du scénario velocity au seuil 0,50 en suivi des transactions : 21 cas bénins sur 42, soit 50 %, intervalle de 0,3553 à 0,6447 écrit « 36% to 64% » sur monitoring/index, source/instrument-monitoring-donnees.json (authored.grille.velocity[0.50].fauxPositifs), scellé 5e2a96e22fa0b59c"
  },
  "suppose": {
   "48": "délai en heures, terme de l'offre décidé par Arslane le 2026-09-29 (grille B) : livraison du rapport de screening, source/offre-screening.json:4 (delai_heures) ; et, autre enregistrement, délai de l'instantané de routage, source/offre-routing.json:10 et :17 (delai_heures)",
@@ -259,7 +260,6 @@
   "03": "numéro d'ordre d'écran",
   "04": "numéro d'ordre d'écran",
   "05": "numéro d'ordre d'écran",
-  "64": "paquets installés sur une machine : LICENCES.md:4 de cascade au commit 72be17e (« 64 packages are installed under node_modules/ »), généré par src/licences.ts",
   "256": "fragment de « SHA-256 », pas un compte",
   "26": "fragment de l'empreinte du scellé dbf26abec438515e (dbf|26|abec…)",
   "438515": "fragment de l'empreinte du scellé dbf26abec438515e (…abec|438515|e)",
