@@ -15,9 +15,9 @@ not typed here: it is read from outil.py, the one place that knows which tools a
 With --live, it also asks GitHub, anonymously, that every repository the site still links to answers 200, and that
 every private one answers 404 (a repository made public again would then be a declared private one wrongly hidden).
 
-WAITING FOR A DECISION (EN_ATTENTE): engagement.html serves the evaluation offer, whose « Download and run » link is
-the routing repository; the offer is a price and license matter, which the chief puts to Arslane. Until then the page
-is listed here with its reason, printed at every run, and never silently.
+WAITING FOR A DECISION (EN_ATTENTE): a page that keeps a route to a private repository on purpose is listed here with
+its reason, printed at every run, never silently. engagement.html's « Download and run » evaluation link was the one
+entry until 5 November 2026, when Arslane made it a write-to-us button; the list is empty since.
 
 Its own witness runs first: a planted page must be refused, a clean one must pass, or it exits 2. The assembler adds
 the outer witness (a planted page in docs/ must turn it red).
@@ -40,9 +40,7 @@ PRIVES = {GITHUB + DEPOTS[k] for k in DEPOTS_PRIVES}
 PUBLICS = {GITHUB + v for k, v in DEPOTS.items() if k not in DEPOTS_PRIVES}
 NOMS_PRIVES = {DEPOTS[k] for k in DEPOTS_PRIVES}
 # the pages that keep a route to a private repository on purpose, each with the reason and who decides
-EN_ATTENTE = {
-    "engagement.html": "the evaluation offer (« Download and run ») is a price and license matter: the chief puts it to Arslane",
-}
+EN_ATTENTE: dict[str, str] = {}
 TEXTES = (".well-known/security.txt", "releve.json")
 
 

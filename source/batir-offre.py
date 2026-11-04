@@ -31,11 +31,11 @@ MOIS_PAYES_AN = 10
 SCEAU = SCEAU_ROUTING   # lu dans le relevé scellé du vert, jamais tapé (8/09)
 # la barre du site (10/09) : les cinq instruments dans l'ordre du rideau, lus dans OUTILS, jamais tapés
 NAV = "".join(f'\n    <a href="{o["page_hero"]}">{o["nom"]}</a>' for o in OUTILS.values())
-from outil import GITHUB, DEPOTS, DEPOT_SITE   # noqa: E402
-# KEPT AS SERVED, FLAGGED (4 November 2026): the routing repository is private (outil.py DEPOTS_PRIVES), so this
-# "Download and run" link answers 404; the evaluation offer it serves is a price and license matter, which the chief
-# puts to Arslane. garde-depots.py lists engagement.html as waiting for that decision.
-DEPOT_URL = GITHUB + DEPOTS["routing"]
+from outil import GITHUB, DEPOT_SITE   # noqa: E402
+# The evaluation offer's button (5 November 2026, Arslane's choice, journal lines 549 and 551): the tool repositories
+# are private, so « Download and run » gave a 404; the button now opens a mail to us. The offer, its price and its
+# terms are unchanged.
+SUJET_EVALUATION = "Thirty-day%20evaluation"
 
 CSS = '''
   :root{--noir:#0e0e11;--noir-b:#08080a;--noir-c:#121215;--filet:#26262c;--sur:#e8e6df;--sur-pale:#9a988f;
@@ -336,7 +336,7 @@ PAGE = f'''<!doctype html><html lang="en">
         <li>Your thirty days start the first time you run the tool. Downloading it does not start the clock</li>
         <li>Results stay internal, and you may not use them in live operations</li>
       </ul>
-      <a class="cta" href="{DEPOT_URL}"><span class="b">Download and run <span class="fl" aria-hidden="true">&#8594;</span></span></a>
+      <a class="cta" href="mailto:{CONTACT}?subject={SUJET_EVALUATION}"><span class="b">Write to us <span class="fl" aria-hidden="true">&#8594;</span></span></a>
       <p class="c-fin">These thirty days are written into the public license, which ships with the code</p>
     </div>
     <div class="col">

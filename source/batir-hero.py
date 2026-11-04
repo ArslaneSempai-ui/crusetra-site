@@ -1867,7 +1867,7 @@ def _section_rapport_routing():
     for k, r in enumerate(_rangs):
         if "".join(d for _, d in r).count('class="mk"') != len(_cmds[k]):
             sys.exit(f"pas {k + 1} de l'essai : les renvois numérotés ne correspondent plus à ses commandes")
-    essai = (f'<div class="r-essai">{_ESSAI_CSS}<p class="marque-h">How the free test goes</p><h3 class="gd-h">Five steps, all on your machine.</h3>'
+    essai = (f'<div class="r-essai">{_ESSAI_CSS}<p class="marque-h">How the free test goes</p><h3 class="gd-h">Five steps, all on your machine, once we have sent you the tool.</h3>'
              '<div class="gd">' + "".join(f'<input type="radio" name="gd" id="gd{k}"{" checked" if k == 0 else ""}>' for k in range(5))
              + '<div class="top"><div class="stage" aria-hidden="true">'
              + "".join(f'<div class="fr" style="animation-delay:{k * 2.5}s">{f}</div>' for k, f in enumerate(_cadres))
