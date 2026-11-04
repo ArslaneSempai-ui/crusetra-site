@@ -5,17 +5,19 @@ Refuse, dans ce que le lecteur voit (le corps des pages, les attributs alt / ari
 les chaînes des scripts de page), toute orthographe britannique des mots listés ci-dessous. Nos acheteurs
 sont américains : license, organization, color, behavior, labeled, optimizer...
 
-Trois exceptions, chacune pour une raison écrite :
+Quatre exceptions, chacune pour une raison écrite :
   1. le code, les commandes et les chemins (<code>, <pre>, lignes de terminal .tm-l, « src/optimise.ts ») :
      ce sont des NOMS, la commande de l'outil s'appelle optimise ;
   2. les données citées d'un outil (<script type="application/json" id="donnees">), qui portent le scellé
      de leur relevé : les changer ici mentirait sur l'outil ;
   3. le facteur « behaviour » de Scoring, nom scellé dans ses relevés, reconnu à son voisinage (un autre
      facteur de Scoring à moins de 60 caractères, ou « behaviour: » / « behaviour at 0. »). En prose
-     (« keyboard behaviour »), il est refusé.
+     (« keyboard behaviour »), il est refusé ;
+  4. le code de l'outil Screening embarqué dans la page d'essai (<script id="moteur">, screening/try.html, 4 novembre
+     2026) : ses messages et ses noms de commande (« optimise », « licence ») sont les siens, portés tels quels.
 
 LE TÉMOIN TOURNE D'ABORD : une page fautive doit déclencher chaque mot de la liste, une page saine aucun,
-et les trois exceptions doivent passer. Un mot muet = garde cassée (code 2).
+et les quatre exceptions doivent passer. Un mot muet = garde cassée (code 2).
 usage: python3 garde-orthographe.py --docs DIR
 """
 import html, pathlib, re, sys
@@ -44,6 +46,8 @@ def segments(page):
     for attrs, corps in re.findall(r"<script([^>]*)>(.*?)</script>", s, flags=re.S):
         if "application/json" in attrs or "ld+json" in attrs:
             continue                          # exception 2 (données d'outil) ; le JSON-LD a sa propre garde
+        if 'id="moteur"' in attrs:
+            continue                          # exception 4 (le code de l'outil, porté tel quel)
         for a, b, c in re.findall(r"'((?:[^'\\\n]|\\.)*)'|\"((?:[^\"\\\n]|\\.)*)\"|`([^`]*)`", corps):
             out.append(("script", a or b or c))
     corps = re.sub(r"<script.*?</script>|<style.*?</style>|<code[^>]*>.*?</code>|<pre[^>]*>.*?</pre>"
@@ -77,7 +81,8 @@ def temoin():
     saine = ('<p>The license, the organization, the color, the behavior.</p><code>npm run optimise</code>'
              '<p class="tm-l">$ crusetra optimise --recall</p><p>Where it lives src/optimise.ts:379 · LICENCES.md</p>'
              '<p>activity behaviour exposure</p><p>behaviour: 51.6%</p>'
-             '<script type="application/json" id="donnees">{"d": "string similarity favouring the prefix"}</script>')
+             '<script type="application/json" id="donnees">{"d": "string similarity favouring the prefix"}</script>'
+             '<script id="moteur">const aide = "npm run optimise -- --recall; no licence recorded";</script>')
     if refus(saine):
         sys.exit(f"GARDE CASSÉE : la page saine du témoin est refusée : {refus(saine)} (code 2)")
 

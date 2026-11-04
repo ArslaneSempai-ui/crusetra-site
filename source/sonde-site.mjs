@@ -47,6 +47,9 @@ for(const s of document.querySelectorAll('main > section, main > nav, body > sec
   for(const el of s.querySelectorAll('*')){
     const c=getComputedStyle(el);
     if(c.display==='none'||c.visibility==='hidden'||c.position==='fixed')continue;
+    // the content of a closed <details> is laid out by Chrome (it reports a box below its summary) but never painted:
+    // measured on 4 November 2026 on screening/try.html, whose folded table read as 968 px outside its section
+    if(el.closest('details:not([open])')&&!el.closest('summary')&&el.tagName!=='DETAILS')continue;
     const r=el.getBoundingClientRect();
     if(!r.height)continue;
     // a box clipped by an ancestor inside the section paints only within that ancestor (25/10: the home's night sky

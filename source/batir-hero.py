@@ -56,7 +56,27 @@ from ciel_accueil import CSS_CIEL, JS_CIEL, JS_TETE, ciel_html, tete_chargement 
 from instrument_carte import (CSS_AFFICHE, affiche_html, CSS_ACCUEIL, eventail_html, methode_html,   # l'affiche (10/09), l'accueil (10/09)
                               _svg_courbes, _svg_paliers, _svg_horloge)
 SCEAU = SCEAU_ROUTING   # lu dans le relevé scellé du vert, jamais tapé (8/09)
-DEPOT_URL = OUTILS["routing"]["depot"]   # the repository, written once in outil.py
+DEPOT_URL = OUTILS["routing"]["depot"]   # the repository, written once in outil.py; None while private (DEPOTS_PRIVES)
+OFFRE_ROUTING = json.loads((BASE / "offre-routing.json").read_text())
+# the free test by mail, as the offer file writes it: the route that works while the repository is private
+ESSAI_ROUTING = OFFRE_ROUTING["essai"]
+SUJET_ESSAI_ROUTING = "Extraction%20cost%20audit%2C%20free%20trial"
+
+
+def lien_depot(url, prefixe=""):
+    """The « View the public repository » link of an appendices row, or nothing while the repository is private."""
+    return (f'<a class="lien-fin" href="{url}">View the public repository <span aria-hidden="true">&#8594;</span></a>'
+            if url else "")
+
+
+def application_structuree(nom, url, description, offre, depot):
+    """The SoftwareApplication of a tool's structured data: downloadUrl and the free-evaluation offer are stated only
+    while the repository is public; a private one is an application a visitor cannot download."""
+    return {"@type": "SoftwareApplication", "name": nom, "url": url,
+            "applicationCategory": "DeveloperApplication", "operatingSystem": "macOS, Linux (Node 24+)",
+            **({"downloadUrl": depot} if depot else {}), **({"description": description} if description else {}),
+            **({"offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD", "description": offre}} if depot else {}),
+            "publisher": {"@id": ORGANISATION["@id"]}}
 
 
 def qte(v):
@@ -261,7 +281,7 @@ def menus_html():
         <a class="lien-fin" href="ENGAGEMENT.html">See pricing <span aria-hidden="true">&#8594;</span></a>
         <a class="lien-fin" href="CONTACT.html">Get in touch <span aria-hidden="true">&#8594;</span></a>
         <a class="lien-fin" href="MENTIONS.html">Read the fine print <span aria-hidden="true">&#8594;</span></a>
-        <a class="lien-fin" href="{DEPOT_URL}">View the public repository <span aria-hidden="true">&#8594;</span></a>
+        {lien_depot(DEPOT_URL)}
       </div></div></nav>'''
 
 
@@ -1155,18 +1175,10 @@ DONNEES_STRUCTUREES = json.dumps({
     "@context": "https://schema.org",
     "@graph": [
         ORGANISATION,
-        {"@type": "SoftwareApplication", "name": "Crusetra Routing",
-         "url": f"{SITE_URL}routing/",
-         "applicationCategory": "DeveloperApplication",
-         "operatingSystem": "macOS, Linux (Node 24+)",
-         "downloadUrl": DEPOT_URL,
-         "description": "A routing audit for KYC extraction: measured on sealed "
-                        "records, rerun on your machine. On your records, on "
-                        "your machine: nothing leaves the network.",
-         "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD",
-                    "description": "Thirty-day evaluation on your own records, "
-                                   "granted in the public license."},
-         "publisher": {"@id": ORGANISATION["@id"]}},
+        application_structuree("Crusetra Routing", f"{SITE_URL}routing/",
+                               "A routing audit for KYC extraction: measured on sealed records, rerun on your machine. "
+                               "On your records, on your machine: nothing leaves the network.",
+                               "Thirty-day evaluation on your own records, granted in the public license.", DEPOT_URL),
     ],
 }, ensure_ascii=True)
 
@@ -1697,7 +1709,9 @@ transition:border-color .3s,transform .3s var(--montee),box-shadow .3s}
 
 
 def liens_tuiles(liens):
-    """liens: (href, verb, title, extra attributes). The row of links as symmetric tiles."""
+    """liens: (href, verb, title, extra attributes). The row of links as symmetric tiles; nothing when there is none."""
+    if not liens:
+        return ""
     return (f'{_TUILES_CSS}<p class="liens tuiles" style="--n:{len(liens)}">'
             + "".join(f'<a class="lien-e" href="{h}"{x}><span class="lv">{v}</span><span class="lt">{t}</span><span class="la" aria-hidden="true">&#8594;</span></a>'
                       for h, v, t, x in liens) + "</p>")
@@ -1765,8 +1779,8 @@ def _section_rapport_routing():
     signe = "../rapports/routing-sample-report.html"
     if not ex.get("signe"):
         sys.exit("le rapport exemple Routing n'est pas signé : relancer batir-rapport-routing.py")
-    releve = f"{DEPOT_URL}/blob/main/examples/cord-receipts/cord-labels-grouped-measured.json"
-    exemple = f"{DEPOT_URL}/tree/main/examples/cord-receipts"
+    releve = f"{DEPOT_URL}/blob/main/examples/cord-receipts/cord-labels-grouped-measured.json" if DEPOT_URL else None
+    exemple = f"{DEPOT_URL}/tree/main/examples/cord-receipts" if DEPOT_URL else None
     sujet = "Extraction%20cost%20audit%2C%20free%20trial"
     # 04/10 (audit Routing) : l'entrée « reçus d'abord » et les cinq pas de l'essai gratuit. Chaque chiffre
     # vient du relevé scellé CORD (rec) ou de l'offre (off) ; aucun n'est tapé ici.
@@ -1782,10 +1796,10 @@ def _section_rapport_routing():
     _bande = "".join(f'<div class="{"o" if w.startswith("ours") else ""}"><b>{pc(n)[:-1]}<small>%</small></b><span>{n}<i>{w}</i></span></div>' for n, w in _taux)
     recus = f"""<div class="r-recus">{_RECUS_CSS}
     <div class="rk3"><div class="top"><div><p class="mh">Start with receipts</p><h3>{ex["cas"]} real receipts,<br>graded in the open.</h3></div>
-    <p class="in">The public run grades two vendors and our local tiers on {ex["cas"]} real receipts. Grade one vendor's outputs against the labels yourself, with nothing downloaded:</p></div>
-    <code><b>$ </b>git clone {DEPOT_URL}
+    <p class="in">The public run grades two vendors and our local tiers on {ex["cas"]} real receipts. {"Grade one vendor's outputs against the labels yourself, with nothing downloaded:" if DEPOT_URL else "To grade your own, write to us: the free test below."}</p></div>
+    {f"""<code><b>$ </b>git clone {DEPOT_URL}
 <b>$ </b>cd {DEPOT_URL.rsplit('/', 1)[1]} &amp;&amp; npm ci --ignore-scripts
-<b>$ </b>{cmd_grade}</code>
+<b>$ </b>{cmd_grade}</code>""" if DEPOT_URL else ""}
     <div class="s">{_bande}</div>
     <p class="nt">Share of totals read right. The local tiers read a text that our macOS OCR produced from the images, so their rates include that OCR's errors.</p></div>
   </div>"""
@@ -1902,7 +1916,7 @@ def _section_rapport_routing():
     <span class="ouvrir-s">One document type and up to {es["extracteurs"]} extractors. Write to {off["contact"]}.</span></span>
     <span class="fl" aria-hidden="true">&#8594;</span></a></div>
   {essai}
-  <p class="liens"><a class="lien-e" href="{pdf}" download><span class="lv">Download</span><span class="lt">The sample report</span><span class="la" aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{signe}"><span class="lv">Verify</span><span class="lt">The signed report</span><span class="la" aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{exemple}"><span class="lv">See</span><span class="lt">Labels, OCR text, vendor outputs</span><span class="la" aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{releve}"><span class="lv">Open</span><span class="lt">The sealed record</span><span class="la" aria-hidden="true">&#8594;</span></a></p>
+  <p class="liens"><a class="lien-e" href="{pdf}" download><span class="lv">Download</span><span class="lt">The sample report</span><span class="la" aria-hidden="true">&#8594;</span></a><a class="lien-e" href="{signe}"><span class="lv">Verify</span><span class="lt">The signed report</span><span class="la" aria-hidden="true">&#8594;</span></a>{f'<a class="lien-e" href="{exemple}"><span class="lv">See</span><span class="lt">Labels, OCR text, vendor outputs</span><span class="la" aria-hidden="true">&#8594;</span></a>' if exemple else ""}{f'<a class="lien-e" href="{releve}"><span class="lv">Open</span><span class="lt">The sealed record</span><span class="la" aria-hidden="true">&#8594;</span></a>' if releve else ""}</p>
 </div></section>
 <script>
 (() => {{
@@ -3127,15 +3141,8 @@ def batir_accueil():
     n = NOMBRES.get(len(vivants), str(len(vivants)))
     graphe = [ORGANISATION]
     for o in vivants:
-        graphe.append({"@type": "SoftwareApplication", "name": f"Crusetra {o['nom']}",
-                       "url": f"{SITE_URL}{o['sous_dossier']}",
-                       "applicationCategory": "DeveloperApplication",
-                       "operatingSystem": "macOS, Linux (Node 24+)",
-                       "downloadUrl": o["depot"],
-                       "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD",
-                                  "description": "Thirty-day evaluation on your own records, "
-                                                 "granted in the public license."},
-                       "publisher": {"@id": ORGANISATION["@id"]}})
+        graphe.append(application_structuree(f"Crusetra {o['nom']}", f"{SITE_URL}{o['sous_dossier']}", None,
+                                             "Thirty-day evaluation on your own records, granted in the public license.", o["depot"]))
     donnees = json.dumps({"@context": "https://schema.org", "@graph": graphe}, ensure_ascii=True)
     # L'ÉVENTAIL (Arslane, 10/09) : les cinq cartes des instruments, les vraies courbes de chaque
     # relevé scellé, dans l'ordre du rideau ; la dernière du paquet est au-dessus
@@ -3158,8 +3165,17 @@ def batir_accueil():
     # the RERUN terminal's commands, written once: the station counts them, the terminal prints them (V4, 6 October
     # 2026: the cd after the clone made three commands four, and a typed « 3 commands » would have stayed)
     depot_routing = OUTILS["routing"]["depot"]
-    cmd_accueil = [f"git clone {depot_routing}", f"cd {depot_routing.rsplit('/', 1)[1]}", "npm ci --ignore-scripts",
-                   "npm run measure:yours -- --cases=your-file.csv"]
+    # while the repository is private, the rerun station and its terminal carry the free test by mail (offre-routing.json)
+    cmd_accueil = ([f"git clone {depot_routing}", f"cd {depot_routing.rsplit('/', 1)[1]}", "npm ci --ignore-scripts",
+                    "npm run measure:yours -- --cases=your-file.csv"] if depot_routing else
+                   [f"to: {OFFRE_ROUTING['contact']}", "subject: Extraction cost audit, free trial",
+                    "attach: nothing; the test runs on the record the tool measures, never on your documents"])
+    station_rerun = (("On your own files, on your machine",
+                      ["One command reruns the whole sweep on", "your records. The report is written next", "to your file, and no data leaves the", "network."],
+                      f"{len(cmd_accueil)} commands, no account, no upload") if depot_routing else
+                     ("On your own files, on request",
+                      [f"Write to us: the free test measures up to {ESSAI_ROUTING['pages']}", "labeled pages of one document type with the", "tool, and the one-page report comes back by", f"email within {ESSAI_ROUTING['delai_heures']} hours of the measured record."],
+                      f"{ESSAI_ROUTING['pages']} pages, {ESSAI_ROUTING['delai_heures']} hours, no charge"))
     stations = [
         ("01 · MEASURE", "On our public test set",
          ["Each tool measures every tier on the", "tool&#8217;s own public test set: 1,000", "held-out records for the reader, 60 + 60 pairs,", "42 + 42 cases, 84 files. Each rate carries its confidence interval."],
@@ -3167,9 +3183,7 @@ def batir_accueil():
         ("02 · SEAL", "Hashed, then frozen",
          ["Each record carries its content hash.", "A page checks it before a figure is shown.", "A record that changed after sealing", "is not used."],
          f"content hash {SCEAU_ROUTING[:8]}… (reader)"),
-        ("03 · RERUN", "On your own files, on your machine",
-         ["One command reruns the whole sweep on", "your records. The report is written next", "to your file, and no data leaves the", "network."],
-         f"{len(cmd_accueil)} commands, no account, no upload"),
+        ("03 · RERUN", *station_rerun),
         ("04 · DOSSIER", "Signed, current, verifiable",
          ["Four reports against five controls:", "present, frozen, signed with a key, fresh,", "and consistent. A reviewer checks the dossier", "from the hashes and signatures alone."],
          f"{dossier_r['couverture']['n']} of {dossier_r['couverture']['sur']} reports · {len(dossier_r['controles']['presents'])} controls"),
@@ -3188,10 +3202,10 @@ def batir_accueil():
     scene = (f'<div class="scene actif"><img class="objet" src="rendus/etats/{img_dossier.name}" '
              f'alt="{SPECS["dossier"]["alt_plateau"]}, state {f_dossier["num"]}: {f_dossier["titre"]}">'
              f'<svg class="appels" viewBox="0 0 1420 1000" aria-hidden="true">{lignes}</svg>{etiquettes}</div>')
-    terminal = f'''<div class="methode-term" role="group" aria-label="The {({3: 'three', 4: 'four', 5: 'five'})[len(cmd_accueil)]} commands that measure your own records">
-        <div class="tb"><i></i><i></i><i></i><span>run it yourself</span></div>
+    terminal = f'''<div class="methode-term" role="group" aria-label="{f"The {({3: 'three', 4: 'four', 5: 'five'})[len(cmd_accueil)]} commands that measure your own records" if depot_routing else "The free test by email, on your own records"}">
+        <div class="tb"><i></i><i></i><i></i><span>{"run it yourself" if depot_routing else "send it to us"}</span></div>
         <div class="tc">{"".join(f"<code>{c}</code>" for c in cmd_accueil)}
-          <span class="note">the report is written next to your file, and nowhere else</span></div>
+          <span class="note">{"the report is written next to your file, and nowhere else" if depot_routing else f"a one-page PDF by email within {ESSAI_ROUTING['delai_heures']} hours of the record; no document comes to us"}</span></div>
       </div>'''
     # the black page redefines the paper tokens ; the method section gets the REAL paper back,
     # read from the site's own :root block (never retyped, so it cannot drift)
@@ -3243,8 +3257,10 @@ def batir_accueil():
         <div><dt>records in our public test set</dt><dd>{N_SOCLE:,}</dd></div>
         <div><dt>file-aimed routing per 100,000 documents, on an assumed price</dt><dd>{moins_cher}</dd></div>
         <div><dt>content hash</dt><dd>{SCEAU_ROUTING}</dd></div>
-        <div class="cmd"><dt>rerun on your own files</dt><dd class="c1">node src/premiere-reponse.mjs</dd>
-          <small class="c2">{cmd_accueil[0]}</small><small class="c2">{cmd_accueil[1]}</small></div>
+        {f'''<div class="cmd"><dt>rerun on your own files</dt><dd class="c1">node src/premiere-reponse.mjs</dd>
+          <small class="c2">{cmd_accueil[0]}</small><small class="c2">{cmd_accueil[1]}</small></div>''' if depot_routing else
+         f'''<div class="cmd"><dt>test on your own files</dt><dd class="c1">by email, within {ESSAI_ROUTING['delai_heures']} hours</dd>
+          <small class="c2">{cmd_accueil[0]}</small><small class="c2">up to {ESSAI_ROUTING['pages']} pages, no charge</small></div>'''}
       </dl>
     </div>
     {eventail_html(cartes)}
@@ -3786,14 +3802,14 @@ def _section_entites(o):
                         + "".join(f"<span class='f'><span class='n'>{n}</span><span class='m'>{m}</span></span>" for n, m in chiffres)
                         + "</span></span>" for tete, chiffres in bande)
               + f"</span><span class='c'>{fin_note[0]} {fin_note[1]}</span></span>")
-    depot = o["depot"].rstrip("/")
+    depot = (o["depot"] or "").rstrip("/")
     html = f'''<section class="entites" id="companies"><div class="colonne">
   <style>{_ENTITES_PANNEAUX_CSS}</style>
   <div class="ca-top"><p class="ca-k">Company and vessel names</p><h2 class="ca-t"><span>{titre[0]}</span> <span>{titre[1]}</span></h2></div>
   <div class="ca-row">{blocs}</div>
   <p class="note">{note_b}</p>
   {liens_tuiles([(f"{depot}/blob/main/verification/GLEIF.md", "Read", "The four verdicts on real names", ""),
-                 (f"{depot}/blob/main/releve-entites.json", "Open", "The sealed record", "")])}
+                 (f"{depot}/blob/main/releve-entites.json", "Open", "The sealed record", "")] if depot else [])}
   <style>{_SCEAUL_CSS}</style>
   <span class="sceau-l sl3"><i></i><span><b></b>measured {R["date"]} at commit {R["commit"]} &#183; sealed and signed &#183; content hash {R["empreinte"]}</span><i></i></span>
 </div></section>
@@ -3883,7 +3899,7 @@ def _section_rapport(o):
     reperes = "".join(f'<span class="{"on" if x["noms"] == r0["noms"] else ""}" style="--p:{PAS.index(x["noms"]) / (len(PAS) - 1):.4f}" data-noms="{x["noms"]}"><b>{usd(x["prix_usd_mois"])}</b>{x["noms"]:,}</span>' for x in rc)
     sujet = "Ten%20names%20to%20screen"
     pdf, img = "../rapports/screening-sample-report.pdf", "../rendus/rapport-exemple.webp"
-    depot = o["depot"].rstrip("/")
+    depot = (o["depot"] or "").rstrip("/")
     # 25/10 (Arslane, the Routing looks carried to Screening): five rows of the committed sample list, one per kind of
     # verdict the record gives (an entity with no candidate, a possible one, a strong one; a strong vessel, a clear one),
     # in the record's own order; names, refs and verdicts read from rec, the count of names from ex.
@@ -3973,8 +3989,8 @@ def _section_rapport(o):
     <span class="ouvrir-s">Email them to {off["contact"]}. The report comes back within {off["delai_heures"]} hours, at no charge.</span></span>
     <span class="fl" aria-hidden="true">&#8594;</span></a></div>
   {liens_tuiles([(pdf, "Download", "The sample report", " download"),
-                 ("../rapports/screening-sample-report.screening.json", "Open", "The record this PDF renders", ""),
-                 (f"{depot}/blob/main/exemple/contreparties-exemple.screening.json", "Open", "The committed example record", "")])}
+                 ("../rapports/screening-sample-report.screening.json", "Open", "The record this PDF renders", "")]
+                + ([(f"{depot}/blob/main/exemple/contreparties-exemple.screening.json", "Open", "The committed example record", "")] if depot else []))}
 </div></section>
 <script>
 (() => {{
@@ -4113,15 +4129,7 @@ def batir_outil_catalogue(o, spec):
         "@context": "https://schema.org",
         "@graph": [
             ORGANISATION,
-            {"@type": "SoftwareApplication", "name": spec["app"],
-             "url": f"{SITE_URL}{o['sous_dossier']}",
-             "applicationCategory": "DeveloperApplication",
-             "operatingSystem": "macOS, Linux (Node 24+)",
-             "downloadUrl": o["depot"],
-             "description": spec["app_desc"],
-             "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD",
-                        "description": spec["offre"]},
-             "publisher": {"@id": ORGANISATION["@id"]}},
+            application_structuree(spec["app"], f"{SITE_URL}{o['sous_dossier']}", spec["app_desc"], spec["offre"], o["depot"]),
         ],
     }, ensure_ascii=True)
 
@@ -4174,7 +4182,7 @@ def batir_outil_catalogue(o, spec):
     # keeps the plain hero with its commands
     hero_css, hero_html = HEROS_VIVANTS.get(o["id"], ("", None))
     commandes_html = "".join(f'<code class="ln">{c}</code>\n    ' for c in
-                             ([f"git clone {o['depot']}", f"cd {o['depot'].rstrip('/').rsplit('/', 1)[1]}"] + spec["commandes"]))
+                             (([f"git clone {o['depot']}", f"cd {o['depot'].rstrip('/').rsplit('/', 1)[1]}"] + spec["commandes"]) if o["depot"] else []))
 
     if hero_html is None:
         hero_html = f'''<section class="hero">
@@ -4232,7 +4240,7 @@ def batir_outil_catalogue(o, spec):
     <a class="lien-fin" href="{lien(o, 'ENGAGEMENT.html')}">See pricing <span aria-hidden="true">&#8594;</span></a>
     <a class="lien-fin" href="{lien(o, 'CONTACT.html')}">Get in touch <span aria-hidden="true">&#8594;</span></a>
     <a class="lien-fin" href="{lien(o, 'MENTIONS.html')}">Read the fine print <span aria-hidden="true">&#8594;</span></a>
-    <a class="lien-fin" href="{o["depot"]}">View the public repository <span aria-hidden="true">&#8594;</span></a>
+    {lien_depot(o["depot"])}
   </div></div></nav>
 </main>
 

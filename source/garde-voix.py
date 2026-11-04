@@ -94,9 +94,11 @@ def phrases_de_script(html):
     Les sélecteurs, classes et formats restent en dessous du seuil : pas de faux
     rouge sur du code."""
     phrases = []
-    for m in re.finditer(r"<script(?:\s[^>]*)?>(.*?)</script>", html, re.S | re.I):
-        script = m.group(1)
+    for m in re.finditer(r"<script(\s[^>]*)?>(.*?)</script>", html, re.S | re.I):
+        script = m.group(2)
         if not script.strip() or script.strip().startswith("{"):   # les JSON embarqués ont leurs témoins
+            continue
+        if 'id="moteur"' in (m.group(1) or ""):   # the screening tool's own code (screening/try.html), not copy
             continue
         ligne0 = html[:m.start()].count("\n") + 1
         for lit in re.finditer(r"([\"'])((?:\\.|(?!\1).)*)\1|`((?:\\.|[^`])*)`", script):

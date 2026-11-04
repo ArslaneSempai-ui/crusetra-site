@@ -31,7 +31,11 @@ MOIS_PAYES_AN = 10
 SCEAU = SCEAU_ROUTING   # lu dans le relevé scellé du vert, jamais tapé (8/09)
 # la barre du site (10/09) : les cinq instruments dans l'ordre du rideau, lus dans OUTILS, jamais tapés
 NAV = "".join(f'\n    <a href="{o["page_hero"]}">{o["nom"]}</a>' for o in OUTILS.values())
-DEPOT_URL = OUTILS["routing"]["depot"]   # the repository, written once in outil.py
+from outil import GITHUB, DEPOTS, DEPOT_SITE   # noqa: E402
+# KEPT AS SERVED, FLAGGED (4 November 2026): the routing repository is private (outil.py DEPOTS_PRIVES), so this
+# "Download and run" link answers 404; the evaluation offer it serves is a price and license matter, which the chief
+# puts to Arslane. garde-depots.py lists engagement.html as waiting for that decision.
+DEPOT_URL = GITHUB + DEPOTS["routing"]
 
 CSS = '''
   :root{--noir:#0e0e11;--noir-b:#08080a;--noir-c:#121215;--filet:#26262c;--sur:#e8e6df;--sur-pale:#9a988f;
@@ -448,7 +452,7 @@ PAGE = f'''<!doctype html><html lang="en">
       <li><b>Attach no file</b>, except the list you send for a Screening report, or the measured record of a Routing free test. A channel for other records is opened in the engagement letter, before signature.</li>
       <li><b>We answer within one business day.</b></li>
     </ul>
-    <div class="cc-actions"><a class="cc-bt" href="mailto:{CONTACT}">Write to us <span aria-hidden="true">&#8594;</span></a><a class="cc-bt cc-sec" href="{DEPOT_URL}/issues">Open an issue <span aria-hidden="true">&#8594;</span></a></div>
+    <div class="cc-actions"><a class="cc-bt" href="mailto:{CONTACT}">Write to us <span aria-hidden="true">&#8594;</span></a><a class="cc-bt cc-sec" href="{GITHUB}{DEPOT_SITE}/issues">Open an issue <span aria-hidden="true">&#8594;</span></a></div>
   </div>
   <form method="dialog"><button class="cc-fermer" aria-label="Close">&#215;</button></form>
 </div></dialog>

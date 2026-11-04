@@ -91,20 +91,8 @@
     {
       "h2": "&#8220;How long, and what lands on our machines?&#8221;",
       "html": [
-        "<p>The evaluation grant runs <b>30 days</b> on your own data, inside your organization. You install Node 24 or newer on macOS or Linux, then about 400 MB of packages and 1.3 GB of weights on the first measurement. On Windows the suite runs in continuous integration minus two test files, named with their reasons, and Windows is claimed only as far as that run is green. The published pass took <b>32 minutes of measurement</b> on the machine named in our public test set. That test set is a file we froze, and its content hash is checked. The generative tier is 8 GB more, and optional.</p>",
-        "<p>Before any install, one script with no dependencies reads our public test set from a fresh copy of the repository. It prints the conclusion <b>in under a second</b>.</p>"
-      ],
-      "verif": {
-        "t": "Read the answer in one second",
-        "p": "On a fresh copy, before npm install, you can already reproduce the first answer.",
-        "cmd": [
-          {
-            "c": "node src/premiere-reponse.mjs",
-            "n": "prints the conclusion from our public test set, with no install"
-          }
-        ],
-        "refs": "src/premiere-reponse.mjs:10 &#183; README.md:271"
-      }
+        "<p>The evaluation grant runs <b>30 days</b> on your own data, inside your organization. You install Node 24 or newer on macOS or Linux, then about 400 MB of packages and 1.3 GB of weights on the first measurement. On Windows the suite runs in continuous integration minus two test files, named with their reasons, and Windows is claimed only as far as that run is green. The published pass took <b>32 minutes of measurement</b> on the machine named in our public test set. That test set is a file we froze, and its content hash is checked. The generative tier is 8 GB more, and optional.</p>"
+      ]
     },
     {
       "h2": "&#8220;What happens to the tool after the engagement?&#8221;",

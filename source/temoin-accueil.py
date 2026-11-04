@@ -7,11 +7,13 @@ Il lit la page SERVIE (docs/index.html) et tient les affirmations du premier éc
      recomposée du relevé scellé du routage (jamais crue sur parole) ; chaque chiffre
      du livre se retrouve sur la page du héros routing (même source, même chaîne de
      gardes : un chiffre tapé à la main sur l'accueil divergerait du héros au premier
-     re-scellement) ; la ligne de commande porte premiere-reponse et le git clone ;
+     re-scellement) ; la ligne de commande porte premiere-reponse et le git clone tant que le dépôt du
+     routing est public, l'adresse de la maison et aucun clone depuis qu'il est privé (outil.py DEPOTS_PRIVES, 4/11) ;
   B. l'éventail : cinq cartes vivantes, une par outil, dans l'ordre du rideau
      (OUTILS d'outil.py, jamais une liste retapée), chacune portant son SVG ;
   C. la méthode : quatre stations numérotées, la station 03 porte le terminal aux
-     QUATRE commandes (le cd depuis le 6/10), la station 02 explique le scellé par son content hash ;
+     QUATRE commandes (le cd depuis le 6/10) tant que le dépôt est public, aux TROIS lignes de l'essai par
+     courriel (destinataire, objet, pièce jointe) depuis qu'il est privé ; la station 02 explique le scellé par son content hash ;
   D. la scène : l'escalier-01 avec DEUX annotations dont les textes sont ceux
      PUBLIÉS de findings-dossier.json (fiche 01), et la note est la phrase de la
      fiche — l'accueil cite le dossier, il ne le paraphrase pas ;
@@ -34,6 +36,7 @@ import sys
 BASE = pathlib.Path(__file__).parent
 sys.path.insert(0, str(BASE))
 import outil  # noqa: E402  (OUTILS, lire_releve_scelle : l'ordre du rideau et le sceau)
+ROUTING_PUBLIC = bool(outil.OUTILS["routing"]["depot"])   # None while private (DEPOTS_PRIVES): the mail route is shown
 
 
 def _nu(x):
@@ -68,10 +71,16 @@ def relever(html, hero_routing, findings_dossier):
             if nombre not in hero_routing:
                 dire(f"le chiffre « {nombre} » ({dt}) ne se retrouve pas sur le héros routing : "
                      "les deux pages lisent la même source, l'un des deux a dérivé")
-    if "premiere-reponse" not in m.group(1):
-        dire("la ligne de commande du grand livre ne porte pas premiere-reponse")
-    if "git clone" not in m.group(1):
-        dire("la ligne de commande du grand livre ne porte pas le git clone")
+    if ROUTING_PUBLIC:
+        if "premiere-reponse" not in m.group(1):
+            dire("la ligne de commande du grand livre ne porte pas premiere-reponse")
+        if "git clone" not in m.group(1):
+            dire("la ligne de commande du grand livre ne porte pas le git clone")
+    else:
+        if outil.CONTACT not in m.group(1):
+            dire("la ligne de commande du grand livre ne porte pas l'adresse de la maison (dépôt privé : l'essai par courriel)")
+        if "git clone" in m.group(1) or "premiere-reponse" in m.group(1):
+            dire("la ligne de commande du grand livre porte encore une commande du dépôt privé")
 
     # B. l'éventail, dans l'ordre du rideau
     cartes = re.findall(r'<a class="carte-ev[^"]*" href="([^"]+)"(.*?)</a>', html, re.S)
@@ -98,9 +107,15 @@ def relever(html, hero_routing, findings_dossier):
         if lis and "methode-term" not in lis[2]:
             dire("la station 03 (RERUN) ne porte pas le terminal des commandes")
         n_cmd = len(re.findall(r"<code[^>]*>", lis[2])) if len(lis) >= 3 else 0
-        if n_cmd != 4:
+        if ROUTING_PUBLIC and n_cmd != 4:
             # trois jusqu'au 6/10 ; le cd entre le clone et npm ci (Crusetra V4, demandé par le chef) en fait quatre
             dire(f"le terminal de la station 03 porte {n_cmd} commandes, la maison en montre quatre")
+        if not ROUTING_PUBLIC:
+            # dépôt privé (4/11) : les trois lignes de l'essai par courriel, l'adresse de la maison, aucun clone
+            if n_cmd != 3:
+                dire(f"le terminal de la station 03 porte {n_cmd} lignes, l'essai par courriel en a trois")
+            if len(lis) >= 3 and (outil.CONTACT not in lis[2] or "git clone" in lis[2]):
+                dire("le terminal de la station 03 ne porte pas l'essai par courriel (adresse de la maison, aucun clone)")
         # 13/09 : « sealed public record » a quitté les ÉCRANS (décision d'Arslane) ; la
         # station 01 dit « our public test set ». Le scellé se DÉFINIT désormais à la
         # station 02 (« SEAL · Hashed, then frozen »), et c'est elle qu'on garde : l'accueil

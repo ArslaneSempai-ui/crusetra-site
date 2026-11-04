@@ -12,7 +12,7 @@
         {
           "h2": "Two ways to reach us, email and a public issue",
           "html": [
-            "<p>Write to <a href=\"mailto:contact@crusetra.com\"><b>contact@crusetra.com</b></a>: the direct channel. For anything worth deciding in the open (a disputed figure, a wrong line, a question others will have), open an issue at <a href=\"https://github.com/ArslaneSempai-ui/crusetra-routing/issues\"><b>github.com/ArslaneSempai-ui/crusetra-routing</b></a>. An issue is public, so keep confidential material out of it: no client names, no records, no internal figures. Either way, attach no file, except the list you send for a Screening report, or the measured record of a Routing free test. For anything else, a channel for records is opened in the engagement letter, before signature, like every other term.</p>"
+            "<p>Write to <a href=\"mailto:contact@crusetra.com\"><b>contact@crusetra.com</b></a>: the direct channel. For anything worth deciding in the open (a disputed figure, a wrong line, a question others will have), open an issue at <a href=\"https://github.com/ArslaneSempai-ui/crusetra-site/issues\"><b>github.com/ArslaneSempai-ui/crusetra-site</b></a>. An issue is public, so keep confidential material out of it: no client names, no records, no internal figures. Either way, attach no file, except the list you send for a Screening report, or the measured record of a Routing free test. For anything else, a channel for records is opened in the engagement letter, before signature, like every other term.</p>"
           ]
         },
         {
@@ -24,7 +24,7 @@
         {
           "h2": "What to bring",
           "html": [
-            "<p>The page you are on and the figure you dispute: each one here has a declared source, so we can meet at it. If you disagree with a measurement, <b>bring your own rerun</b>. The record is frozen and the command is public, so you can reproduce it. If you measured your own cases, bring the report the tool wrote beside your CSV: it contains rates and their confidence intervals, and no values from your documents.</p>"
+            "<p>The page you are on and the figure you dispute: each one here has a declared source, so we can meet at it. If you disagree with a measurement, <b>bring the figure and its source</b>: the record is frozen, and its content hash is on the page. If you measured your own cases, bring the report the tool wrote beside your CSV: it contains rates and their confidence intervals, and no values from your documents.</p>"
           ]
         },
         {
@@ -36,7 +36,7 @@
         {
           "h2": "Before writing",
           "html": [
-            "<p>Two shortcuts. On a fresh clone, <code>node src/premiere-reponse.mjs</code> prints the conclusion in under a second, with what would flip it. And the eight objections a bank's reviewers actually raise are already answered, mechanism by mechanism, in <b>Appendix C, Questions</b> below.</p>"
+            "<p>One shortcut. The eight objections a bank's reviewers actually raise are already answered, mechanism by mechanism, in <b>Appendix C, Questions</b> below.</p>"
           ]
         }
       ]

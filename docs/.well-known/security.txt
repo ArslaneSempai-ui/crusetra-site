@@ -1,6 +1,5 @@
 Contact: mailto:contact@crusetra.com
 Contact: https://github.com/ArslaneSempai-ui/crusetra-site/issues
-Contact: https://github.com/ArslaneSempai-ui/crusetra-routing/issues
 Expires: 2027-08-31T00:00:00.000Z
 Preferred-Languages: en, fr
 Canonical: https://crusetra.com/.well-known/security.txt

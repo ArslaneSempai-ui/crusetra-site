@@ -36,6 +36,10 @@ DEPOTS = {"routing": "crusetra-routing", "screening": "crusetra-screening",
           "monitoring": "crusetra-monitoring", "scoring": "crusetra-scoring",
           "dossier": "crusetra-dossier"}
 DEPOT_SITE = "crusetra-site"   # the site's own repository, under its GitHub name (the local folder keeps cascade-site)
+# PRIVATE since 29 October 2026 (Arslane's choice: old pull requests carry flagged lines), so anonymous GitHub answers
+# 404: no served page may link to them or print a clone command (garde-depots.py refuses one). Their "depot" is None,
+# and every builder offers the route that works instead: the self-serve test (screening/try.html) or the mail route.
+DEPOTS_PRIVES = frozenset({"routing", "screening"})
 ORGANISATION = {"@type": "Organization", "@id": f"{SITE_URL}#org", "name": "Crusetra",
                 "url": SITE_URL, "logo": f"{SITE_URL}og.png", "email": CONTACT}
 # The films shown on the site, by file name in source/films (10 October 2026, Arslane: "vas y fais le").
@@ -45,8 +49,8 @@ FILMS_VISIBLES = frozenset({"routing", "dossier", "screening"})
 
 
 def depot_url(outil_id):
-    """The public repository of a tool, under its GitHub name."""
-    return GITHUB + DEPOTS[outil_id]
+    """The public repository of a tool under its GitHub name, or None while it is private (DEPOTS_PRIVES)."""
+    return None if outil_id in DEPOTS_PRIVES else GITHUB + DEPOTS[outil_id]
 
 
 def _canonique(x, racine=True):
@@ -518,7 +522,7 @@ def pied_html(outil=None, sceau=None, tests=None, courante=None, prefixe=None):
         liens += [(prefixe + h, n) for h, n in LIENS_MAISON if h not in _PROPRES_A_L_OUTIL]
     else:
         liens = [(prefixe + h, n) for h, n in LIENS_MAISON]
-    if outil:
+    if outil and outil["depot"]:   # a private repository has no public page to link
         liens.append((outil["depot"], "Repository"))
     rang = "".join(f'<a href="{h}"' + (' aria-current="true"' if h == courante else "") + f'>{n}</a>'
                    for h, n in liens)

@@ -40,7 +40,53 @@ FIELDS, TIERS = D["fields"], D["tiers"]
 from outil import SCEAU_ROUTING
 from outil import OUTILS, barre_site, CSS_BARRE_SITE, pied_html, n_tests, SITE_URL
 SCEAU = SCEAU_ROUTING   # lu dans le relevé scellé du vert, jamais tapé (8/09)
-DEPOT_URL = OUTILS["routing"]["depot"]   # the repository, written once in outil.py
+DEPOT_URL = OUTILS["routing"]["depot"]   # the repository, written once in outil.py; None while private (DEPOTS_PRIVES)
+OFFRE = json.loads((BASE / "offre-routing.json").read_text())
+ESSAI = OFFRE["essai"]   # the free test by mail, the route that works while the repository is private
+
+
+def aside_vos():
+    """The side column: the four commands while the repository is public, the free test by mail while it is private."""
+    if DEPOT_URL:
+        return f'''<p><b>These are our readings. Now test them against yours.</b> The tool clones next to your
+    files and measures them where they sit, so your CSV never moves and the report lands beside it.</p>
+    </details>
+  </div>
+  <aside class="clone-col">
+  <div class="vos" role="group" aria-label="The four commands that measure your own records">
+    <span class="vos-t">The four commands, exactly as they run</span>
+    <div class="term"><div class="term-bar"><i></i><i></i><i></i><span>run it yourself</span></div>
+    <div class="term-corps">
+      <code class="cmd">git clone {DEPOT_URL}</code>
+      <code class="cmd">cd {DEPOT_URL.rsplit("/", 1)[1]}</code>
+      <code class="cmd">npm ci --ignore-scripts</code>
+      <code class="cmd">npm run measure:yours -- --cases=your-file.csv</code>
+      <span class="sortie">nothing leaves your machine; cut the network and it still runs</span>
+    </div></div>
+  </div>
+  <div class="ouvrir-ligne"><a class="ouvrir" href="{DEPOT_URL}">Run it on your records <span class="fl" aria-hidden="true">&#8594;</span></a>
+    <a class="ouvrir tarif" href="ENGAGEMENT.html">See pricing <span class="fl" aria-hidden="true">&#8594;</span></a></div>
+  </aside>'''
+    sujet = "Extraction%20cost%20audit%2C%20free%20trial"
+    return f'''<p><b>These are our readings. Now test them against yours.</b> Write to us: the free test measures up to
+    {ESSAI["pages"]} labeled pages of one document type with the tool, and the one-page report comes back by email within
+    {ESSAI["delai_heures"]} hours of the measured record, at no charge. No document comes to us.</p>
+    </details>
+  </div>
+  <aside class="clone-col">
+  <div class="vos" role="group" aria-label="The free test by email, on your own records">
+    <span class="vos-t">The free test, exactly as it runs</span>
+    <div class="term"><div class="term-bar"><i></i><i></i><i></i><span>send it to us</span></div>
+    <div class="term-corps">
+      <code class="cmd">to: {OFFRE["contact"]}</code>
+      <code class="cmd">subject: Extraction cost audit, free trial</code>
+      <code class="cmd">attach: nothing; the test runs on the record the tool measures, never on your documents</code>
+      <span class="sortie">a one-page PDF by email within {ESSAI["delai_heures"]} hours of the record; the record carries a content hash, this report is not signed</span>
+    </div></div>
+  </div>
+  <div class="ouvrir-ligne"><a class="ouvrir" href="mailto:{OFFRE["contact"]}?subject={sujet}">Try it free on {ESSAI["pages"]} of your pages <span class="fl" aria-hidden="true">&#8594;</span></a>
+    <a class="ouvrir tarif" href="ENGAGEMENT.html">See pricing <span class="fl" aria-hidden="true">&#8594;</span></a></div>
+  </aside>'''
 
 
 def table_html():
@@ -396,25 +442,7 @@ PAGE = f'''<!doctype html><html lang="en">
     and the optimizer reads your measurement instead of the assumption.</p>
   <p><b>Your documents never touch this page,</b> because nothing is uploaded and nothing is
     fetched: the browser's own security rules refuse each network call.</p>
-  <p><b>These are our readings. Now test them against yours.</b> The tool clones next to your
-    files and measures them where they sit, so your CSV never moves and the report lands beside it.</p>
-    </details>
-  </div>
-  <aside class="clone-col">
-  <div class="vos" role="group" aria-label="The four commands that measure your own records">
-    <span class="vos-t">The four commands, exactly as they run</span>
-    <div class="term"><div class="term-bar"><i></i><i></i><i></i><span>run it yourself</span></div>
-    <div class="term-corps">
-      <code class="cmd">git clone {DEPOT_URL}</code>
-      <code class="cmd">cd {DEPOT_URL.rsplit("/", 1)[1]}</code>
-      <code class="cmd">npm ci --ignore-scripts</code>
-      <code class="cmd">npm run measure:yours -- --cases=your-file.csv</code>
-      <span class="sortie">nothing leaves your machine; cut the network and it still runs</span>
-    </div></div>
-  </div>
-  <div class="ouvrir-ligne"><a class="ouvrir" href="{DEPOT_URL}">Run it on your records <span class="fl" aria-hidden="true">&#8594;</span></a>
-    <a class="ouvrir tarif" href="ENGAGEMENT.html">See pricing <span class="fl" aria-hidden="true">&#8594;</span></a></div>
-  </aside>
+  {aside_vos()}
 </div></section>
 
 {pied_html(outil=OUTILS["routing"], sceau=SCEAU, tests=n_tests(OUTILS["routing"]), prefixe="")}

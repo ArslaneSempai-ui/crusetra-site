@@ -44,6 +44,7 @@ PREFIXE = urlparse(BASE_URL).path
 PROD_SCREENING = {
     "HERO-SCREENING.html": "screening/index.html",
     "INSTRUMENT-SCREENING.html": "screening/instrument.html",
+    "ESSAI-SCREENING.html": "screening/try.html",   # 4 November 2026: the self-serve test, in the visitor's browser
     "ANNEXE-SCREENING-METHODE.html": "screening/method.html",
     "ANNEXE-SCREENING-SECURITE.html": "screening/security.html",
 }
@@ -119,7 +120,7 @@ def verifier_pieces_stables(avant, apres):
 
 _PIECES_AVANT = photo_pieces()
 
-for batisseur in ("batir-hero.py", "batir-instrument.py", "batir-instrument-screening.py",
+for batisseur in ("batir-hero.py", "batir-instrument.py", "batir-instrument-screening.py", "batir-essai-screening.py",
                   "batir-instrument-monitoring.py", "batir-instrument-scoring.py",
                   "batir-instrument-dossier.py",
                   "batir-offre.py", "batir-annexe.py", "batir-404.py"):
@@ -173,9 +174,15 @@ def csp(t):
     if attributs:
         style_src += " 'unsafe-hashes' " + " ".join(h(a) for a in attributs)
     script_src = " ".join(h(s) for s in scripts) if scripts else "'none'"
+    # THE SELF-SERVE TEST (screening/try.html) runs the matcher in a Web Worker so the page stays usable while the
+    # lists are indexed (about ten seconds). The worker is built from the text of a <script type="text/plain"
+    # id="moteur"> node of the page itself, through a blob: URL; it loads nothing and connects to nothing (the
+    # page's connect-src 'none' binds it too). Only a page carrying that node gets worker-src blob:.
+    ouvrier = "worker-src blob:; " if 'id="moteur"' in t else ""
     regle = ("default-src 'none'; "
              f"style-src {style_src}; "
              f"script-src {script_src}; "
+             f"{ouvrier}"
              "font-src 'self'; img-src 'self' data:; media-src 'self'; "
              "base-uri 'self'; "
              "form-action 'none'; connect-src 'none'")
@@ -294,7 +301,7 @@ def _fil_ariane(page, adresse):
                 {"@type": "ListItem", "position": 2, "name": nom, "item": f"{BASE_URL}{dossier}/"}]
     if not page.endswith("/index.html"):
         feuille = {"method.html": "Method", "security.html": "Security",
-                   "instrument.html": "Instrument"}.get(page.split("/", 1)[1])
+                   "instrument.html": "Instrument", "try.html": "Try it on your names"}.get(page.split("/", 1)[1])
         if not feuille:
             return None
         elements.append({"@type": "ListItem", "position": 3, "name": feuille, "item": adresse})
@@ -911,11 +918,12 @@ if not HOTE.endswith(".github.io"):
 (DOCS / "robots.txt").write_text(
     f"User-agent: *\nAllow: /\nSitemap: {BASE_URL}sitemap.xml\n")
 (DOCS / ".well-known").mkdir()
+# a private repository's issues are no contact at all (anonymous GitHub answers 404): only public ones are listed
 (DOCS / ".well-known" / "security.txt").write_text(
     f"Contact: mailto:{CONTACT}\n"
     f"Contact: {GITHUB}{DEPOT_SITE}/issues\n"
-    f"Contact: {depot_url('routing')}/issues\n"
-    "Expires: 2027-08-31T00:00:00.000Z\n"
+    + (f"Contact: {depot_url('routing')}/issues\n" if depot_url("routing") else "")
+    + "Expires: 2027-08-31T00:00:00.000Z\n"
     "Preferred-Languages: en, fr\n"
     f"Canonical: {BASE_URL}.well-known/security.txt\n")
 # the site's repository is named once (DEPOT_SITE, outil.py): security.txt above reads it, and the README's title must
@@ -1159,6 +1167,24 @@ if _gl.returncode != 0:
     sys.exit("LE COMPTE DES LISTES N'EST PAS CELUI DE L'OUTIL (garde-listes, listes-manifest.json) :\n"
              + _gl.stdout[-2400:] + _gl.stderr[-400:])
 print("  " + next(l.strip() for l in _gl.stdout.splitlines() if "listes tenues" in l))
+
+# ── the private repositories (4 November 2026): crusetra-screening and crusetra-routing are private, so a served
+# link or clone command naming them sends a visitor to a 404. garde-depots.py refuses one; same jaw as above: a
+# planted page must turn it red first, and the guard runs its own witness (exit 2 = broken).
+_zzd = DOCS / "zz-temoin-depots.html"
+_zzd.write_text('<p>Clone it: <code>git clone https://github.com/ArslaneSempai-ui/crusetra-screening.git</code></p>')
+_gd = subprocess.run([sys.executable, str(MAQ / "garde-depots.py"), "--docs", str(DOCS)], capture_output=True, text=True)
+if _gd.returncode == 2:
+    sys.exit("GARDE CASSÉE (garde-depots, son témoin interne) :\n" + _gd.stdout[-1200:] + _gd.stderr[-400:])
+if _gd.returncode != 1 or "zz-temoin-depots.html" not in _gd.stdout:
+    sys.exit("GARDE CASSÉE : la garde des dépôts n'a pas vu la page témoin plantée : son zéro ne vaut rien\n"
+             + _gd.stdout[-1200:] + _gd.stderr[-400:])
+_zzd.unlink()
+_gd = subprocess.run([sys.executable, str(MAQ / "garde-depots.py"), "--docs", str(DOCS)], capture_output=True, text=True)
+if _gd.returncode != 0:
+    sys.exit("UNE PAGE SERVIE MÈNE À UN DÉPÔT PRIVÉ (garde-depots.py, outil.py DEPOTS_PRIVES) :\n"
+             + _gd.stdout[-2400:] + _gd.stderr[-400:])
+print("  " + next(l.strip() for l in _gd.stdout.splitlines() if "dépôts tenus" in l))
 
 # ── le témoin de l'accueil : le grand livre, l'éventail, la méthode ──────────
 # Statique et auto-témoigné par mutation (quatre mues doivent rougir avant que le
