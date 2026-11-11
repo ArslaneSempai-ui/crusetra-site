@@ -97,12 +97,12 @@
       "retour_texte": "&#8592; Back to Screening",
       "titre": "Name variants to catch in OFAC's July 14 shipping sanctions",
       "lede": "On July 14, 2026, OFAC sanctioned a group of container lines, ship owners and freight firms. If one of these names appears in a file you screen, it may be spelled differently, because shipping papers pass through many hands. Here are the variants we found, and how our screening tool handled them.",
-      "description": "On July 14, 2026, OFAC sanctioned container lines, ship owners and freight firms tied to the Shamkhani network. The name variants in OFAC's own documents, and how our screening tool handled these names.",
+      "description": "On July 14, 2026, OFAC sanctioned container lines, ship owners and freight firms tied to an Iranian shipping network. The name variants in OFAC's own documents, and how our screening tool handled these names.",
       "sections": [
         {
           "h2": "What OFAC listed",
           "html": [
-            "<p>That day OFAC <a href=\"https://ofac.treasury.gov/recent-actions/20260714\">added 54 entries to its Specially Designated Nationals List (SDN List)</a>, covering 10 people, 24 companies and 20 ships. Treasury's <a href=\"https://home.treasury.gov/news/press-releases/sb0562\">press release</a> ties them to the shipping network of [name removed], which it calls \"a major force behind Iran's oil exports.\"</p>",
+            "<p>That day OFAC <a href=\"https://ofac.treasury.gov/recent-actions/20260714\">added 54 entries to its Specially Designated Nationals List (SDN List)</a>, covering 10 people, 24 companies and 20 ships. Treasury's <a href=\"https://home.treasury.gov/news/press-releases/sb0562\">press release</a> ties them to an Iranian shipping network, which it calls \"a major force behind Iran's oil exports.\"</p>",
             "<p>The release names Sea Lead Shipping PTE. Ltd. of Singapore and three of its subsidiaries. Sea Lead managed and operated three ships that OFAC lists as container ships. Treasury also says a We Freight group provided \"transportation intermediary services\" to the network's container shipping. A <a href=\"https://ofac.treasury.gov/media/932746/download?inline\">note from Treasury, Commerce and Justice</a> explains that OFAC can fine a firm under US jurisdiction even if it did not know, or have reason to know, that a deal was prohibited.</p>"
           ]
         },

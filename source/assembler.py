@@ -1186,6 +1186,22 @@ if _gd.returncode != 0:
              + _gd.stdout[-2400:] + _gd.stderr[-400:])
 print("  " + next(l.strip() for l in _gd.stdout.splitlines() if "dépôts tenus" in l))
 
+# ── bracketed placeholders (11 November 2026): « [name removed] » stood in the OFAC article's body on the live page.
+# garde-crochets.py refuses one in any served page; same jaw: a planted page must turn it red first (exit 2 = broken).
+_zzc = DOCS / "zz-temoin-crochets.html"
+_zzc.write_text('<p>ties them to the network of [name removed], which</p>')
+_gc = subprocess.run([sys.executable, str(MAQ / "garde-crochets.py"), "--docs", str(DOCS)], capture_output=True, text=True)
+if _gc.returncode == 2:
+    sys.exit("GARDE CASSÉE (garde-crochets, son témoin interne) :\n" + _gc.stdout[-1200:] + _gc.stderr[-400:])
+if _gc.returncode != 1 or "zz-temoin-crochets.html" not in _gc.stdout:
+    sys.exit("GARDE CASSÉE : la garde des crochets n'a pas vu la page témoin plantée : son zéro ne vaut rien\n"
+             + _gc.stdout[-1200:] + _gc.stderr[-400:])
+_zzc.unlink()
+_gc = subprocess.run([sys.executable, str(MAQ / "garde-crochets.py"), "--docs", str(DOCS)], capture_output=True, text=True)
+if _gc.returncode != 0:
+    sys.exit("UN CROCHET DE REMPLACEMENT EST SERVI (garde-crochets.py) :\n" + _gc.stdout[-2400:] + _gc.stderr[-400:])
+print("  " + next(l.strip() for l in _gc.stdout.splitlines() if "crochets tenus" in l))
+
 # ── le témoin de l'accueil : le grand livre, l'éventail, la méthode ──────────
 # Statique et auto-témoigné par mutation (quatre mues doivent rougir avant que le
 # vert soit cru) ; un accueil dont le sceau, les cartes ou les citations dérivent
