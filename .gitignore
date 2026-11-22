@@ -23,3 +23,6 @@ source/INSTRUMENT-*.html
 source/HERO-*.html
 .verif-final/
 source/ESSAI-SCREENING.html
+.env
+.env.*
+*.pem
